@@ -53,6 +53,8 @@
 }
 
 :root {
+  /* Native controls (date pickers, scrollbars) follow the theme. */
+  color-scheme: light;
   /* Cool slate surfaces, steel-blue actions. Status hues are reserved for test results. */
   --background: oklch(0.984 0.004 250);
   --foreground: oklch(0.23 0.022 256);
@@ -93,6 +95,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.185 0.016 256);
   --foreground: oklch(0.95 0.006 250);
   --card: oklch(0.225 0.018 256);

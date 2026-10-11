@@ -12,7 +12,9 @@ import { fromNodeHeaders } from "better-auth/node"
 import type { FastifyRequest } from "fastify"
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { z } from "zod"
+import { httpError } from "../../lib/http-error.ts"
 import { requireAuth, requirePermission } from "../../plugins/auth.ts"
+import { assertCan, loadProjectAccess } from "../projects/access.ts"
 import * as users from "./service.ts"
 
 const idParams = z.object({ id: z.string().min(1).max(64) })
@@ -34,14 +36,35 @@ const usersRoutes: FastifyPluginAsyncZod = async (app) => {
       onRequest: requireAuth,
       schema: {
         tags,
-        summary: "Search active users (for member pickers)",
+        summary:
+          "Search active non-admin users (admins, or QA Leads within their project)",
         querystring: directoryQuerySchema,
         response: { 200: z.object({ items: z.array(directoryUserSchema) }) },
       },
     },
-    async (request) => ({
-      items: await users.searchDirectory(deps, request.query.q),
-    })
+    async (request) => {
+      // Admins search everyone (to pick a new project's first QA Lead).
+      // Everyone else searches within a project whose members they manage:
+      // 404 if they can't see it, 403 if they can't add people to it.
+      let projectId: string | undefined
+      if (request.query.project) {
+        const access = await loadProjectAccess(
+          app.prisma,
+          request.user!,
+          request.query.project
+        )
+        assertCan(access, "members:manage")
+        if (access.project.archivedAt) {
+          throw httpError(403, "This project is archived")
+        }
+        projectId = access.project.id
+      } else if (request.user!.role !== "admin") {
+        throw httpError(403, "You don't have permission to do that")
+      }
+      return {
+        items: await users.searchDirectory(deps, request.query.q, projectId),
+      }
+    }
   )
 
   app.get(

@@ -13,21 +13,13 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
-import { apiGet, apiSend } from "@/lib/api"
+import { apiGet, apiSend, toSearch } from "@/lib/api"
 
 const userPageSchema = pageSchema(userSchema)
 
 export const usersKeys = {
   all: ["users"] as const,
   list: (query: UserListQuery) => [...usersKeys.all, "list", query] as const,
-}
-
-function toSearch(query: UserListQuery): string {
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) params.set(key, String(value))
-  }
-  return params.toString()
 }
 
 export const usersListOptions = (query: UserListQuery) =>

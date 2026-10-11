@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { listQuerySchema } from "./list.ts"
-import { portalRoleSchema } from "./roles.ts"
+import { portalRoleSchema, projectRoleSchema } from "./roles.ts"
 
 /** Matches Better Auth's username plugin: letters, digits, `_` and `.`. */
 export const usernameSchema = z
@@ -81,12 +81,16 @@ export const directoryUserSchema = z.object({
   id: z.string(),
   name: z.string(),
   username: z.string(),
+  /** With `project` in the query: their role there, or null if not a member. */
+  memberRole: projectRoleSchema.nullable().optional(),
 })
 
 export type DirectoryUser = z.infer<typeof directoryUserSchema>
 
 export const directoryQuerySchema = z.object({
   q: z.string().trim().min(1).max(100),
+  /** A project key: leaves admins out and marks each person's role there. */
+  project: z.string().min(1).max(16).optional(),
 })
 
 /** A signed-in user changing their own password. */

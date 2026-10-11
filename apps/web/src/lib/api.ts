@@ -59,3 +59,12 @@ export function errorMessage(err: unknown): string {
   if (err instanceof ApiError) return err.message
   return "We couldn't reach the server. Try again in a moment."
 }
+
+/** A query string from an object, skipping undefined and empty values. */
+export function toSearch(query: object): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value))
+  }
+  return params.toString()
+}

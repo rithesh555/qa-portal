@@ -322,14 +322,18 @@ describe("users API", () => {
   })
 
   describe("directory", () => {
-    it("lets any signed-in user search active users with minimal fields", async () => {
+    it("returns active non-admin users with minimal fields", async () => {
       await call(admin, "POST", `/api/users/${await idOf("carol")}/deactivate`)
-      const res = await call(member, "GET", "/api/users/directory?q=a")
+      const res = await call(admin, "GET", "/api/users/directory?q=o")
       expect(res.statusCode).toBe(200)
       const items = res.json().items
+      // carol is deactivated and alice is an admin, so only bob.
       expect(items.map((u: { username: string }) => u.username)).toEqual([
-        "alice",
+        "bob",
       ])
+      // Members who lead no project don't need it (see projects tests).
+      const plain = await call(member, "GET", "/api/users/directory?q=a")
+      expect(plain.statusCode).toBe(403)
       expect(Object.keys(items[0]).sort()).toEqual(["id", "name", "username"])
     })
 

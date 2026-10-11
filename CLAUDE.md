@@ -10,7 +10,7 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 - **Access model:** portal role `admin` | `user`. Admin sees and manages everything and is the only one who creates/archives projects. Everyone else sees only projects they are members of, with a **per-project role** (`lead` | `tester` | `viewer`); project leads manage that project's members. The permission matrix lives in `packages/shared` — the web hides, the API enforces (inaccessible ids → 404). Users are deactivated, never deleted.
 - **DB:** PostgreSQL 17 (Docker) + Prisma **7.10.0 pinned** — npm `latest` points at an 8.x release candidate; do not upgrade without asking.
 - **Shared:** Zod schemas/types in `packages/shared`
-- **Tests:** Vitest (unit + API integration against a separate test DB)
+- **Tests:** Vitest (unit + API integration against a separate test DB). The API suite resets that one test DB, so never run two API test runs at once (e.g. from parallel agents) — they break each other.
 - **Monorepo:** pnpm workspaces. Node 22 LTS via nvm.
 
 ## Scope
@@ -30,6 +30,8 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 8. Git: a hook blocks push, `reset --hard`, `clean -f`, `branch -D`, `checkout .`, `restore .`. The user pushes.
 9. Secrets live only in `.env` (git-ignored); keep `.env.example` up to date.
 
-## Phase gate (end of every phase)
+## Phase workflow
 
-`pnpm lint && pnpm typecheck && pnpm test` all green (including authorization tests for every new endpoint: admin / lead / tester / viewer / non-member / deactivated) → walk through new screens with Playwright MCP → `/code-review` → `docker compose up` (Postgres) healthy and the app runs against it.
+- **Start:** for a phase with complex screens (test case editor, run execution, dashboard), publish a clickable design mockup and get the user's feedback before building.
+- **Gate (end of every phase):** `pnpm lint && pnpm typecheck && pnpm test` all green (including authorization tests for every new endpoint: admin / lead / tester / viewer / non-member / deactivated) → walk through new screens with Playwright MCP → `ux-reviewer` agent on new/changed screens → `authz-auditor` agent on new/changed API routes → `/code-review` (plus `/security-review` in Phases 3 and 8) → `docker compose up` (Postgres) healthy and the app runs against it → commit with the user's approval.
+- A PostToolUse hook runs Prettier on every edited file (`.claude/hooks/format-file.sh`).

@@ -3,12 +3,14 @@ import {
   type DirectoryUser,
   effectivePortalRole,
   type Page,
+  type ProjectRole,
   type UpdateUserInput,
   type User,
   type UserListQuery,
 } from "@qa/shared"
 import type { Auth } from "../../auth/auth.ts"
 import { diff, recordActivity } from "../../lib/activity.ts"
+import { isUniqueViolation } from "../../lib/db-errors.ts"
 import { httpError } from "../../lib/http-error.ts"
 import { hashPassword } from "better-auth/crypto"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
@@ -93,14 +95,6 @@ async function assertNotLastAdmin(tx: Tx, target: UserRow) {
   if ((await otherActiveAdmins(tx, target.id)) === 0) {
     throw httpError(409, "The portal needs at least one active admin")
   }
-}
-
-function isUniqueViolation(err: unknown): boolean {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    (err as { code?: unknown }).code === "P2002"
-  )
 }
 
 export async function listUsers(
@@ -342,22 +336,50 @@ export async function reactivateUser(
   return toUser(row)
 }
 
-/** Active users matching `q`, for member pickers. At most 20, minimal fields. */
+/**
+ * Active non-admin users matching `q`, for pickers. At most 20, minimal
+ * fields. With a project, each person's role in it is included.
+ */
 export async function searchDirectory(
   { prisma }: UsersDeps,
-  q: string
+  q: string,
+  projectId?: string
 ): Promise<DirectoryUser[]> {
   const rows = await prisma.user.findMany({
     where: {
-      ...ACTIVE,
+      // Admins can open every project, so they're never picked as members.
+      NOT: [{ banned: true }, { role: { contains: "admin" } }],
       OR: [
         { name: { contains: q, mode: "insensitive" } },
         { username: { contains: q, mode: "insensitive" } },
       ],
     },
-    select: { id: true, name: true, username: true },
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      ...(projectId
+        ? {
+            memberships: {
+              where: { projectId },
+              select: { role: true },
+            },
+          }
+        : {}),
+    },
     orderBy: [{ name: "asc" }, { id: "asc" }],
     take: 20,
   })
-  return rows.map((row) => ({ ...row, username: row.username ?? "" }))
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    username: row.username ?? "",
+    ...(projectId
+      ? {
+          memberRole:
+            (row as { memberships?: { role: ProjectRole }[] }).memberships?.[0]
+              ?.role ?? null,
+        }
+      : {}),
+  }))
 }

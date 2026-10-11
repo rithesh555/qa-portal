@@ -10,12 +10,11 @@ import {
   KeyRoundIcon,
   PencilIcon,
   PlusIcon,
-  SearchIcon,
   UserCheckIcon,
   UserXIcon,
   UsersIcon,
 } from "lucide-react"
-import { useEffect, useEffectEvent, useState } from "react"
+import { useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -34,11 +33,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -51,6 +45,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/toast"
 import { ListPagination } from "@/components/list-pagination"
+import { SearchBox } from "@/components/search-box"
 import { useSession } from "@/features/auth/session"
 import { useListParams } from "@/hooks/use-list-params"
 import { errorMessage } from "@/lib/api"
@@ -65,47 +60,6 @@ const STATUS_LABELS: Record<(typeof USER_STATUSES)[number], string> = {
 }
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" })
-
-/** Updates the URL search term 300 ms after the user stops typing. */
-function SearchBox({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (value: string) => void
-}) {
-  const [draft, setDraft] = useState(value)
-  const [synced, setSynced] = useState(value)
-  // Follow outside changes (back button, cleared filters), but not our own
-  // update coming back trimmed, or a trailing space being typed would vanish.
-  if (value !== synced) {
-    setSynced(value)
-    if (draft.trim() !== value) setDraft(value)
-  }
-  // The URL holds the trimmed term; only a real difference triggers a search.
-  const pending = draft.trim() !== value
-  const commit = useEffectEvent(() => onChange(draft))
-  useEffect(() => {
-    if (!pending) return
-    const timer = setTimeout(commit, 300)
-    return () => clearTimeout(timer)
-  }, [draft, pending])
-
-  return (
-    <InputGroup className="sm:max-w-xs">
-      <InputGroupAddon>
-        <SearchIcon />
-      </InputGroupAddon>
-      <InputGroupInput
-        type="search"
-        placeholder="Search name, username or email"
-        aria-label="Search users"
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-      />
-    </InputGroup>
-  )
-}
 
 function RowActions({
   user,
@@ -206,11 +160,6 @@ export function UsersPage() {
   const [deactivating, setDeactivating] = useState<User | null>(null)
 
   const page = users.data
-  const lastPage = page ? Math.max(1, Math.ceil(page.total / page.pageSize)) : 1
-  // A stale link can point past the end (e.g. after deactivations); go to the last page.
-  useEffect(() => {
-    if (page && page.page > lastPage) setQuery({ page: lastPage })
-  }, [page, lastPage, setQuery])
   const filtered = Boolean(query.q) || query.status !== "active"
 
   return (
@@ -247,7 +196,11 @@ export function UsersPage() {
             ))}
           </TabsList>
         </Tabs>
-        <SearchBox value={query.q ?? ""} onChange={(q) => setQuery({ q })} />
+        <SearchBox
+          value={query.q ?? ""}
+          onChange={(q) => setQuery({ q })}
+          label="Search name, username or email"
+        />
       </div>
 
       {users.isError ? (
@@ -374,7 +327,7 @@ export function UsersPage() {
               page={page.page}
               pageSize={page.pageSize}
               total={page.total}
-              noun="users"
+              noun={["user", "users"]}
               onPageChange={(next) => setQuery({ page: next })}
             />
           )}

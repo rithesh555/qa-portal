@@ -1,39 +1,59 @@
 import type { ReactNode } from "react"
-import { createBrowserRouter, type RouteObject } from "react-router"
+import { createBrowserRouter } from "react-router"
 import { RequireAuth, RequirePermission } from "@/features/auth/guards"
 import { LoginPage } from "@/features/auth/login-page"
+import { MembersPage } from "@/features/projects/members-page"
+import { ProjectOverviewPage } from "@/features/projects/overview-page"
+import { ProjectLayout } from "@/features/projects/project-layout"
+import { ProjectsPage } from "@/features/projects/projects-page"
+import { ReleasesPage } from "@/features/projects/releases-page"
 import { UsersPage } from "@/features/users/users-page"
 import { ModulePlaceholder } from "@/pages/module-placeholder"
 import { NotFound } from "@/pages/not-found"
 import { AppShell } from "./app-shell"
-import { NAV, type NavItem } from "./nav"
+import { NAV, PROJECT_NAV } from "./nav"
 
-// Built modules; the rest show a placeholder until their phase.
-const PAGES: Partial<Record<string, ReactNode>> = {
-  "/users": <UsersPage />,
+const BUILT: Partial<Record<string, ReactNode>> = {
+  "": <ProjectOverviewPage />,
+  members: <MembersPage />,
+  releases: <ReleasesPage />,
 }
 
-// Admin-only modules sit behind their permission; project data is scoped by the API.
-const moduleRoutes: RouteObject[] = NAV.map((item) => ({
-  element: item.permission ? (
-    <RequirePermission action={item.permission} />
-  ) : undefined,
-  children: [
-    item.path === "/"
-      ? { index: true, element: pageFor(item) }
-      : { path: item.path.slice(1), element: pageFor(item) },
-  ],
-}))
+// Project pages from later phases show a placeholder until they're built.
+const projectPages = PROJECT_NAV.map((item) =>
+  item.path
+    ? {
+        path: item.path,
+        element: BUILT[item.path] ?? <ModulePlaceholder item={item} />,
+      }
+    : { index: true, element: BUILT[""] }
+)
 
-function pageFor(item: NavItem) {
-  return PAGES[item.path] ?? <ModulePlaceholder item={item} />
-}
+const home = NAV.find((item) => item.path === "/")!
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   {
     element: <RequireAuth />,
-    children: [{ path: "/", element: <AppShell />, children: moduleRoutes }],
+    children: [
+      {
+        path: "/",
+        element: <AppShell />,
+        children: [
+          { index: true, element: <ModulePlaceholder item={home} /> },
+          { path: "projects", element: <ProjectsPage /> },
+          {
+            path: "projects/:key",
+            element: <ProjectLayout />,
+            children: [...projectPages, { path: "*", element: <NotFound /> }],
+          },
+          {
+            element: <RequirePermission action="users:manage" />,
+            children: [{ path: "users", element: <UsersPage /> }],
+          },
+        ],
+      },
+    ],
   },
   { path: "*", element: <NotFound /> },
 ])

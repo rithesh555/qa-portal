@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react"
+import { type MouseEvent, useEffect } from "react"
 import { useLocation } from "react-router"
 import {
   Pagination,
@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/pagination"
 
 /**
- * "Showing 26–50 of 103 users" with previous/next links. The links carry the
+ * "Showing 26–50 of 103 users" with previous/next links. A page past the end
+ * (e.g. after items were removed, or an old link) moves to the last page. The links carry the
  * current filters (open in a new tab works); a plain click navigates in-app.
  */
 export function ListPagination({
@@ -22,13 +23,18 @@ export function ListPagination({
   page: number
   pageSize: number
   total: number
-  noun: string
+  /** [singular, plural], e.g. ["project", "projects"]. */
+  noun: readonly [string, string]
   onPageChange: (page: number) => void
 }) {
   const location = useLocation()
   const pages = Math.max(1, Math.ceil(total / pageSize))
   const first = total === 0 ? 0 : (page - 1) * pageSize + 1
   const last = Math.min(total, page * pageSize)
+
+  useEffect(() => {
+    if (page > pages) onPageChange(pages)
+  }, [page, pages, onPageChange])
 
   function hrefFor(target: number) {
     const params = new URLSearchParams(location.search)
@@ -66,7 +72,7 @@ export function ListPagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
       <p aria-live="polite">
-        Showing {first}–{last} of {total} {noun}
+        Showing {first}–{last} of {total} {total === 1 ? noun[0] : noun[1]}
       </p>
       <Pagination className="mx-0 w-auto">
         <PaginationContent>

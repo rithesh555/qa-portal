@@ -17,22 +17,26 @@ datasource db {
 }
 
 model User {
-  id              String        @id
+  id              String          @id
   name            String
   email           String
-  emailVerified   Boolean       @default(false) @map("email_verified")
+  emailVerified   Boolean         @default(false) @map("email_verified")
   image           String?
-  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
   username        String?
-  displayUsername String?       @map("display_username")
+  displayUsername String?         @map("display_username")
   role            String?
-  banned          Boolean?      @default(false)
-  banReason       String?       @map("ban_reason")
-  banExpires      DateTime?     @map("ban_expires") @db.Timestamptz(3)
+  banned          Boolean?        @default(false)
+  banReason       String?         @map("ban_reason")
+  banExpires      DateTime?       @map("ban_expires") @db.Timestamptz(3)
   sessions        Session[]
   accounts        Account[]
   activities      ActivityLog[]
+  memberships     ProjectMember[] @relation("member")
+  addedMembers    ProjectMember[] @relation("addedBy")
+  createdProjects Project[]
+  createdReleases Release[]
 
   @@unique([email])
   @@unique([username])
@@ -109,8 +113,9 @@ model ActivityLog {
   id         String   @id @default(uuid(7)) @db.Uuid
   actorId    String   @map("actor_id")
   actor      User     @relation(fields: [actorId], references: [id], onDelete: Restrict)
-  /// Null for portal-wide changes (e.g. user management). FK added with projects.
+  /// Null for portal-wide changes (e.g. user management).
   projectId  String?  @map("project_id") @db.Uuid
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: Restrict)
   entityType String   @map("entity_type")
   entityId   String   @map("entity_id")
   action     String
@@ -122,4 +127,83 @@ model ActivityLog {
   @@index([projectId, createdAt(sort: Desc)])
   @@index([entityType, entityId, createdAt(sort: Desc)])
   @@map("activity_log")
+}
+
+enum ProjectRole {
+  lead
+  tester
+  viewer
+
+  @@map("project_role")
+}
+
+enum ReleaseStatus {
+  planned
+  in_progress
+  released
+
+  @@map("release_status")
+}
+
+/// Projects are archived, never deleted.
+model Project {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  /// 2–6 capitals/digits; part of every ID (PAY-TC-12), so never changes.
+  key         String          @unique
+  name        String
+  description String          @default("")
+  archivedAt  DateTime?       @map("archived_at") @db.Timestamptz(3)
+  createdById String          @map("created_by_id")
+  createdBy   User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  /// Optimistic concurrency: bumped on every edit.
+  version     Int             @default(1)
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  members     ProjectMember[]
+  releases    Release[]
+  activities  ActivityLog[]
+
+  @@index([createdById])
+  @@index([archivedAt, name])
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  projectId String      @map("project_id") @db.Uuid
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  userId    String      @map("user_id")
+  user      User        @relation("member", fields: [userId], references: [id], onDelete: Restrict)
+  role      ProjectRole
+  addedById String      @map("added_by_id")
+  addedBy   User        @relation("addedBy", fields: [addedById], references: [id], onDelete: Restrict)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([addedById])
+  @@index([projectId, role])
+  @@map("project_members")
+}
+
+model Release {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  projectId   String        @map("project_id") @db.Uuid
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  name        String
+  description String        @default("")
+  status      ReleaseStatus @default(planned)
+  startDate   DateTime?     @map("start_date") @db.Date
+  targetDate  DateTime?     @map("target_date") @db.Date
+  createdById String        @map("created_by_id")
+  createdBy   User          @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([projectId, name])
+  @@index([projectId, status])
+  @@index([createdById])
+  @@map("releases")
 }
