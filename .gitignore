@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+logs/
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+
+# python (Phase 2 load tests)
+__pycache__/
+.venv/
+
+# playwright (Phase 2)
+test-results/
+playwright-report/
+.playwright-mcp/
+apps/api/src/generated/

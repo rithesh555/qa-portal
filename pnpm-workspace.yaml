@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Only listed packages may run install scripts (pnpm supply-chain default).
+allowBuilds:
+  esbuild: true
+  msw: false
+  prisma@7.10.0: true
+  "@prisma/engines@7.10.0": true

@@ -1,0 +1,55 @@
+import type { FastifyError, FastifyInstance } from "fastify"
+import fp from "fastify-plugin"
+import { hasZodFastifySchemaValidationErrors } from "fastify-type-provider-zod"
+import { STATUS_CODES } from "node:http"
+
+/** Every error response has this shape. */
+export interface ErrorBody {
+  statusCode: number
+  error: string
+  message: string
+  details?: unknown
+}
+
+function body(
+  statusCode: number,
+  message: string,
+  details?: unknown
+): ErrorBody {
+  return {
+    statusCode,
+    error: STATUS_CODES[statusCode] ?? "Error",
+    message,
+    ...(details === undefined ? {} : { details }),
+  }
+}
+
+export default fp(
+  async (app: FastifyInstance) => {
+    app.setNotFoundHandler((request, reply) => {
+      reply
+        .code(404)
+        .send(body(404, `Route ${request.method} ${request.url} not found`))
+    })
+
+    app.setErrorHandler((error: FastifyError, request, reply) => {
+      if (hasZodFastifySchemaValidationErrors(error)) {
+        return reply
+          .code(400)
+          .send(body(400, "Request validation failed", error.validation))
+      }
+
+      const statusCode =
+        error.statusCode && error.statusCode >= 400 ? error.statusCode : 500
+      if (statusCode >= 500) {
+        request.log.error({ err: error }, "request failed")
+        // Never leak internals for server errors.
+        return reply
+          .code(statusCode)
+          .send(body(statusCode, "Internal server error"))
+      }
+      return reply.code(statusCode).send(body(statusCode, error.message))
+    })
+  },
+  { name: "errors" }
+)
