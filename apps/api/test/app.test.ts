@@ -6,7 +6,15 @@ describe("app", () => {
   let app: FastifyInstance
 
   beforeAll(async () => {
-    app = await buildTestApp()
+    app = await buildTestApp({
+      beforeReady: (instance) => {
+        instance.get("/api/test/unique-clash", async () => {
+          throw Object.assign(new Error("Unique constraint failed"), {
+            code: "P2002",
+          })
+        })
+      },
+    })
   })
   afterAll(async () => {
     await app.close()
@@ -61,6 +69,19 @@ describe("app", () => {
     expect(res.json()).toMatchObject({
       statusCode: 404,
       error: "Not Found",
+    })
+  })
+
+  it("turns a database uniqueness clash into 409 without leaking details", async () => {
+    const res = await app.inject({
+      method: "GET",
+      url: "/api/test/unique-clash",
+    })
+    expect(res.statusCode).toBe(409)
+    expect(res.json()).toEqual({
+      statusCode: 409,
+      error: "Conflict",
+      message: "That value is already in use",
     })
   })
 

@@ -1,4 +1,9 @@
-import { effectiveRole, hasRole, type Role, type SessionUser } from "@qa/shared"
+import {
+  type Action,
+  can,
+  effectivePortalRole,
+  type SessionUser,
+} from "@qa/shared"
 import { fromNodeHeaders } from "better-auth/node"
 import type {
   FastifyReply,
@@ -7,6 +12,7 @@ import type {
 } from "fastify"
 import fp from "fastify-plugin"
 import { type Auth, CLIENT_IP_HEADER, createAuth } from "../auth/auth.ts"
+import { httpError } from "../lib/http-error.ts"
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -21,10 +27,6 @@ interface AuthPluginOptions {
   baseURL: string
   secret: string
   webOrigin: string
-}
-
-function httpError(statusCode: number, message: string) {
-  return Object.assign(new Error(message), { statusCode })
 }
 
 /** Copies Set-Cookie headers from a Better Auth response onto the reply. */
@@ -55,7 +57,7 @@ async function loadUser(
     username: session.user.username ?? "",
     name: session.user.name,
     email: session.user.email,
-    role: effectiveRole(session.user.role),
+    role: effectivePortalRole(session.user.role),
   }
   return request.user
 }
@@ -70,14 +72,32 @@ export const requireAuth: preHandlerAsyncHookHandler = async (
   }
 }
 
-/** preHandler: 401 without a session, 403 below `minimum`. */
-export function requireRole(minimum: Role): preHandlerAsyncHookHandler {
+/**
+ * preHandler for portal-wide actions (no project involved): 401 without a
+ * session, 403 when the shared permission matrix denies the action.
+ */
+export function requirePermission(action: Action): preHandlerAsyncHookHandler {
   return async (request, reply) => {
     const user = await loadUser(request, reply)
     if (!user) throw httpError(401, "Authentication required")
-    if (!hasRole(user.role, minimum)) throw httpError(403, "Insufficient role")
+    if (!can(action, { portalRole: user.role })) {
+      throw httpError(403, "You don't have permission to do that")
+    }
   }
 }
+
+/**
+ * The only Better Auth endpoints reachable from outside. Everything else it
+ * offers (admin/*, update-user, list-sessions, ...) stays server-side, so
+ * user changes go through /api/users, which checks the permission matrix and
+ * writes the activity log. New Better Auth endpoints are closed by default.
+ */
+const PUBLIC_AUTH_ROUTES = [
+  { method: "POST", url: "/api/auth/sign-in/username" },
+  { method: "POST", url: "/api/auth/sign-out" },
+  { method: "POST", url: "/api/auth/change-password" },
+  { method: "GET", url: "/api/auth/get-session" },
+] as const
 
 async function forwardToBetterAuth(
   request: FastifyRequest,
@@ -110,12 +130,13 @@ export default fp<AuthPluginOptions>(
     app.decorate("auth", createAuth({ prisma: app.prisma, ...options }))
     app.decorateRequest("user", null)
 
-    app.route({
-      method: ["GET", "POST"],
-      url: "/api/auth/*",
-      schema: { hide: true },
-      handler: forwardToBetterAuth,
-    })
+    for (const route of PUBLIC_AUTH_ROUTES) {
+      app.route({
+        ...route,
+        schema: { hide: true },
+        handler: forwardToBetterAuth,
+      })
+    }
   },
   { name: "auth", dependencies: ["prisma"] }
 )

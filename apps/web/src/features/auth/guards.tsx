@@ -1,4 +1,4 @@
-import { hasRole, type Role } from "@qa/shared"
+import { type Action, can } from "@qa/shared"
 import { CloudOffIcon } from "lucide-react"
 import { Navigate, Outlet, useLocation } from "react-router"
 import { FullPageSpinner } from "@/components/full-page-spinner"
@@ -65,9 +65,9 @@ export function RequireAuth() {
   return <Navigate to="/login" replace state={{ from }} />
 }
 
-/** Renders child routes only for `minimum` role or above. Use inside RequireAuth. */
-export function RequireRole({ minimum }: { minimum: Role }) {
+/** Renders child routes only when the portal-wide `action` is allowed. Use inside RequireAuth. */
+export function RequirePermission({ action }: { action: Action }) {
   const { data: user } = useSession()
-  if (!user || !hasRole(user.role, minimum)) return <NoAccess />
+  if (!user || !can(action, { portalRole: user.role })) return <NoAccess />
   return <Outlet />
 }

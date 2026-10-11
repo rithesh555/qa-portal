@@ -1,5 +1,6 @@
-import { ROLE_LABELS } from "@qa/shared"
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react"
+import { PORTAL_ROLE_LABELS } from "@qa/shared"
+import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react"
+import { useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router"
 import { BrandMark } from "@/components/brand-mark"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -29,6 +30,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { ChangePasswordDialog } from "@/features/auth/change-password-dialog"
 import { useSession } from "@/features/auth/session"
 import { useSignOut } from "@/features/auth/use-sign-out"
 import { NAV, type NavItem, navFor } from "./nav"
@@ -49,49 +51,62 @@ function isActive(itemPath: string, pathname: string): boolean {
 function UserMenu() {
   const { data: user } = useSession()
   const signOut = useSignOut()
+  const [changingPassword, setChangingPassword] = useState(false)
   if (!user) return null
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <SidebarMenuButton
-            size="lg"
-            className="data-popup-open:bg-sidebar-accent"
-          />
-        }
-      >
-        <Avatar className="size-8 rounded-md">
-          <AvatarFallback className="rounded-md">
-            {initials(user.name)}
-          </AvatarFallback>
-        </Avatar>
-        <span className="grid flex-1 text-left text-sm leading-tight">
-          <span className="truncate font-medium">{user.name}</span>
-          <span className="truncate text-xs text-muted-foreground">
-            {ROLE_LABELS[user.role]}
-          </span>
-        </span>
-        <ChevronsUpDownIcon className="ml-auto" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="start" className="min-w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            <span className="block font-medium text-foreground">
-              {user.name}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <SidebarMenuButton
+              size="lg"
+              className="data-popup-open:bg-sidebar-accent"
+            />
+          }
+        >
+          <Avatar className="size-8 rounded-md">
+            <AvatarFallback className="rounded-md">
+              {initials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-medium">{user.name}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {PORTAL_ROLE_LABELS[user.role]}
             </span>
-            <span className="block truncate font-normal">@{user.username}</span>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => void signOut()}>
-            <LogOutIcon />
-            Sign out
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </span>
+          <ChevronsUpDownIcon className="ml-auto" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side="top" align="start" className="min-w-56">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>
+              <span className="block font-medium text-foreground">
+                {user.name}
+              </span>
+              <span className="block truncate font-normal">
+                @{user.username}
+              </span>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setChangingPassword(true)}>
+              <KeyRoundIcon />
+              Change password
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void signOut()}>
+              <LogOutIcon />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ChangePasswordDialog
+        open={changingPassword}
+        onOpenChange={setChangingPassword}
+      />
+    </>
   )
 }
 

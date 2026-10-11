@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify"
 import { buildApp } from "../src/app.ts"
 import type { Env } from "../src/env.ts"
 import type { PrismaClient } from "../src/lib/prisma.ts"
-import type { Role } from "@qa/shared"
+import type { PortalRole } from "@qa/shared"
 import { testEnv } from "./test-env.ts"
 
 export async function buildTestApp(
@@ -29,7 +29,7 @@ export function nextIp(): string {
 
 export async function createUser(
   app: FastifyInstance,
-  user: { username: string; role: Role; password?: string }
+  user: { username: string; role: PortalRole; password?: string }
 ): Promise<void> {
   await app.auth.api.createUser({
     body: {

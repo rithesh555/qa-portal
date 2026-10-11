@@ -1,15 +1,18 @@
 import { createAccessControl } from "better-auth/plugins/access"
-import { adminAc, defaultStatements } from "better-auth/plugins/admin/access"
+import {
+  adminAc,
+  defaultStatements,
+  userAc,
+} from "better-auth/plugins/admin/access"
 
 /**
- * Better Auth access control. Only the built-in `user`/`session` admin
- * statements for now; QA modules add their own resources in later phases.
+ * Better Auth access control for the portal-wide roles only. Project rights
+ * (lead/tester/viewer) live on project memberships and are checked with
+ * `can()` from @qa/shared.
  */
 export const ac = createAccessControl({ ...defaultStatements })
 
 export const roles = {
   admin: ac.newRole({ ...adminAc.statements }),
-  qa_lead: ac.newRole({ user: [], session: [] }),
-  tester: ac.newRole({ user: [], session: [] }),
-  viewer: ac.newRole({ user: [], session: [] }),
+  user: ac.newRole({ ...userAc.statements }),
 }

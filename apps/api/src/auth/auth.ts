@@ -49,7 +49,7 @@ export function createAuth({ prisma, baseURL, secret, webOrigin }: AuthConfig) {
     },
     plugins: [
       username(),
-      admin({ ac, roles, defaultRole: "viewer", adminRoles: ["admin"] }),
+      admin({ ac, roles, defaultRole: "user", adminRoles: ["admin"] }),
     ],
   })
 }

@@ -4,7 +4,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import { createMemoryRouter } from "react-router"
 import { RouterProvider } from "react-router/dom"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { RequireAuth, RequireRole } from "./guards.tsx"
+import { RequireAuth, RequirePermission } from "./guards.tsx"
 import { sessionQueryKey } from "./session.ts"
 
 function renderAt(path: string, session: SessionUser | null) {
@@ -18,7 +18,7 @@ function renderAt(path: string, session: SessionUser | null) {
         children: [
           { path: "/", element: <p>home page</p> },
           {
-            element: <RequireRole minimum="admin" />,
+            element: <RequirePermission action="users:manage" />,
             children: [{ path: "/users", element: <p>users page</p> }],
           },
         ],
@@ -63,12 +63,12 @@ describe("RequireAuth", () => {
   })
 
   it("renders the page for a signed-in user", async () => {
-    renderAt("/", user("viewer"))
+    renderAt("/", user("user"))
     expect(await screen.findByText("home page")).toBeInTheDocument()
   })
 
   it("keeps showing the page when a background session check fails", async () => {
-    const { queryClient } = renderAt("/", user("viewer"))
+    const { queryClient } = renderAt("/", user("user"))
     expect(await screen.findByText("home page")).toBeInTheDocument()
     stubFetchStatus(502)
     await queryClient.refetchQueries({ queryKey: sessionQueryKey })
@@ -109,9 +109,9 @@ describe("RequireAuth", () => {
   })
 })
 
-describe("RequireRole", () => {
-  it("shows a no-access message to lower roles", async () => {
-    renderAt("/users", user("qa_lead"))
+describe("RequirePermission", () => {
+  it("shows a no-access message when the action is denied", async () => {
+    renderAt("/users", user("user"))
     expect(
       await screen.findByRole("heading", {
         name: "You don't have access to this page",
@@ -120,7 +120,7 @@ describe("RequireRole", () => {
     expect(screen.queryByText("users page")).not.toBeInTheDocument()
   })
 
-  it("renders the page for a sufficient role", async () => {
+  it("renders the page when the action is allowed", async () => {
     renderAt("/users", user("admin"))
     expect(await screen.findByText("users page")).toBeInTheDocument()
   })

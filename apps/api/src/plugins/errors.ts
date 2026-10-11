@@ -39,6 +39,11 @@ export default fp(
           .send(body(400, "Request validation failed", error.validation))
       }
 
+      // A unique constraint lost a race with another request (Prisma P2002).
+      if ((error as { code?: unknown }).code === "P2002") {
+        return reply.code(409).send(body(409, "That value is already in use"))
+      }
+
       const statusCode =
         error.statusCode && error.statusCode >= 400 ? error.statusCode : 500
       if (statusCode >= 500) {

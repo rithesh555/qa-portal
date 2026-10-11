@@ -6,7 +6,8 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 
 - **Web:** React 19 + Vite + TypeScript, Tailwind v4, shadcn/ui, TanStack Query, React Router, React Hook Form + Zod (`apps/web`)
 - **API:** Fastify 5 + TypeScript, Zod type provider, @fastify/swagger, pino, helmet, rate-limit, CORS (`apps/api`)
-- **Auth:** Better Auth — username/password, roles (Admin, QA Lead, Tester, Viewer), DB sessions in httpOnly cookies. No public sign-up; admin creates users.
+- **Auth:** Better Auth — username/password, DB sessions in httpOnly cookies. No public sign-up; admin creates users.
+- **Access model:** portal role `admin` | `user`. Admin sees and manages everything and is the only one who creates/archives projects. Everyone else sees only projects they are members of, with a **per-project role** (`lead` | `tester` | `viewer`); project leads manage that project's members. The permission matrix lives in `packages/shared` — the web hides, the API enforces (inaccessible ids → 404). Users are deactivated, never deleted.
 - **DB:** PostgreSQL 17 (Docker) + Prisma **7.10.0 pinned** — npm `latest` points at an 8.x release candidate; do not upgrade without asking.
 - **Shared:** Zod schemas/types in `packages/shared`
 - **Tests:** Vitest (unit + API integration against a separate test DB)
@@ -14,7 +15,7 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 
 ## Scope
 
-- **Phases 1–8: the app only** (foundation, then one module per phase, then hardening). `compose.yaml` runs PostgreSQL only.
+- **Phases 1–8: the app only.** Order: 1 Foundation → 2 Access model & User management → 3 Projects, members & releases → 4 Test cases → 5 Test runs → 6 Defects → 7 Dashboard & Reports → 8 Hardening. `compose.yaml` runs PostgreSQL only. No file attachments in v1.
 - **Phase 9 (last, only once the app is fully developed; do not start without the user):** app Dockerfiles/nginx, CI/CD, Playwright E2E suite, Locust load tests.
 
 ## Rules — no guesswork
@@ -31,4 +32,4 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 
 ## Phase gate (end of every phase)
 
-`pnpm lint && pnpm typecheck && pnpm test` all green → walk through new screens with Playwright MCP → `/code-review` → `docker compose up` (Postgres) healthy and the app runs against it.
+`pnpm lint && pnpm typecheck && pnpm test` all green (including authorization tests for every new endpoint: admin / lead / tester / viewer / non-member / deactivated) → walk through new screens with Playwright MCP → `/code-review` → `docker compose up` (Postgres) healthy and the app runs against it.

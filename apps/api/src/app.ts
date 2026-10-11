@@ -18,6 +18,7 @@ import auth from "./plugins/auth.ts"
 import errors from "./plugins/errors.ts"
 import prisma from "./plugins/prisma.ts"
 import health from "./routes/health.ts"
+import usersRoutes from "./modules/users/routes.ts"
 import me from "./routes/me.ts"
 
 export interface BuildAppOptions {
@@ -91,6 +92,7 @@ export async function buildApp({
 
   await app.register(health, { prefix: "/api" })
   await app.register(me, { prefix: "/api" })
+  await app.register(usersRoutes, { prefix: "/api" })
 
   return app
 }

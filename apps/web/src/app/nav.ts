@@ -1,4 +1,4 @@
-import { hasRole, type Role } from "@qa/shared"
+import { type Action, can, type PortalRole } from "@qa/shared"
 import {
   BugIcon,
   ChartColumnIcon,
@@ -14,58 +14,55 @@ export interface NavItem {
   title: string
   path: string
   icon: LucideIcon
-  /** Least privileged role that can open this module. */
-  minRole: Role
+  /** Portal-wide action needed to open this module; none = every signed-in user. */
+  permission?: Action
   /** Phase in which the module gets built (for placeholder pages). */
   phase: number
 }
 
 export const NAV: readonly NavItem[] = [
-  { title: "Home", path: "/", icon: HouseIcon, minRole: "viewer", phase: 2 },
+  { title: "Home", path: "/", icon: HouseIcon, phase: 7 },
   {
     title: "Projects",
     path: "/projects",
     icon: FolderKanbanIcon,
-    minRole: "viewer",
     phase: 3,
   },
   {
     title: "Test cases",
     path: "/test-cases",
     icon: ListChecksIcon,
-    minRole: "viewer",
-    phase: 3,
+    phase: 4,
   },
   {
     title: "Test runs",
     path: "/test-runs",
     icon: PlayIcon,
-    minRole: "viewer",
-    phase: 4,
+    phase: 5,
   },
   {
     title: "Defects",
     path: "/defects",
     icon: BugIcon,
-    minRole: "viewer",
-    phase: 5,
+    phase: 6,
   },
   {
     title: "Reports",
     path: "/reports",
     icon: ChartColumnIcon,
-    minRole: "viewer",
-    phase: 6,
+    phase: 7,
   },
   {
     title: "Users",
     path: "/users",
     icon: UsersIcon,
-    minRole: "admin",
-    phase: 7,
+    permission: "users:manage",
+    phase: 2,
   },
 ]
 
-export function navFor(role: Role): NavItem[] {
-  return NAV.filter((item) => hasRole(role, item.minRole))
+export function navFor(role: PortalRole): NavItem[] {
+  return NAV.filter(
+    (item) => !item.permission || can(item.permission, { portalRole: role })
+  )
 }

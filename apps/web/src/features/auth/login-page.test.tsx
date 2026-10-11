@@ -50,14 +50,14 @@ describe("LoginPage errors", () => {
     ).toBeInTheDocument()
   })
 
-  it("explains a blocked account", async () => {
+  it("explains a deactivated account", async () => {
     signInMock.mockResolvedValue({
       data: null,
       error: { status: 403, statusText: "Forbidden" },
     } as never)
     await submitLogin()
     expect(
-      await screen.findByText(/This account is blocked/)
+      await screen.findByText(/This account has been deactivated/)
     ).toBeInTheDocument()
   })
 

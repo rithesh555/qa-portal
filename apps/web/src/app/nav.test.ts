@@ -17,14 +17,8 @@ describe("navFor", () => {
     ])
   })
 
-  it("hides user management from QA leads and below", () => {
-    for (const role of ["qa_lead", "tester", "viewer"] as const) {
-      expect(titles(role)).not.toContain("Users")
-    }
-  })
-
-  it("gives viewers the read-only modules", () => {
-    expect(titles("viewer")).toEqual([
+  it("gives members every module except user management", () => {
+    expect(titles("user")).toEqual([
       "Home",
       "Projects",
       "Test cases",

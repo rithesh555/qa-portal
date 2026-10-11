@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
-import { requireRole } from "../src/plugins/auth.ts"
+import { requirePermission } from "../src/plugins/auth.ts"
 import {
   buildTestApp,
   createUser,
@@ -19,8 +19,8 @@ describe("auth", () => {
     app = await buildTestApp({
       beforeReady: (instance) => {
         instance.get(
-          "/api/test/lead-only",
-          { preHandler: requireRole("qa_lead") },
+          "/api/test/admin-only",
+          { preHandler: requirePermission("users:manage") },
           async () => ({ ok: true })
         )
       },
@@ -29,7 +29,7 @@ describe("auth", () => {
   beforeEach(async () => {
     await resetDb(app.prisma)
     await createUser(app, { username: "alice", role: "admin" })
-    await createUser(app, { username: "victor", role: "viewer" })
+    await createUser(app, { username: "victor", role: "user" })
   })
   afterAll(async () => {
     await app.close()
@@ -175,13 +175,13 @@ describe("auth", () => {
       expect(refreshed?.maxAge).toBe(24 * 60 * 60)
     })
 
-    it("acts with the highest of several stored roles", async () => {
+    it("treats admin among several stored roles as admin", async () => {
       await app.auth.api.createUser({
         body: {
           email: "multi@test.local",
           name: "multi",
           password: PASSWORD,
-          role: ["tester", "qa_lead"],
+          role: ["user", "admin"],
           data: { username: "multi" },
         },
       })
@@ -191,8 +191,74 @@ describe("auth", () => {
         url: "/api/me",
         headers: { cookie },
       })
-      expect(res.json().role).toBe("qa_lead")
+      expect(res.json().role).toBe("admin")
     })
+
+    it("gives new users the user role by default", async () => {
+      await app.auth.api.createUser({
+        body: {
+          email: "plain@test.local",
+          name: "plain",
+          password: PASSWORD,
+          data: { username: "plain" },
+        },
+      })
+      const cookie = await signIn(app, "plain")
+      const res = await app.inject({
+        method: "GET",
+        url: "/api/me",
+        headers: { cookie },
+      })
+      expect(res.json().role).toBe("user")
+    })
+
+    it("lets a user change their own password and keeps them signed in", async () => {
+      const cookie = await signIn(app, "victor")
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/auth/change-password",
+        headers: { ...ORIGIN, cookie },
+        payload: {
+          currentPassword: PASSWORD,
+          newPassword: "victors-new-password",
+          revokeOtherSessions: true,
+        },
+      })
+      expect(res.statusCode).toBe(200)
+      const fresh = res.cookies.map((c) => `${c.name}=${c.value}`).join("; ")
+      const me = await app.inject({
+        method: "GET",
+        url: "/api/me",
+        headers: { cookie: fresh || cookie },
+      })
+      expect(me.statusCode).toBe(200)
+      await expect(signIn(app, "victor")).rejects.toThrow()
+      await expect(
+        signIn(app, "victor", "victors-new-password")
+      ).resolves.toContain("session_token")
+    })
+
+    it.each([
+      ["POST", "/api/auth/update-user"],
+      ["POST", "/api/auth/admin/set-role"],
+      ["GET", "/api/auth/admin/list-users"],
+      ["GET", "/api/auth/%61dmin/list-users"],
+      ["POST", "/api/auth/sign-up/email"],
+      ["POST", "/api/auth/delete-user"],
+      ["GET", "/api/auth/list-sessions"],
+    ] as const)(
+      "only forwards the auth endpoints the app uses: %s %s is 404",
+      async (method, url) => {
+        const cookie = await signIn(app, "victor")
+        const res = await app.inject({
+          method,
+          url,
+          headers: { ...ORIGIN, cookie },
+          ...(method === "POST" ? { payload: { name: "Mallory" } } : {}),
+        })
+        expect(res.statusCode).toBe(404)
+      }
+    )
 
     it("returns 401 after sign-out", async () => {
       const cookie = await signIn(app, "alice")
@@ -212,50 +278,29 @@ describe("auth", () => {
   })
 
   describe("roles", () => {
-    it("lets an admin list users through the admin API", async () => {
-      const cookie = await signIn(app, "alice")
+    it("requirePermission rejects anonymous requests with 401", async () => {
       const res = await app.inject({
         method: "GET",
-        url: "/api/auth/admin/list-users",
-        headers: { cookie },
-      })
-      expect(res.statusCode).toBe(200)
-      expect(res.json().users).toHaveLength(2)
-    })
-
-    it("forbids a viewer from the admin API", async () => {
-      const cookie = await signIn(app, "victor")
-      const res = await app.inject({
-        method: "GET",
-        url: "/api/auth/admin/list-users",
-        headers: { cookie },
-      })
-      expect(res.statusCode).toBe(403)
-    })
-
-    it("requireRole rejects anonymous requests with 401", async () => {
-      const res = await app.inject({
-        method: "GET",
-        url: "/api/test/lead-only",
+        url: "/api/test/admin-only",
       })
       expect(res.statusCode).toBe(401)
     })
 
-    it("requireRole rejects a lower role with 403", async () => {
+    it("requirePermission rejects a non-admin with 403 for an admin-only action", async () => {
       const cookie = await signIn(app, "victor")
       const res = await app.inject({
         method: "GET",
-        url: "/api/test/lead-only",
+        url: "/api/test/admin-only",
         headers: { cookie },
       })
       expect(res.statusCode).toBe(403)
     })
 
-    it("requireRole admits a higher role", async () => {
+    it("requirePermission admits an admin", async () => {
       const cookie = await signIn(app, "alice")
       const res = await app.inject({
         method: "GET",
-        url: "/api/test/lead-only",
+        url: "/api/test/admin-only",
         headers: { cookie },
       })
       expect(res.statusCode).toBe(200)

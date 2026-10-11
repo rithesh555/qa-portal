@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { roleSchema } from "./roles.ts"
+import { portalRoleSchema } from "./roles.ts"
 
 export const loginSchema = z.object({
   username: z
@@ -18,7 +18,7 @@ export const sessionUserSchema = z.object({
   username: z.string(),
   name: z.string(),
   email: z.string(),
-  role: roleSchema,
+  role: portalRoleSchema,
 })
 
 export type SessionUser = z.infer<typeof sessionUserSchema>

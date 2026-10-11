@@ -37,7 +37,7 @@ function signInErrorMessage(status: number): string {
     return "That username and password don't match. Check them and try again."
   }
   if (status === 403) {
-    return "This account is blocked. Ask an admin to restore access."
+    return "This account has been deactivated. Ask an admin to restore access."
   }
   return NETWORK_ERROR
 }

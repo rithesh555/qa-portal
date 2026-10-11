@@ -1,35 +1,42 @@
 import { z } from "zod"
 
-/** Ordered from most to least privileged. */
-export const ROLES = ["admin", "qa_lead", "tester", "viewer"] as const
+/**
+ * Portal-wide role, stored in Better Auth's `role` column. Admins see and
+ * manage everything; everyone else is a `user` whose rights come from their
+ * project memberships.
+ */
+export const PORTAL_ROLES = ["admin", "user"] as const
 
-export const roleSchema = z.enum(ROLES)
+export const portalRoleSchema = z.enum(PORTAL_ROLES)
 
-export type Role = z.infer<typeof roleSchema>
+export type PortalRole = z.infer<typeof portalRoleSchema>
 
-export const ROLE_LABELS: Record<Role, string> = {
+export const PORTAL_ROLE_LABELS: Record<PortalRole, string> = {
   admin: "Admin",
-  qa_lead: "QA Lead",
+  user: "Member",
+}
+
+/** Role inside one project. Ordered from most to least privileged. */
+export const PROJECT_ROLES = ["lead", "tester", "viewer"] as const
+
+export const projectRoleSchema = z.enum(PROJECT_ROLES)
+
+export type ProjectRole = z.infer<typeof projectRoleSchema>
+
+export const PROJECT_ROLE_LABELS: Record<ProjectRole, string> = {
+  lead: "QA Lead",
   tester: "Tester",
   viewer: "Viewer",
 }
 
-/** True when `actual` is at least as privileged as `required`. Unknown roles never pass. */
-export function hasRole(actual: Role, required: Role): boolean {
-  const have = ROLES.indexOf(actual)
-  const need = ROLES.indexOf(required)
-  return have !== -1 && need !== -1 && have <= need
-}
-
 /**
- * The role a user acts with. Better Auth stores several roles as a
- * comma-separated string; the most privileged known one wins. Anything
- * unusable falls back to the least privilege.
+ * The portal role a user acts with. Better Auth stores several roles as a
+ * comma-separated string; only an exact `admin` entry grants admin, anything
+ * else is a plain user.
  */
-export function effectiveRole(stored: string | null | undefined): Role {
-  const known = (stored ?? "")
-    .split(",")
-    .map((part) => roleSchema.safeParse(part.trim()))
-    .flatMap((parsed) => (parsed.success ? [parsed.data] : []))
-  return ROLES.find((role) => known.includes(role)) ?? "viewer"
+export function effectivePortalRole(
+  stored: string | null | undefined
+): PortalRole {
+  const parts = (stored ?? "").split(",").map((part) => part.trim())
+  return parts.includes("admin") ? "admin" : "user"
 }

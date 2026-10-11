@@ -19,7 +19,7 @@ const signedIn = {
   username: "sam",
   name: "Sam",
   email: "sam@test.local",
-  role: "viewer" as const,
+  role: "user" as const,
 }
 
 function setup() {
