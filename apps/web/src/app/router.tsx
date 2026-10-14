@@ -2,6 +2,10 @@ import type { ReactNode } from "react"
 import { createBrowserRouter } from "react-router"
 import { RequireAuth, RequirePermission } from "@/features/auth/guards"
 import { LoginPage } from "@/features/auth/login-page"
+import { CaseEditorPage } from "@/features/cases/case-editor-page"
+import { CasePage } from "@/features/cases/case-page"
+import { CasesPage } from "@/features/cases/cases-page"
+import { ImportPage } from "@/features/cases/import-page"
 import { MembersPage } from "@/features/projects/members-page"
 import { ProjectOverviewPage } from "@/features/projects/overview-page"
 import { ProjectLayout } from "@/features/projects/project-layout"
@@ -15,6 +19,7 @@ import { NAV, PROJECT_NAV } from "./nav"
 
 const BUILT: Partial<Record<string, ReactNode>> = {
   "": <ProjectOverviewPage />,
+  cases: <CasesPage />,
   members: <MembersPage />,
   releases: <ReleasesPage />,
 }
@@ -45,7 +50,14 @@ export const router = createBrowserRouter([
           {
             path: "projects/:key",
             element: <ProjectLayout />,
-            children: [...projectPages, { path: "*", element: <NotFound /> }],
+            children: [
+              ...projectPages,
+              { path: "cases/new", element: <CaseEditorPage /> },
+              { path: "cases/import", element: <ImportPage /> },
+              { path: "cases/:ref", element: <CasePage /> },
+              { path: "cases/:ref/edit", element: <CaseEditorPage /> },
+              { path: "*", element: <NotFound /> },
+            ],
           },
           {
             element: <RequirePermission action="users:manage" />,

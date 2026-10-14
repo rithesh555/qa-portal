@@ -276,13 +276,18 @@ export async function setArchived(
   return getProject(prisma, access)
 }
 
+/**
+ * The project's recent activity. Per-case entries of a bulk change, an import
+ * or archiving a suite are kept out (inFeed = false): the change's own summary
+ * entry stands for them, and they stay in each case's history.
+ */
 export async function listActivity(
   prisma: PrismaClient,
   access: ProjectAccess,
   limit: number
 ): Promise<ActivityItem[]> {
   const rows = await prisma.activityLog.findMany({
-    where: { projectId: access.project.id },
+    where: { projectId: access.project.id, inFeed: true },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: limit,
     select: {

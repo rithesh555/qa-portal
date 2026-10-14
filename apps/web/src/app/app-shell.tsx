@@ -278,7 +278,8 @@ export function AppShell() {
   return (
     <SidebarProvider>
       <AppSidebar items={items} pathname={pathname} project={project} />
-      <SidebarInset>
+      {/* min-w-0: wide tables scroll inside the page instead of widening it. */}
+      <SidebarInset className="min-w-0">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator

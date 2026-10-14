@@ -32,6 +32,6 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 
 ## Phase workflow
 
-- **Start:** for a phase with complex screens (test case editor, run execution, dashboard), publish a clickable design mockup and get the user's feedback before building.
+- **Start:** for a phase with complex screens (test case editor, run execution, dashboard), publish a clickable design mockup, then have it reviewed in parallel by the `ux-reviewer` agent (source review of the mockup files: usability, a11y, consistency) and a general-purpose agent acting as an experienced QA manager (domain fit, open questions, missing features, risks for later phases). Merge their findings into one list, get the user's approval, update the mockup, and only then build.
 - **Gate (end of every phase):** `pnpm lint && pnpm typecheck && pnpm test` all green (including authorization tests for every new endpoint: admin / lead / tester / viewer / non-member / deactivated) → walk through new screens with Playwright MCP → `ux-reviewer` agent on new/changed screens → `authz-auditor` agent on new/changed API routes → `/code-review` (plus `/security-review` in Phases 3 and 8) → `docker compose up` (Postgres) healthy and the app runs against it → commit with the user's approval.
 - A PostToolUse hook runs Prettier on every edited file (`.claude/hooks/format-file.sh`).

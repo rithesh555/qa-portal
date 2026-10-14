@@ -37,6 +37,10 @@ model User {
   addedMembers    ProjectMember[] @relation("addedBy")
   createdProjects Project[]
   createdReleases Release[]
+  createdSuites   Suite[]
+  createdCases    TestCase[]      @relation("caseCreatedBy")
+  updatedCases    TestCase[]      @relation("caseUpdatedBy")
+  importBatches   ImportBatch[]
 
   @@unique([email])
   @@unique([username])
@@ -121,10 +125,13 @@ model ActivityLog {
   action     String
   /// Changed fields as { field: { from, to } }; never contains secrets.
   changes    Json?
+  /// False for the per-item entries of a bulk change or import: the project
+  /// feed shows that change's summary entry instead.
+  inFeed     Boolean  @default(true) @map("in_feed")
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   @@index([actorId, createdAt(sort: Desc)])
-  @@index([projectId, createdAt(sort: Desc)])
+  @@index([projectId, inFeed, createdAt(sort: Desc)])
   @@index([entityType, entityId, createdAt(sort: Desc)])
   @@map("activity_log")
 }
@@ -147,21 +154,25 @@ enum ReleaseStatus {
 
 /// Projects are archived, never deleted.
 model Project {
-  id          String          @id @default(uuid(7)) @db.Uuid
+  id          String           @id @default(uuid(7)) @db.Uuid
   /// 2–6 capitals/digits; part of every ID (PAY-TC-12), so never changes.
-  key         String          @unique
+  key         String           @unique
   name        String
-  description String          @default("")
-  archivedAt  DateTime?       @map("archived_at") @db.Timestamptz(3)
-  createdById String          @map("created_by_id")
-  createdBy   User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  description String           @default("")
+  archivedAt  DateTime?        @map("archived_at") @db.Timestamptz(3)
+  createdById String           @map("created_by_id")
+  createdBy   User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
   /// Optimistic concurrency: bumped on every edit.
-  version     Int             @default(1)
-  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  version     Int              @default(1)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   members     ProjectMember[]
   releases    Release[]
   activities  ActivityLog[]
+  counters    ProjectCounter[]
+  suites      Suite[]
+  cases       TestCase[]
+  imports     ImportBatch[]
 
   @@index([createdById])
   @@index([archivedAt, name])
@@ -206,4 +217,150 @@ model Release {
   @@index([projectId, status])
   @@index([createdById])
   @@map("releases")
+}
+
+/// Per-project sequences for readable IDs (PAY-TC-12, import #7, later runs
+/// and defects). Allocated with INSERT … ON CONFLICT … RETURNING inside the
+/// write's transaction, so numbers are never reused.
+model ProjectCounter {
+  projectId String  @map("project_id") @db.Uuid
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  /// "case", "import", …
+  scope     String
+  /// The last number handed out.
+  value     Int     @default(0)
+
+  @@id([projectId, scope])
+  @@map("project_counters")
+}
+
+/// Groups test cases. One level of nesting (a parent must be top-level), checked
+/// in the service so it can be lifted later. Sibling names are unique among
+/// active suites, ignoring case — also checked in the service, under the
+/// project lock that every suite write takes.
+model Suite {
+  id            String       @id @default(uuid(7)) @db.Uuid
+  projectId     String       @map("project_id") @db.Uuid
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  parentId      String?      @map("parent_id") @db.Uuid
+  parent        Suite?       @relation("suiteChildren", fields: [parentId], references: [id], onDelete: Restrict)
+  children      Suite[]      @relation("suiteChildren")
+  name          String
+  archivedAt    DateTime?    @map("archived_at") @db.Timestamptz(3)
+  /// Set when an import created this suite, so archiving the import can tidy it up.
+  importBatchId String?      @map("import_batch_id") @db.Uuid
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Restrict)
+  createdById   String       @map("created_by_id")
+  createdBy     User         @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  version       Int          @default(1)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  cases         TestCase[]   @relation("caseSuite")
+  archivedCases TestCase[]   @relation("caseArchivedWithSuite")
+
+  @@index([projectId, archivedAt])
+  @@index([parentId])
+  @@index([importBatchId])
+  @@index([createdById])
+  @@map("suites")
+}
+
+enum CasePriority {
+  critical
+  high
+  medium
+  low
+
+  @@map("case_priority")
+}
+
+enum CaseType {
+  functional
+  security
+  performance
+  usability
+  other
+
+  @@map("case_type")
+}
+
+enum CaseStatus {
+  draft
+  ready
+
+  @@map("case_status")
+}
+
+/// Test cases are archived, never deleted. Test runs (Phase 5) copy a case's
+/// content when it is added, so editing never rewrites past results.
+model TestCase {
+  id               String       @id @default(uuid(7)) @db.Uuid
+  projectId        String       @map("project_id") @db.Uuid
+  project          Project      @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  /// Per project, from ProjectCounter scope "case": the 12 in PAY-TC-12.
+  number           Int
+  suiteId          String?      @map("suite_id") @db.Uuid
+  suite            Suite?       @relation("caseSuite", fields: [suiteId], references: [id], onDelete: Restrict)
+  title            String
+  preconditions    String       @default("")
+  /// [{ action, expected }] in order; always replaced as a whole with the case.
+  steps            Json
+  priority         CasePriority
+  type             CaseType
+  status           CaseStatus   @default(draft)
+  labels           String[]     @default([])
+  references       String       @default("")
+  archivedAt       DateTime?    @map("archived_at") @db.Timestamptz(3)
+  archiveReason    String       @default("") @map("archive_reason")
+  /// The suite whose archiving archived this case; restoring the case restores it.
+  archivedSuiteId  String?      @map("archived_suite_id") @db.Uuid
+  archivedSuite    Suite?       @relation("caseArchivedWithSuite", fields: [archivedSuiteId], references: [id], onDelete: Restrict)
+  importBatchId    String?      @map("import_batch_id") @db.Uuid
+  importBatch      ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Restrict)
+  duplicatedFromId String?      @map("duplicated_from_id") @db.Uuid
+  duplicatedFrom   TestCase?    @relation("caseDuplicates", fields: [duplicatedFromId], references: [id], onDelete: Restrict)
+  duplicates       TestCase[]   @relation("caseDuplicates")
+  /// Shown as "version": bumped only when the title, preconditions or steps change.
+  revision         Int          @default(1)
+  /// Optimistic concurrency: bumped on every change.
+  version          Int          @default(1)
+  createdById      String       @map("created_by_id")
+  createdBy        User         @relation("caseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedById      String       @map("updated_by_id")
+  updatedBy        User         @relation("caseUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([projectId, number])
+  @@index([projectId, archivedAt, suiteId])
+  @@index([projectId, updatedAt])
+  @@index([suiteId])
+  @@index([archivedSuiteId])
+  @@index([importBatchId])
+  @@index([duplicatedFromId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([labels], type: Gin)
+  @@map("test_cases")
+}
+
+/// One CSV/Excel import, so a lead can archive everything it added at once.
+model ImportBatch {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  projectId   String     @map("project_id") @db.Uuid
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  /// Per project, from ProjectCounter scope "import": import #7.
+  number      Int
+  fileName    String     @map("file_name")
+  caseCount   Int        @map("case_count")
+  archivedAt  DateTime?  @map("archived_at") @db.Timestamptz(3)
+  createdById String     @map("created_by_id")
+  createdBy   User       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  cases       TestCase[]
+  suites      Suite[]
+
+  @@unique([projectId, number])
+  @@index([createdById])
+  @@map("import_batches")
 }

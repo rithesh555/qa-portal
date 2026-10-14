@@ -4,6 +4,8 @@
 import { config } from "dotenv"
 import { z } from "zod"
 import { createAuth } from "../src/auth/auth.ts"
+import { formatCaseKey } from "@qa/shared"
+import { demoCaseLibrary } from "../src/demo/cases.ts"
 import { demoProjects } from "../src/demo/projects.ts"
 import { demoUsers } from "../src/demo/users.ts"
 import { recordActivity } from "../src/lib/activity.ts"
@@ -150,6 +152,90 @@ try {
     projects += 1
   }
   console.log(`Demo projects: ${projects} created.`)
+
+  // Test cases, written by each project's first QA Lead (demo.admin if none).
+  let cases = 0
+  const demos = demoProjects(demoUsers(DEMO_USER_PASSWORD))
+  for (const [index, demo] of demos.entries()) {
+    const project = await prisma.project.findUniqueOrThrow({
+      where: { key: demo.key },
+      select: { id: true, key: true },
+    })
+    if (await prisma.testCase.count({ where: { projectId: project.id } })) {
+      continue
+    }
+    const lead = demo.members.find((m) => m.role === "lead")
+    const author = (lead && ids.get(lead.username)) || admin
+    const library = demoCaseLibrary(demo.key, index)
+    await prisma.$transaction(
+      async (tx) => {
+        const suiteIds = new Map<string, string>()
+        for (const suite of library.suites) {
+          const top = await tx.suite.create({
+            data: {
+              projectId: project.id,
+              name: suite.name,
+              createdById: author.id,
+            },
+          })
+          suiteIds.set(suite.name, top.id)
+          for (const child of suite.children) {
+            const made = await tx.suite.create({
+              data: {
+                projectId: project.id,
+                parentId: top.id,
+                name: child,
+                createdById: author.id,
+              },
+            })
+            suiteIds.set(`${suite.name}/${child}`, made.id)
+          }
+        }
+        await tx.testCase.createMany({
+          data: library.cases.map(({ suitePath, ...c }, i) => ({
+            ...c,
+            steps: c.steps,
+            projectId: project.id,
+            number: i + 1,
+            suiteId: suitePath.length
+              ? suiteIds.get(suitePath.join("/"))!
+              : null,
+            createdById: author.id,
+            updatedById: author.id,
+          })),
+        })
+        await tx.projectCounter.create({
+          data: {
+            projectId: project.id,
+            scope: "case",
+            value: library.cases.length,
+          },
+        })
+        const made = await tx.testCase.findMany({
+          where: { projectId: project.id },
+          select: { id: true, number: true, title: true },
+        })
+        await tx.activityLog.createMany({
+          data: made.map((c) => ({
+            actorId: author.id,
+            projectId: project.id,
+            entityType: "case",
+            inFeed: false,
+            entityId: c.id,
+            action: "created",
+            changes: {
+              key: formatCaseKey(project.key, c.number),
+              title: c.title,
+              bulk: true,
+            },
+          })),
+        })
+      },
+      { timeout: 60_000 }
+    )
+    cases += library.cases.length
+  }
+  console.log(`Demo test cases: ${cases} created.`)
 } finally {
   await prisma.$disconnect()
 }
