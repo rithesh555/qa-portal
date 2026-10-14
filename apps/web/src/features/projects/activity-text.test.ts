@@ -163,6 +163,61 @@ describe("describeActivity", () => {
       }),
       "updated release 4.2",
     ],
+    [
+      item("run", "created", { key: "PAY-R-3", name: "Smoke", cases: 24 }),
+      "started run PAY-R-3 (Smoke) with 24 test cases",
+    ],
+    [
+      item("run", "created", {
+        key: "PAY-R-4",
+        name: "Retest",
+        cases: 1,
+        copiedFrom: "PAY-R-3",
+      }),
+      "started run PAY-R-4 (Retest) from PAY-R-3 with 1 test case",
+    ],
+    [
+      item("run", "updated", { key: "PAY-R-3", name: "Smoke" }),
+      "updated run PAY-R-3",
+    ],
+    [
+      item("run", "closed", { key: "PAY-R-3", untested: 0 }),
+      "closed run PAY-R-3",
+    ],
+    [
+      item("run", "closed", { key: "PAY-R-3", untested: 2 }),
+      "closed run PAY-R-3 with 2 cases untested",
+    ],
+    [item("run", "reopened", { key: "PAY-R-3" }), "reopened run PAY-R-3"],
+    [
+      item("run", "results_recorded", {
+        key: "PAY-R-3",
+        status: "blocked",
+        count: 5,
+      }),
+      "marked 5 cases Blocked in PAY-R-3",
+    ],
+    [
+      item("run", "assigned", {
+        key: "PAY-R-3",
+        assignee: { id: "u2", name: "Tom" },
+        count: 4,
+      }),
+      "assigned 4 cases in PAY-R-3 to Tom",
+    ],
+    [
+      item("run", "assigned", { key: "PAY-R-3", assignee: null, count: 1 }),
+      "unassigned 1 case in PAY-R-3",
+    ],
+    [
+      item("run", "cases_added", { key: "PAY-R-3", count: 3 }),
+      "added 3 cases to PAY-R-3",
+    ],
+    [
+      item("run", "cases_removed", { key: "PAY-R-3", count: 2 }),
+      "removed 2 cases from PAY-R-3",
+    ],
+    [item("run", "closed"), "closed a run"],
   ])("%#: describes %o", (activity, text) => {
     expect(describeActivity(activity)).toBe(text)
   })

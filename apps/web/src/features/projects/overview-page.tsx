@@ -37,30 +37,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { errorMessage } from "@/lib/api"
+import { exactTime, timeAgo } from "@/lib/time"
 import { describeActivity } from "./activity-text"
 import { useActivity, useReleases, useSetArchived } from "./api"
 import { EditProjectDialog } from "./edit-project-dialog"
 import { useProjectContext } from "./project-layout"
 import { ReleaseStatusBadge, formatDay } from "./release-status"
-
-const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
-const exact = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-const shortDate = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-})
-
-function when(iso: string): string {
-  const minutes = Math.round((Date.parse(iso) - Date.now()) / 60_000)
-  if (minutes > -1) return "just now"
-  if (minutes > -60) return relative.format(minutes, "minute")
-  if (minutes > -24 * 60)
-    return relative.format(Math.round(minutes / 60), "hour")
-  return shortDate.format(new Date(iso))
-}
 
 function CurrentRelease() {
   const { project } = useProjectContext()
@@ -193,10 +175,10 @@ function RecentActivity() {
                 </span>
                 <time
                   dateTime={item.createdAt}
-                  title={exact.format(new Date(item.createdAt))}
+                  title={exactTime.format(new Date(item.createdAt))}
                   className="whitespace-nowrap text-muted-foreground"
                 >
-                  {when(item.createdAt)}
+                  {timeAgo(item.createdAt)}
                 </time>
               </li>
             ))}

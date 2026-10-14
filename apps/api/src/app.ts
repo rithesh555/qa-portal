@@ -20,6 +20,7 @@ import prisma from "./plugins/prisma.ts"
 import health from "./routes/health.ts"
 import caseRoutes from "./modules/cases/routes.ts"
 import projectRoutes from "./modules/projects/routes.ts"
+import runRoutes from "./modules/runs/routes.ts"
 import usersRoutes from "./modules/users/routes.ts"
 import me from "./routes/me.ts"
 
@@ -97,6 +98,7 @@ export async function buildApp({
   await app.register(usersRoutes, { prefix: "/api" })
   await app.register(projectRoutes, { prefix: "/api" })
   await app.register(caseRoutes, { prefix: "/api" })
+  await app.register(runRoutes, { prefix: "/api" })
 
   return app
 }

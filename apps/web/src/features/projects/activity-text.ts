@@ -7,6 +7,8 @@ import {
   type ProjectRole,
   RELEASE_STATUS_LABELS,
   type ReleaseStatus,
+  RUN_CASE_STATUS_LABELS,
+  type RunCaseStatus,
 } from "@qa/shared"
 
 // Activity details are stored JSON written by older versions too, so every
@@ -140,7 +142,9 @@ export function describeActivity(item: ActivityItem): string {
     case "bulk.archived":
       return describeBulk(item.action, c)
     default:
-      return "made a change"
+      return item.entityType === "run"
+        ? describeRun(item.action, c)
+        : "made a change"
   }
 }
 
@@ -185,4 +189,53 @@ function describeBulk(action: string, c: Record<string, unknown>): string {
     }
   }
   return `changed ${count}`
+}
+
+const runCases = (n: number) => `${n} ${n === 1 ? "case" : "cases"}`
+
+/** Something done to a test run (single results aren't logged here). */
+function describeRun(action: string, c: Record<string, unknown>): string {
+  const key = text(c.key)
+  const run = key ? `run ${key}` : "a run"
+  const count = typeof c.count === "number" ? runCases(c.count) : "some cases"
+  const inRun = key ? ` in ${key}` : ""
+  switch (action) {
+    case "created": {
+      const name = text(c.name)
+      const from = text(c.copiedFrom)
+      const n = typeof c.cases === "number" ? ` with ${cases(c.cases)}` : ""
+      return `started ${run}${name ? ` (${name})` : ""}${from ? ` from ${from}` : ""}${n}`
+    }
+    case "updated":
+      return `updated ${run}`
+    case "closed": {
+      const untested = typeof c.untested === "number" ? c.untested : 0
+      return untested > 0
+        ? `closed ${run} with ${runCases(untested)} untested`
+        : `closed ${run}`
+    }
+    case "reopened":
+      return `reopened ${run}`
+    case "results_recorded": {
+      const status =
+        typeof c.status === "string" && c.status in RUN_CASE_STATUS_LABELS
+          ? RUN_CASE_STATUS_LABELS[c.status as RunCaseStatus]
+          : null
+      return status
+        ? `marked ${count} ${status}${inRun}`
+        : `recorded results on ${count}${inRun}`
+    }
+    case "assigned": {
+      const who = nameOf(c.assignee)
+      return who
+        ? `assigned ${count}${inRun} to ${who}`
+        : `unassigned ${count}${inRun}`
+    }
+    case "cases_added":
+      return `added ${count} to ${key ?? "a run"}`
+    case "cases_removed":
+      return `removed ${count} from ${key ?? "a run"}`
+    default:
+      return `changed ${run}`
+  }
 }

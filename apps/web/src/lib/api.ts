@@ -39,10 +39,12 @@ export async function apiSend<S extends z.ZodType>(
   method: "POST" | "PATCH" | "PUT" | "DELETE",
   path: string,
   body?: unknown,
-  schema?: S
+  schema?: S,
+  init?: { signal?: AbortSignal }
 ): Promise<z.infer<S>> {
   const res = await fetch(`/api${path}`, {
     method,
+    signal: init?.signal,
     credentials: "same-origin",
     headers: {
       accept: "application/json",

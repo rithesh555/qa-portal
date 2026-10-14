@@ -7,6 +7,9 @@ export default defineConfig((configEnv) =>
       environment: "jsdom",
       setupFiles: ["./src/test/setup.ts"],
       include: ["src/**/*.test.{ts,tsx}"],
+      // UI tests click through whole pages; under a full parallel run
+      // (alongside the API suite) one can take several seconds.
+      testTimeout: 20_000,
     },
   })
 )

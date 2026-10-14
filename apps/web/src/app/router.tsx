@@ -11,6 +11,9 @@ import { ProjectOverviewPage } from "@/features/projects/overview-page"
 import { ProjectLayout } from "@/features/projects/project-layout"
 import { ProjectsPage } from "@/features/projects/projects-page"
 import { ReleasesPage } from "@/features/projects/releases-page"
+import { NewRunPage } from "@/features/runs/new-run-page"
+import { RunPage } from "@/features/runs/run-page"
+import { RunsPage } from "@/features/runs/runs-page"
 import { UsersPage } from "@/features/users/users-page"
 import { ModulePlaceholder } from "@/pages/module-placeholder"
 import { NotFound } from "@/pages/not-found"
@@ -22,6 +25,7 @@ const BUILT: Partial<Record<string, ReactNode>> = {
   cases: <CasesPage />,
   members: <MembersPage />,
   releases: <ReleasesPage />,
+  runs: <RunsPage />,
 }
 
 // Project pages from later phases show a placeholder until they're built.
@@ -56,6 +60,8 @@ export const router = createBrowserRouter([
               { path: "cases/import", element: <ImportPage /> },
               { path: "cases/:ref", element: <CasePage /> },
               { path: "cases/:ref/edit", element: <CaseEditorPage /> },
+              { path: "runs/new", element: <NewRunPage /> },
+              { path: "runs/:ref", element: <RunPage /> },
               { path: "*", element: <NotFound /> },
             ],
           },

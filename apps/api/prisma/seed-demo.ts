@@ -4,13 +4,17 @@
 import { config } from "dotenv"
 import { z } from "zod"
 import { createAuth } from "../src/auth/auth.ts"
-import { formatCaseKey } from "@qa/shared"
+import { formatCaseKey, formatRunKey } from "@qa/shared"
 import { demoCaseLibrary } from "../src/demo/cases.ts"
 import { demoProjects } from "../src/demo/projects.ts"
+import { demoOutcome, demoRuns } from "../src/demo/runs.ts"
 import { demoUsers } from "../src/demo/users.ts"
 import { recordActivity } from "../src/lib/activity.ts"
 import { loadEnv } from "../src/env.ts"
+import { nextNumbers } from "../src/lib/counters.ts"
 import { createPrisma } from "../src/lib/prisma.ts"
+import { currentCases, snapshotData } from "../src/modules/runs/select.ts"
+import { shareOut } from "../src/modules/runs/service.ts"
 
 config({ path: new URL("../../../.env", import.meta.url), quiet: true })
 
@@ -236,6 +240,141 @@ try {
     cases += library.cases.length
   }
   console.log(`Demo test cases: ${cases} created.`)
+
+  // Test runs: a finished one, one in progress and a fresh one per active project.
+  let runs = 0
+  const DAY = 24 * 60 * 60 * 1000
+  for (const [index, demo] of demos.entries()) {
+    if (demo.archived) continue
+    const plans = demoRuns(demo.key, index)
+    const project = await prisma.project.findUniqueOrThrow({
+      where: { key: demo.key },
+      select: { id: true, key: true },
+    })
+    if (
+      await prisma.testRun.count({
+        where: { projectId: project.id, name: plans[0]!.name },
+      })
+    ) {
+      continue
+    }
+    const people = demo.members
+      .filter((m) => m.role !== "viewer")
+      .map((m) => ids.get(m.username)!)
+    const lead = demo.members.find((m) => m.role === "lead")
+    const owner = (lead && ids.get(lead.username)) || admin
+    const releases = await prisma.release.findMany({
+      where: { projectId: project.id },
+      select: { id: true, status: true },
+      orderBy: { createdAt: "asc" },
+    })
+    const current = releases.find((r) => r.status === "in_progress")
+    const previous = releases.find((r) => r.status === "released")
+    await prisma.$transaction(
+      async (tx) => {
+        const ready = await tx.testCase.findMany({
+          where: { projectId: project.id, archivedAt: null, status: "ready" },
+          select: { id: true },
+        })
+        const cases = await currentCases(
+          tx,
+          project.id,
+          ready.map((c) => c.id)
+        )
+        if (cases.length === 0) return
+        const assignment = shareOut(
+          cases,
+          people.map((p) => p.id)
+        )
+        for (const [ri, plan] of plans.entries()) {
+          const number = await nextNumbers(tx, project.id, "run")
+          const started = new Date(Date.now() - plan.daysAgo * DAY)
+          const run = await tx.testRun.create({
+            data: {
+              projectId: project.id,
+              number,
+              name: plan.name,
+              environment: plan.environment,
+              releaseId: (plan.closed ? previous : current)?.id ?? null,
+              state: plan.closed ? "closed" : "open",
+              closedAt: plan.closed
+                ? new Date(started.getTime() + 3 * DAY)
+                : null,
+              closedById: plan.closed ? owner.id : null,
+              createdById: owner.id,
+              createdAt: started,
+            },
+          })
+          await tx.runCase.createMany({
+            data: cases.map((c, i) => ({
+              runId: run.id,
+              caseId: c.id,
+              position: i + 1,
+              assigneeId: assignment.get(c.id) ?? null,
+              ...snapshotData(c),
+              status: demoOutcome(ri, i, plan.tested, 0)?.status ?? "untested",
+            })),
+          })
+          const rows = await tx.runCase.findMany({
+            where: { runId: run.id },
+            select: {
+              id: true,
+              position: true,
+              revision: true,
+              assigneeId: true,
+              steps: true,
+            },
+          })
+          await tx.testResult.createMany({
+            data: rows.flatMap((rc) => {
+              const steps = Array.isArray(rc.steps) ? rc.steps.length : 0
+              const outcome = demoOutcome(
+                ri,
+                rc.position - 1,
+                plan.tested,
+                steps
+              )
+              if (!outcome) return []
+              return [
+                {
+                  runCaseId: rc.id,
+                  ...outcome,
+                  revision: rc.revision,
+                  recordedById: rc.assigneeId ?? owner.id,
+                  recordedAt: new Date(
+                    started.getTime() +
+                      ((rc.position * 37) % 48) * 60 * 60 * 1000
+                  ),
+                },
+              ]
+            }),
+          })
+          const key = formatRunKey(project.key, number)
+          await recordActivity(tx, {
+            actorId: owner.id,
+            projectId: project.id,
+            entityType: "run",
+            entityId: run.id,
+            action: "created",
+            changes: { key, name: plan.name, cases: cases.length },
+          })
+          if (plan.closed) {
+            await recordActivity(tx, {
+              actorId: owner.id,
+              projectId: project.id,
+              entityType: "run",
+              entityId: run.id,
+              action: "closed",
+              changes: { key, untested: 0 },
+            })
+          }
+        }
+      },
+      { timeout: 60_000 }
+    )
+    runs += plans.length
+  }
+  console.log(`Demo test runs: ${runs} created.`)
 } finally {
   await prisma.$disconnect()
 }
