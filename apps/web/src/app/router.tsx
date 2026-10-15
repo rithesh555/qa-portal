@@ -6,6 +6,9 @@ import { CaseEditorPage } from "@/features/cases/case-editor-page"
 import { CasePage } from "@/features/cases/case-page"
 import { CasesPage } from "@/features/cases/cases-page"
 import { ImportPage } from "@/features/cases/import-page"
+import { DefectPage } from "@/features/defects/defect-page"
+import { DefectsPage } from "@/features/defects/defects-page"
+import { NewDefectPage } from "@/features/defects/new-defect-page"
 import { MembersPage } from "@/features/projects/members-page"
 import { ProjectOverviewPage } from "@/features/projects/overview-page"
 import { ProjectLayout } from "@/features/projects/project-layout"
@@ -23,6 +26,7 @@ import { NAV, PROJECT_NAV } from "./nav"
 const BUILT: Partial<Record<string, ReactNode>> = {
   "": <ProjectOverviewPage />,
   cases: <CasesPage />,
+  defects: <DefectsPage />,
   members: <MembersPage />,
   releases: <ReleasesPage />,
   runs: <RunsPage />,
@@ -62,6 +66,8 @@ export const router = createBrowserRouter([
               { path: "cases/:ref/edit", element: <CaseEditorPage /> },
               { path: "runs/new", element: <NewRunPage /> },
               { path: "runs/:ref", element: <RunPage /> },
+              { path: "defects/new", element: <NewDefectPage /> },
+              { path: "defects/:ref", element: <DefectPage /> },
               { path: "*", element: <NotFound /> },
             ],
           },

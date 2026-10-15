@@ -24,6 +24,7 @@ You review the UX of the QA Portal (`/home/ritheshshetty/projects/qa-portal`), a
 7. **Keyboard only** — Tab order, visible focus, Escape closes dialogs/menus, Enter submits, no traps.
 8. **Accessibility basics** — accessible names on icon buttons, headings in order, tables have headers, status not by colour alone, links vs buttons used correctly (check roles in the snapshot).
 9. **Console** — any errors or warnings beyond expected 401s before sign-in.
+10. **Visual polish and mockup match** — if the caller gives an approved mockup (link or files), compare each screen with it and list differences in layout, components or wording. Check spacing and alignment, typography and visual hierarchy (one clear primary action, headings that read in order), and consistency with earlier screens: same design tokens from `apps/web/src/index.css` (no hard-coded colours), shadcn components used the same way, same page header, list, empty-state and dialog patterns.
 
 Take screenshots into `.playwright-mcp/` (git-ignored) and look at them; don't judge layout from snapshots alone.
 

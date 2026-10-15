@@ -60,6 +60,9 @@ import {
   STATUS_PRESSED,
 } from "./run-status"
 import { type ShortcutAction, useRunShortcuts } from "./use-run-shortcuts"
+import { useKnownDefects } from "@/features/defects/api"
+import { KnownDefects } from "@/features/defects/known-defects"
+import { LogDefectDialog } from "@/features/defects/log-defect-dialog"
 
 const RESULT_KEYS: Record<ResultStatus, string> = {
   passed: "P",
@@ -75,6 +78,8 @@ export interface Recorded {
   previous: { status: RunCaseStatus; note: string; failedStep: number | null }
   /** The run case's version after this result. */
   version: number
+  /** Stay on the case: it retests a fixed defect, which can now be closed or reopened. */
+  hold: boolean
 }
 
 const NO_STEP = "__none__"
@@ -259,7 +264,7 @@ export function RunCasePane({
   /** Move focus to the case heading on arrival (after navigating or saving). */
   autoFocus: boolean
 }) {
-  const { project } = useProjectContext()
+  const { project, allowed } = useProjectContext()
   const detailQuery = useRunCase(project.key, run.key, item.id)
   const record = useRecordResult(project.key, run.key)
   const refresh = useRefreshCase(project.key, run.key)
@@ -281,6 +286,9 @@ export function RunCasePane({
   const noteRef = useRef<HTMLTextAreaElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const detail = detailQuery.data
+  const known = useKnownDefects(project.key, item.id)
+  const knownDefects = known.data ?? []
+  const [logging, setLogging] = useState<{ preselect?: string } | null>(null)
 
   useEffect(() => {
     if (pending) noteRef.current?.focus()
@@ -324,6 +332,14 @@ export function RunCasePane({
             }
           : { status: "untested", note: "", failedStep: null },
         version: after.version,
+        // A retest of a fixed defect: stay so it can be closed or reopened.
+        // Until the defects load, stay to be safe.
+        hold:
+          (status === "passed" ||
+            status === "failed" ||
+            status === "blocked") &&
+          (known.isPending ||
+            knownDefects.some((d) => d.onCase && d.status === "fixed")),
       })
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -492,6 +508,13 @@ export function RunCasePane({
           </Alert>
         )}
 
+        <KnownDefects
+          item={item}
+          detail={detail}
+          defects={knownDefects}
+          onReopen={(preselect) => setLogging({ preselect })}
+        />
+
         {changed && (
           <Alert>
             <HistoryIcon />
@@ -646,9 +669,20 @@ export function RunCasePane({
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted-foreground">Result:</span>
             <RunCaseStatusBadge status={item.status} />
+            {detail &&
+              allowed("defects:edit") &&
+              (item.status === "failed" || item.status === "blocked") && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setLogging({})}
+                >
+                  Log defect…
+                </Button>
+              )}
           </div>
           {canRecord && (
             <div
@@ -818,6 +852,16 @@ export function RunCasePane({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {detail && (
+        <LogDefectDialog
+          open={logging !== null}
+          onOpenChange={(open) => !open && setLogging(null)}
+          run={run}
+          item={item}
+          detail={detail}
+          preselect={logging?.preselect}
+        />
+      )}
     </article>
   )
 }

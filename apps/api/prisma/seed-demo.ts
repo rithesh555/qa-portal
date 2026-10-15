@@ -4,9 +4,10 @@
 import { config } from "dotenv"
 import { z } from "zod"
 import { createAuth } from "../src/auth/auth.ts"
-import { formatCaseKey, formatRunKey } from "@qa/shared"
+import { formatCaseKey, formatDefectKey, formatRunKey } from "@qa/shared"
 import { demoCaseLibrary } from "../src/demo/cases.ts"
 import { demoProjects } from "../src/demo/projects.ts"
+import { demoDefects } from "../src/demo/defects.ts"
 import { demoOutcome, demoRuns } from "../src/demo/runs.ts"
 import { demoUsers } from "../src/demo/users.ts"
 import { recordActivity } from "../src/lib/activity.ts"
@@ -375,6 +376,160 @@ try {
     runs += plans.length
   }
   console.log(`Demo test runs: ${runs} created.`)
+
+  // Defects: one in each part of the workflow per active project, mostly
+  // logged from failed or blocked results of the run in progress.
+  let defects = 0
+  for (const [index, demo] of demos.entries()) {
+    if (demo.archived) continue
+    const plans = demoDefects(demo.key, index)
+    const project = await prisma.project.findUniqueOrThrow({
+      where: { key: demo.key },
+      select: { id: true, key: true },
+    })
+    if (
+      await prisma.defect.count({
+        where: { projectId: project.id, title: plans[0]!.fields.title },
+      })
+    ) {
+      continue
+    }
+    const run = await prisma.testRun.findFirst({
+      where: {
+        projectId: project.id,
+        name: demoRuns(demo.key, index)[1]!.name,
+      },
+      select: { id: true, releaseId: true, environment: true },
+    })
+    if (!run) continue
+    const failures = await prisma.runCase.findMany({
+      where: { runId: run.id, status: { in: ["failed", "blocked"] } },
+      orderBy: { position: "asc" },
+      select: {
+        id: true,
+        caseId: true,
+        results: {
+          orderBy: { recordedAt: "desc" },
+          take: 1,
+          select: { id: true, status: true },
+        },
+      },
+    })
+    const testers = demo.members
+      .filter((m) => m.role !== "viewer")
+      .map((m) => ids.get(m.username)!)
+    const lead = demo.members.find((m) => m.role === "lead")
+    const leadUser = (lead && ids.get(lead.username)) || admin
+    await prisma.$transaction(
+      async (tx) => {
+        let f = 0
+        for (const [i, plan] of plans.entries()) {
+          const source = plan.fromResult ? failures[f++] : undefined
+          if (plan.fromResult && !source) continue
+          const reporter = testers[i % testers.length] ?? admin
+          const number = await nextNumbers(tx, project.id, "defect")
+          const logged = new Date(Date.now() - plan.daysAgo * DAY)
+          const at = (step: number) =>
+            new Date(logged.getTime() + step * 6 * 60 * 60 * 1000)
+          const final = plan.path.at(-1)!
+          const stepAt = (s: string) => {
+            const k = plan.path.lastIndexOf(s as never)
+            return k >= 0 ? at(k) : null
+          }
+          const defect = await tx.defect.create({
+            data: {
+              projectId: project.id,
+              number,
+              ...plan.fields,
+              environment: plan.fields.environment || run.environment,
+              status: final,
+              priority: plan.priority,
+              source: source ? "result" : "manual",
+              reporterId: reporter.id,
+              assigneeId:
+                plan.path.length > 1
+                  ? (testers[(i + 1) % testers.length]?.id ?? null)
+                  : null,
+              caseId: source?.caseId ?? null,
+              foundInRunId: source ? run.id : null,
+              foundInReleaseId: run.releaseId,
+              fixedInReleaseId: stepAt("fixed") ? run.releaseId : null,
+              fixedInBuild: stepAt("fixed") ? "rc2" : "",
+              resolution: final === "rejected" ? plan.resolution! : null,
+              reopenCount: plan.path.filter((s) => s === "reopened").length,
+              openedAt: stepAt("open"),
+              fixedAt: stepAt("fixed"),
+              closedAt: stepAt("closed"),
+              createdAt: logged,
+            },
+            select: { id: true },
+          })
+          for (const [k, to] of plan.path.entries()) {
+            const actor =
+              k === 0
+                ? reporter
+                : ["open", "rejected", "reopened"].includes(to)
+                  ? leadUser
+                  : reporter
+            await tx.defectStatusChange.create({
+              data: {
+                defectId: defect.id,
+                fromStatus: k === 0 ? null : plan.path[k - 1]!,
+                toStatus: to,
+                resolution: to === "rejected" ? plan.resolution! : null,
+                note: to === "reopened" ? "Still fails on the new build" : "",
+                actorId: actor.id,
+                at: at(k),
+              },
+            })
+            await tx.activityLog.create({
+              data: {
+                actorId: actor.id,
+                projectId: project.id,
+                entityType: "defect",
+                entityId: defect.id,
+                action: k === 0 ? "created" : "status_changed",
+                changes:
+                  k === 0
+                    ? {
+                        key: formatDefectKey(project.key, number),
+                        title: plan.fields.title,
+                        severity: plan.fields.severity,
+                      }
+                    : {
+                        key: formatDefectKey(project.key, number),
+                        from: plan.path[k - 1]!,
+                        to,
+                        ...(to === "rejected"
+                          ? { resolution: plan.resolution! }
+                          : {}),
+                      },
+                createdAt: at(k),
+              },
+            })
+          }
+          const result = source?.results[0]
+          if (source && result) {
+            await tx.defectResultLink.create({
+              data: {
+                defectId: defect.id,
+                resultId: result.id,
+                runCaseId: source.id,
+                runId: run.id,
+                caseId: source.caseId,
+                kind: result.status === "blocked" ? "blocked" : "failed",
+                linkedById: reporter.id,
+                linkedAt: logged,
+              },
+            })
+          }
+          defects += 1
+        }
+      },
+      { timeout: 60_000 }
+    )
+  }
+  console.log(`Demo defects: ${defects} created.`)
 } finally {
   await prisma.$disconnect()
 }

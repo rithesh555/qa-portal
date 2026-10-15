@@ -20,6 +20,8 @@ const MATRIX = {
   // Reopening changes results already used in reports.
   "runs:reopen": ["lead"],
   "defects:edit": ["lead", "tester"],
+  // Confirm or reject new defects, set priority, reopen closed or rejected ones.
+  "defects:triage": ["lead"],
 } as const satisfies Record<string, readonly ProjectRole[]>
 
 export type Action = keyof typeof MATRIX

@@ -12,6 +12,16 @@
   --color-status-fail: var(--status-fail);
   --color-status-blocked: var(--status-blocked);
   --color-status-skipped: var(--status-skipped);
+  --color-defect-new: var(--defect-new);
+  --color-defect-new-ink: var(--defect-new-ink);
+  --color-defect-open: var(--defect-open);
+  --color-defect-open-ink: var(--defect-open-ink);
+  --color-defect-progress: var(--defect-progress);
+  --color-defect-progress-ink: var(--defect-progress-ink);
+  --color-defect-fixed: var(--defect-fixed);
+  --color-defect-fixed-ink: var(--defect-fixed-ink);
+  --color-defect-reopened: var(--defect-reopened);
+  --color-defect-reopened-ink: var(--defect-reopened-ink);
   /* Darker (light theme) shades for status text and icons on the page background. */
   --color-status-pass-ink: var(--status-pass-ink);
   --color-status-fail-ink: var(--status-fail);
@@ -99,6 +109,17 @@
   --status-skipped: oklch(0.52 0.02 256);
   --status-pass-ink: oklch(0.5 0.13 155);
   --status-blocked-ink: oklch(0.55 0.13 70);
+  /* Defect statuses: own hues, never the result colours. */
+  --defect-new: oklch(0.95 0.035 280);
+  --defect-new-ink: oklch(0.38 0.12 280);
+  --defect-open: oklch(0.95 0.035 200);
+  --defect-open-ink: oklch(0.38 0.12 200);
+  --defect-progress: oklch(0.95 0.035 230);
+  --defect-progress-ink: oklch(0.38 0.12 230);
+  --defect-fixed: oklch(0.95 0.035 300);
+  --defect-fixed-ink: oklch(0.38 0.12 300);
+  --defect-reopened: oklch(0.95 0.035 340);
+  --defect-reopened-ink: oklch(0.38 0.12 340);
 }
 
 .dark {
@@ -140,6 +161,16 @@
   --status-skipped: oklch(0.62 0.02 256);
   --status-pass-ink: var(--status-pass);
   --status-blocked-ink: var(--status-blocked);
+  --defect-new: oklch(0.3 0.05 280);
+  --defect-new-ink: oklch(0.86 0.08 280);
+  --defect-open: oklch(0.3 0.05 200);
+  --defect-open-ink: oklch(0.86 0.08 200);
+  --defect-progress: oklch(0.3 0.05 230);
+  --defect-progress-ink: oklch(0.86 0.08 230);
+  --defect-fixed: oklch(0.3 0.05 300);
+  --defect-fixed-ink: oklch(0.86 0.08 300);
+  --defect-reopened: oklch(0.3 0.05 340);
+  --defect-reopened-ink: oklch(0.86 0.08 340);
 }
 
 /* Fail and blocked carry stripes, so they never depend on colour alone. */

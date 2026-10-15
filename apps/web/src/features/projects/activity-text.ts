@@ -7,7 +7,13 @@ import {
   type ProjectRole,
   RELEASE_STATUS_LABELS,
   type ReleaseStatus,
+  DEFECT_STATUS_LABELS,
+  type DefectStatus,
+  RESOLUTION_LABELS,
+  type Resolution,
   RUN_CASE_STATUS_LABELS,
+  SEVERITY_LABELS,
+  type Severity,
   type RunCaseStatus,
 } from "@qa/shared"
 
@@ -144,7 +150,9 @@ export function describeActivity(item: ActivityItem): string {
     default:
       return item.entityType === "run"
         ? describeRun(item.action, c)
-        : "made a change"
+        : item.entityType === "defect"
+          ? describeDefect(item.action, c)
+          : "made a change"
   }
 }
 
@@ -238,4 +246,32 @@ function describeRun(action: string, c: Record<string, unknown>): string {
     default:
       return `changed ${run}`
   }
+}
+
+/** A defect logged or moved along its workflow (field edits stay out of the feed). */
+function describeDefect(action: string, c: Record<string, unknown>): string {
+  const key = text(c.key)
+  const defect = key ? `defect ${key}` : "a defect"
+  if (action === "created") {
+    const severity = text(c.severity)
+    const level =
+      severity && severity in SEVERITY_LABELS
+        ? ` (${SEVERITY_LABELS[severity as Severity]})`
+        : ""
+    const title = text(c.title)
+    return `logged ${defect}${level}${title ? `: ${title}` : ""}`
+  }
+  if (action === "status_changed") {
+    const to = text(c.to)
+    if (!key || !to || !(to in DEFECT_STATUS_LABELS))
+      return "changed a defect's status"
+    if (to === "rejected") {
+      const r = text(c.resolution)
+      return r && r in RESOLUTION_LABELS
+        ? `rejected ${defect} (${RESOLUTION_LABELS[r as Resolution]})`
+        : `rejected ${defect}`
+    }
+    return `moved ${defect} to ${DEFECT_STATUS_LABELS[to as DefectStatus]}`
+  }
+  return `changed ${defect}`
 }

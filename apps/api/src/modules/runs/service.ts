@@ -232,7 +232,7 @@ export async function getRun(
   return loadRun(prisma, access, run.id)
 }
 
-async function checkRelease(
+export async function checkRelease(
   tx: Prisma.TransactionClient,
   projectId: string,
   releaseId: string | null
@@ -249,7 +249,8 @@ async function checkRelease(
 export async function checkAssignees(
   tx: Prisma.TransactionClient,
   projectId: string,
-  userIds: string[]
+  userIds: string[],
+  message = "Assign cases only to active QA Leads and Testers of this project"
 ) {
   if (userIds.length === 0) return
   const members = await tx.projectMember.findMany({
@@ -262,10 +263,7 @@ export async function checkAssignees(
     select: { userId: true },
   })
   if (members.length !== new Set(userIds).size) {
-    throw httpError(
-      400,
-      "Assign cases only to active QA Leads and Testers of this project"
-    )
+    throw httpError(400, message)
   }
 }
 

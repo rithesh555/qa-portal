@@ -17,34 +17,39 @@ datasource db {
 }
 
 model User {
-  id              String          @id
+  id              String               @id
   name            String
   email           String
-  emailVerified   Boolean         @default(false) @map("email_verified")
+  emailVerified   Boolean              @default(false) @map("email_verified")
   image           String?
-  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
   username        String?
-  displayUsername String?         @map("display_username")
+  displayUsername String?              @map("display_username")
   role            String?
-  banned          Boolean?        @default(false)
-  banReason       String?         @map("ban_reason")
-  banExpires      DateTime?       @map("ban_expires") @db.Timestamptz(3)
+  banned          Boolean?             @default(false)
+  banReason       String?              @map("ban_reason")
+  banExpires      DateTime?            @map("ban_expires") @db.Timestamptz(3)
   sessions        Session[]
   accounts        Account[]
   activities      ActivityLog[]
-  memberships     ProjectMember[] @relation("member")
-  addedMembers    ProjectMember[] @relation("addedBy")
+  memberships     ProjectMember[]      @relation("member")
+  addedMembers    ProjectMember[]      @relation("addedBy")
   createdProjects Project[]
   createdReleases Release[]
   createdSuites   Suite[]
-  createdCases    TestCase[]      @relation("caseCreatedBy")
-  updatedCases    TestCase[]      @relation("caseUpdatedBy")
+  createdCases    TestCase[]           @relation("caseCreatedBy")
+  updatedCases    TestCase[]           @relation("caseUpdatedBy")
   importBatches   ImportBatch[]
-  createdRuns     TestRun[]       @relation("runCreatedBy")
-  closedRuns      TestRun[]       @relation("runClosedBy")
+  createdRuns     TestRun[]            @relation("runCreatedBy")
+  closedRuns      TestRun[]            @relation("runClosedBy")
   assignedCases   RunCase[]
   recordedResults TestResult[]
+  reportedDefects Defect[]             @relation("defectReporter")
+  assignedDefects Defect[]             @relation("defectAssignee")
+  defectChanges   DefectStatusChange[]
+  defectComments  DefectComment[]
+  defectLinks     DefectResultLink[]
 
   @@unique([email])
   @@unique([username])
@@ -178,6 +183,7 @@ model Project {
   cases       TestCase[]
   imports     ImportBatch[]
   runs        TestRun[]
+  defects     Defect[]
 
   @@index([createdById])
   @@index([archivedAt, name])
@@ -218,7 +224,9 @@ model Release {
   createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  runs TestRun[]
+  runs         TestRun[]
+  foundDefects Defect[]  @relation("defectFoundIn")
+  fixedDefects Defect[]  @relation("defectFixedIn")
 
   @@unique([projectId, name])
   @@index([projectId, status])
@@ -301,43 +309,45 @@ enum CaseStatus {
 /// Test cases are archived, never deleted. Test runs (Phase 5) copy a case's
 /// content when it is added, so editing never rewrites past results.
 model TestCase {
-  id               String       @id @default(uuid(7)) @db.Uuid
-  projectId        String       @map("project_id") @db.Uuid
-  project          Project      @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  id               String             @id @default(uuid(7)) @db.Uuid
+  projectId        String             @map("project_id") @db.Uuid
+  project          Project            @relation(fields: [projectId], references: [id], onDelete: Restrict)
   /// Per project, from ProjectCounter scope "case": the 12 in PAY-TC-12.
   number           Int
-  suiteId          String?      @map("suite_id") @db.Uuid
-  suite            Suite?       @relation("caseSuite", fields: [suiteId], references: [id], onDelete: Restrict)
+  suiteId          String?            @map("suite_id") @db.Uuid
+  suite            Suite?             @relation("caseSuite", fields: [suiteId], references: [id], onDelete: Restrict)
   title            String
-  preconditions    String       @default("")
+  preconditions    String             @default("")
   /// [{ action, expected }] in order; always replaced as a whole with the case.
   steps            Json
   priority         CasePriority
   type             CaseType
-  status           CaseStatus   @default(draft)
-  labels           String[]     @default([])
-  references       String       @default("")
-  archivedAt       DateTime?    @map("archived_at") @db.Timestamptz(3)
-  archiveReason    String       @default("") @map("archive_reason")
+  status           CaseStatus         @default(draft)
+  labels           String[]           @default([])
+  references       String             @default("")
+  archivedAt       DateTime?          @map("archived_at") @db.Timestamptz(3)
+  archiveReason    String             @default("") @map("archive_reason")
   /// The suite whose archiving archived this case; restoring the case restores it.
-  archivedSuiteId  String?      @map("archived_suite_id") @db.Uuid
-  archivedSuite    Suite?       @relation("caseArchivedWithSuite", fields: [archivedSuiteId], references: [id], onDelete: Restrict)
-  importBatchId    String?      @map("import_batch_id") @db.Uuid
-  importBatch      ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: Restrict)
-  duplicatedFromId String?      @map("duplicated_from_id") @db.Uuid
-  duplicatedFrom   TestCase?    @relation("caseDuplicates", fields: [duplicatedFromId], references: [id], onDelete: Restrict)
-  duplicates       TestCase[]   @relation("caseDuplicates")
+  archivedSuiteId  String?            @map("archived_suite_id") @db.Uuid
+  archivedSuite    Suite?             @relation("caseArchivedWithSuite", fields: [archivedSuiteId], references: [id], onDelete: Restrict)
+  importBatchId    String?            @map("import_batch_id") @db.Uuid
+  importBatch      ImportBatch?       @relation(fields: [importBatchId], references: [id], onDelete: Restrict)
+  duplicatedFromId String?            @map("duplicated_from_id") @db.Uuid
+  duplicatedFrom   TestCase?          @relation("caseDuplicates", fields: [duplicatedFromId], references: [id], onDelete: Restrict)
+  duplicates       TestCase[]         @relation("caseDuplicates")
   runCases         RunCase[]
+  defects          Defect[]
+  defectLinks      DefectResultLink[]
   /// Shown as "version": bumped only when the title, preconditions or steps change.
-  revision         Int          @default(1)
+  revision         Int                @default(1)
   /// Optimistic concurrency: bumped on every change.
-  version          Int          @default(1)
-  createdById      String       @map("created_by_id")
-  createdBy        User         @relation("caseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  updatedById      String       @map("updated_by_id")
-  updatedBy        User         @relation("caseUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
-  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  version          Int                @default(1)
+  createdById      String             @map("created_by_id")
+  createdBy        User               @relation("caseCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedById      String             @map("updated_by_id")
+  updatedBy        User               @relation("caseUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@unique([projectId, number])
   @@index([projectId, archivedAt, suiteId])
@@ -393,27 +403,29 @@ enum RunCaseStatus {
 /// A test run: a fixed set of copied test cases, each getting results.
 /// Closed runs are read-only; only a QA Lead reopens them.
 model TestRun {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  projectId   String    @map("project_id") @db.Uuid
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  id           String             @id @default(uuid(7)) @db.Uuid
+  projectId    String             @map("project_id") @db.Uuid
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Restrict)
   /// Per project, from ProjectCounter scope "run": the 12 in PAY-R-12.
-  number      Int
-  name        String
-  description String    @default("")
+  number       Int
+  name         String
+  description  String             @default("")
   /// Free text such as "Chrome 128 · build 4.2.0-rc1".
-  environment String    @default("")
-  releaseId   String?   @map("release_id") @db.Uuid
-  release     Release?  @relation(fields: [releaseId], references: [id], onDelete: Restrict)
-  state       RunState  @default(open)
-  closedAt    DateTime? @map("closed_at") @db.Timestamptz(3)
-  closedById  String?   @map("closed_by_id")
-  closedBy    User?     @relation("runClosedBy", fields: [closedById], references: [id], onDelete: Restrict)
-  createdById String    @map("created_by_id")
-  createdBy   User      @relation("runCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  version     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  cases       RunCase[]
+  environment  String             @default("")
+  releaseId    String?            @map("release_id") @db.Uuid
+  release      Release?           @relation(fields: [releaseId], references: [id], onDelete: Restrict)
+  state        RunState           @default(open)
+  closedAt     DateTime?          @map("closed_at") @db.Timestamptz(3)
+  closedById   String?            @map("closed_by_id")
+  closedBy     User?              @relation("runClosedBy", fields: [closedById], references: [id], onDelete: Restrict)
+  createdById  String             @map("created_by_id")
+  createdBy    User               @relation("runCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  version      Int                @default(1)
+  createdAt    DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  cases        RunCase[]
+  foundDefects Defect[]           @relation("defectFoundInRun")
+  defectLinks  DefectResultLink[]
 
   @@unique([projectId, number])
   @@index([projectId, state, updatedAt(sort: Desc)])
@@ -426,34 +438,35 @@ model TestRun {
 /// One test case inside a run, with the copy (snapshot) the run took of it.
 /// `status` mirrors the latest result so lists and counts need no joins.
 model RunCase {
-  id            String        @id @default(uuid(7)) @db.Uuid
-  runId         String        @map("run_id") @db.Uuid
-  run           TestRun       @relation(fields: [runId], references: [id], onDelete: Restrict)
+  id            String             @id @default(uuid(7)) @db.Uuid
+  runId         String             @map("run_id") @db.Uuid
+  run           TestRun            @relation(fields: [runId], references: [id], onDelete: Restrict)
   /// The source case; kept even if it is archived later.
-  caseId        String        @map("case_id") @db.Uuid
-  case          TestCase      @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  caseId        String             @map("case_id") @db.Uuid
+  case          TestCase           @relation(fields: [caseId], references: [id], onDelete: Restrict)
   /// Suite order, then case number, when the case was added.
   position      Int
   // --- snapshot of the case -----------------------------------------------
   title         String
-  preconditions String        @default("")
+  preconditions String             @default("")
   steps         Json
-  suitePath     String        @default("") @map("suite_path")
+  suitePath     String             @default("") @map("suite_path")
   priority      CasePriority
   type          CaseType
-  caseStatus    CaseStatus    @map("case_status")
-  labels        String[]      @default([])
+  caseStatus    CaseStatus         @map("case_status")
+  labels        String[]           @default([])
   /// The case's version (revision) that was copied.
   revision      Int
   // ---------------------------------------------------------------------------
-  assigneeId    String?       @map("assignee_id")
-  assignee      User?         @relation(fields: [assigneeId], references: [id], onDelete: Restrict)
-  status        RunCaseStatus @default(untested)
+  assigneeId    String?            @map("assignee_id")
+  assignee      User?              @relation(fields: [assigneeId], references: [id], onDelete: Restrict)
+  status        RunCaseStatus      @default(untested)
   /// Bumped on every result, re-copy or assignment: concurrent recording check.
-  version       Int           @default(1)
-  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  version       Int                @default(1)
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   results       TestResult[]
+  defectLinks   DefectResultLink[]
 
   @@unique([runId, caseId])
   @@index([runId, position])
@@ -466,19 +479,199 @@ model RunCase {
 /// A recorded result. Never edited or deleted: a newer result supersedes it
 /// (undo and "use the latest version" add an "untested" result).
 model TestResult {
-  id           String        @id @default(uuid(7)) @db.Uuid
-  runCaseId    String        @map("run_case_id") @db.Uuid
-  runCase      RunCase       @relation(fields: [runCaseId], references: [id], onDelete: Restrict)
+  id           String             @id @default(uuid(7)) @db.Uuid
+  runCaseId    String             @map("run_case_id") @db.Uuid
+  runCase      RunCase            @relation(fields: [runCaseId], references: [id], onDelete: Restrict)
   status       RunCaseStatus
-  note         String        @default("")
-  failedStep   Int?          @map("failed_step")
+  note         String             @default("")
+  failedStep   Int?               @map("failed_step")
   /// The case version this result was recorded against.
   revision     Int
-  recordedById String        @map("recorded_by_id")
-  recordedBy   User          @relation(fields: [recordedById], references: [id], onDelete: Restrict)
-  recordedAt   DateTime      @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  recordedById String             @map("recorded_by_id")
+  recordedBy   User               @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  recordedAt   DateTime           @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  defectLinks  DefectResultLink[]
 
   @@index([runCaseId, recordedAt(sort: Desc)])
   @@index([recordedById])
   @@map("test_results")
+}
+
+enum DefectStatus {
+  new
+  open
+  in_progress
+  fixed
+  reopened
+  closed
+  rejected
+}
+
+enum Severity {
+  critical
+  major
+  minor
+  trivial
+}
+
+enum DefectPriority {
+  high
+  medium
+  low
+}
+
+enum Reproducibility {
+  always
+  intermittent
+  once
+}
+
+enum DetectedIn {
+  qa
+  uat
+  production
+}
+
+enum Resolution {
+  duplicate
+  cannot_reproduce
+  works_as_designed
+  not_a_defect
+  wont_fix
+}
+
+enum DefectSource {
+  result
+  manual
+}
+
+enum DefectLinkKind {
+  failed
+  blocked
+  passed
+}
+
+/// A problem found while testing. Never deleted; a QA Lead rejects the ones that aren't real.
+model Defect {
+  id               String               @id @default(uuid(7)) @db.Uuid
+  projectId        String               @map("project_id") @db.Uuid
+  project          Project              @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  number           Int
+  title            String
+  description      String               @default("")
+  steps            String
+  expected         String               @default("")
+  actual           String
+  status           DefectStatus         @default(new)
+  severity         Severity
+  /// Set by a QA Lead at triage.
+  priority         DefectPriority?
+  reproducibility  Reproducibility      @default(always)
+  detectedIn       DetectedIn           @default(qa) @map("detected_in")
+  environment      String               @default("")
+  source           DefectSource
+  reporterId       String               @map("reporter_id")
+  reporter         User                 @relation("defectReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  assigneeId       String?              @map("assignee_id")
+  assignee         User?                @relation("defectAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  /// Free text: developers work in the external tracker, not here.
+  developer        String               @default("")
+  trackerUrl       String               @default("") @map("tracker_url")
+  caseId           String?              @map("case_id") @db.Uuid
+  case             TestCase?            @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  /// The run it was first logged from; never changes.
+  foundInRunId     String?              @map("found_in_run_id") @db.Uuid
+  foundInRun       TestRun?             @relation("defectFoundInRun", fields: [foundInRunId], references: [id], onDelete: Restrict)
+  foundInReleaseId String?              @map("found_in_release_id") @db.Uuid
+  foundInRelease   Release?             @relation("defectFoundIn", fields: [foundInReleaseId], references: [id], onDelete: Restrict)
+  fixedInReleaseId String?              @map("fixed_in_release_id") @db.Uuid
+  fixedInRelease   Release?             @relation("defectFixedIn", fields: [fixedInReleaseId], references: [id], onDelete: Restrict)
+  fixedInBuild     String               @default("") @map("fixed_in_build")
+  resolution       Resolution?
+  duplicateOfId    String?              @map("duplicate_of_id") @db.Uuid
+  duplicateOf      Defect?              @relation("defectDuplicates", fields: [duplicateOfId], references: [id], onDelete: Restrict)
+  duplicates       Defect[]             @relation("defectDuplicates")
+  reopenCount      Int                  @default(0) @map("reopen_count")
+  /// Latest time it was confirmed, marked fixed, or closed (for aging reports).
+  openedAt         DateTime?            @map("opened_at") @db.Timestamptz(3)
+  fixedAt          DateTime?            @map("fixed_at") @db.Timestamptz(3)
+  closedAt         DateTime?            @map("closed_at") @db.Timestamptz(3)
+  version          Int                  @default(1)
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  statusChanges    DefectStatusChange[]
+  comments         DefectComment[]
+  links            DefectResultLink[]
+
+  @@unique([projectId, number])
+  @@index([projectId, status, updatedAt(sort: Desc)])
+  @@index([projectId, severity])
+  @@index([reporterId])
+  @@index([assigneeId])
+  @@index([caseId])
+  @@index([foundInRunId])
+  @@index([foundInReleaseId])
+  @@index([fixedInReleaseId])
+  @@index([duplicateOfId])
+  @@map("defects")
+}
+
+/// Every status a defect has had: time in each state, reopen and fix-time reports.
+model DefectStatusChange {
+  id         String        @id @default(uuid(7)) @db.Uuid
+  defectId   String        @map("defect_id") @db.Uuid
+  defect     Defect        @relation(fields: [defectId], references: [id], onDelete: Restrict)
+  /// Null for the first entry (logged).
+  fromStatus DefectStatus? @map("from_status")
+  toStatus   DefectStatus  @map("to_status")
+  resolution Resolution?
+  note       String        @default("")
+  actorId    String        @map("actor_id")
+  actor      User          @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  at         DateTime      @default(now()) @db.Timestamptz(3)
+
+  @@index([defectId, at])
+  @@index([actorId])
+  @@map("defect_status_changes")
+}
+
+model DefectComment {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  defectId  String   @map("defect_id") @db.Uuid
+  defect    Defect   @relation(fields: [defectId], references: [id], onDelete: Restrict)
+  authorId  String   @map("author_id")
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([defectId, createdAt])
+  @@index([authorId])
+  @@map("defect_comments")
+}
+
+/// A run result tied to a defect: the failure it was logged from, a blocked case, or a pass that verified the fix.
+model DefectResultLink {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  defectId   String         @map("defect_id") @db.Uuid
+  defect     Defect         @relation(fields: [defectId], references: [id], onDelete: Restrict)
+  resultId   String         @map("result_id") @db.Uuid
+  result     TestResult     @relation(fields: [resultId], references: [id], onDelete: Restrict)
+  runCaseId  String         @map("run_case_id") @db.Uuid
+  runCase    RunCase        @relation(fields: [runCaseId], references: [id], onDelete: Restrict)
+  runId      String         @map("run_id") @db.Uuid
+  run        TestRun        @relation(fields: [runId], references: [id], onDelete: Restrict)
+  caseId     String         @map("case_id") @db.Uuid
+  case       TestCase       @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  kind       DefectLinkKind
+  linkedById String         @map("linked_by_id")
+  linkedBy   User           @relation(fields: [linkedById], references: [id], onDelete: Restrict)
+  linkedAt   DateTime       @default(now()) @map("linked_at") @db.Timestamptz(3)
+
+  @@unique([defectId, resultId])
+  @@index([resultId])
+  @@index([runCaseId])
+  @@index([runId])
+  @@index([caseId])
+  @@index([linkedById])
+  @@map("defect_result_links")
 }

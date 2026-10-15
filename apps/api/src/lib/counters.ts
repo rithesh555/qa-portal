@@ -1,6 +1,6 @@
 import type { Prisma } from "./prisma.ts"
 
-export type CounterScope = "case" | "import" | "run"
+export type CounterScope = "case" | "import" | "run" | "defect"
 
 /**
  * Reserves `count` consecutive numbers in a project's sequence and returns the

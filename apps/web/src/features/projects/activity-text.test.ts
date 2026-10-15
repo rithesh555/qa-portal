@@ -218,6 +218,32 @@ describe("describeActivity", () => {
       "removed 2 cases from PAY-R-3",
     ],
     [item("run", "closed"), "closed a run"],
+    [
+      item("defect", "created", {
+        key: "PAY-D-4",
+        title: "Spinner",
+        severity: "critical",
+      }),
+      "logged defect PAY-D-4 (Critical): Spinner",
+    ],
+    [
+      item("defect", "status_changed", {
+        key: "PAY-D-4",
+        from: "new",
+        to: "open",
+      }),
+      "moved defect PAY-D-4 to Open",
+    ],
+    [
+      item("defect", "status_changed", {
+        key: "PAY-D-4",
+        from: "new",
+        to: "rejected",
+        resolution: "duplicate",
+      }),
+      "rejected defect PAY-D-4 (Duplicate)",
+    ],
+    [item("defect", "status_changed"), "changed a defect's status"],
   ])("%#: describes %o", (activity, text) => {
     expect(describeActivity(activity)).toBe(text)
   })

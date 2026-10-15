@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { parseKeyRef } from "./keys.ts"
 import { listQuerySchema } from "./list.ts"
 
 // ---------------------------------------------------------------------------
@@ -10,21 +11,13 @@ export function formatCaseKey(projectKey: string, number: number): string {
   return `${projectKey}-TC-${number}`
 }
 
-const MAX_CASE_NUMBER = 2_147_483_647
-
 /**
  * The case number from a URL segment: either this project's full key
  * (PAY-TC-12, any case) or a bare number. Null for anything else, including
  * another project's key.
  */
 export function parseCaseRef(projectKey: string, ref: string): number | null {
-  const match = new RegExp(
-    `^(?:${projectKey}-TC-)?([1-9][0-9]{0,9})$`,
-    "i"
-  ).exec(ref.trim())
-  if (!match) return null
-  const number = Number(match[1])
-  return number <= MAX_CASE_NUMBER ? number : null
+  return parseKeyRef(projectKey, "TC", ref)
 }
 
 // ---------------------------------------------------------------------------

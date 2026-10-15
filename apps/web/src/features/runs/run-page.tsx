@@ -394,7 +394,7 @@ export function RunPage() {
   function onRecorded(r: Recorded) {
     setLast(r)
     let message = `${r.item.caseKey} marked ${RUN_CASE_STATUS_LABELS[r.status]}`
-    if (advance) {
+    if (advance && !r.hold) {
       // The next untested case in the list being shown, wrapping round.
       const from = shown.findIndex((c) => c.id === r.item.id)
       const order =

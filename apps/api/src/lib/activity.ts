@@ -11,6 +11,8 @@ export interface ActivityEntry {
   entityId: string
   action: string
   changes?: Changes | Record<string, unknown> | null
+  /** False keeps it out of the project's activity feed (still in the entity's history). */
+  inFeed?: boolean
 }
 
 /** Appends one entry to the activity log. Pass the transaction client when inside one. */
@@ -22,6 +24,7 @@ export async function recordActivity(db: Db, entry: ActivityEntry) {
       entityType: entry.entityType,
       entityId: entry.entityId,
       action: entry.action,
+      ...(entry.inFeed === false ? { inFeed: false } : {}),
       // Values come from validated input and DB rows, so they are JSON-safe.
       ...(entry.changes
         ? { changes: entry.changes as Prisma.InputJsonObject }

@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { parseKeyRef } from "./keys.ts"
 import {
   casePrioritySchema,
   caseStatusSchema,
@@ -19,13 +20,7 @@ export function formatRunKey(projectKey: string, number: number): string {
 
 /** The run number from this project's key (PAY-R-12, any case) or a bare number; null otherwise. */
 export function parseRunRef(projectKey: string, ref: string): number | null {
-  const match = new RegExp(
-    `^(?:${projectKey}-R-)?([1-9][0-9]{0,9})$`,
-    "i"
-  ).exec(ref.trim())
-  if (!match) return null
-  const number = Number(match[1])
-  return number <= 2_147_483_647 ? number : null
+  return parseKeyRef(projectKey, "R", ref)
 }
 
 // ---------------------------------------------------------------------------
