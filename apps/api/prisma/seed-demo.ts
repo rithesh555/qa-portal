@@ -13,11 +13,21 @@ import { demoUsers } from "../src/demo/users.ts"
 import { recordActivity } from "../src/lib/activity.ts"
 import { loadEnv } from "../src/env.ts"
 import { nextNumbers } from "../src/lib/counters.ts"
-import { createPrisma } from "../src/lib/prisma.ts"
+import { createPrisma, type Prisma } from "../src/lib/prisma.ts"
 import { currentCases, snapshotData } from "../src/modules/runs/select.ts"
 import { shareOut } from "../src/modules/runs/service.ts"
+import { computeReport } from "../src/modules/reports/service.ts"
 
 config({ path: new URL("../../../.env", import.meta.url), quiet: true })
+
+/** When a demo result was recorded: spread over the two days after the run started, never in the future. */
+const resultStamp = (started: Date, position: number) =>
+  new Date(
+    Math.min(
+      started.getTime() + ((position * 37) % 48) * 60 * 60 * 1000,
+      Date.now() - position * 1000
+    )
+  )
 
 const env = loadEnv()
 if (env.NODE_ENV !== "development") {
@@ -314,6 +324,9 @@ try {
               assigneeId: assignment.get(c.id) ?? null,
               ...snapshotData(c),
               status: demoOutcome(ri, i, plan.tested, 0)?.status ?? "untested",
+              resultAt: demoOutcome(ri, i, plan.tested, 0)
+                ? resultStamp(started, i + 1)
+                : null,
             })),
           })
           const rows = await tx.runCase.findMany({
@@ -342,10 +355,7 @@ try {
                   ...outcome,
                   revision: rc.revision,
                   recordedById: rc.assigneeId ?? owner.id,
-                  recordedAt: new Date(
-                    started.getTime() +
-                      ((rc.position * 37) % 48) * 60 * 60 * 1000
-                  ),
+                  recordedAt: resultStamp(started, rc.position),
                 },
               ]
             }),
@@ -530,6 +540,33 @@ try {
     )
   }
   console.log(`Demo defects: ${defects} created.`)
+
+  // Released releases get the sign-off snapshot marking them Released would take.
+  const unfrozen = await prisma.release.findMany({
+    where: { status: "released", reportSnapshot: null },
+    select: {
+      id: true,
+      project: { select: { id: true, key: true } },
+      createdById: true,
+    },
+  })
+  for (const r of unfrozen) {
+    const report = await computeReport(prisma, {
+      project: r.project,
+      releaseId: r.id,
+      workload: true,
+      now: new Date(),
+    })
+    await prisma.releaseReportSnapshot.create({
+      data: {
+        releaseId: r.id,
+        report: report as unknown as Prisma.InputJsonValue,
+        takenAt: new Date(report.asOf),
+        takenById: r.createdById,
+      },
+    })
+  }
+  console.log(`Demo release snapshots: ${unfrozen.length} created.`)
 } finally {
   await prisma.$disconnect()
 }

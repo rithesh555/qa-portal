@@ -22,6 +22,7 @@ import caseRoutes from "./modules/cases/routes.ts"
 import projectRoutes from "./modules/projects/routes.ts"
 import runRoutes from "./modules/runs/routes.ts"
 import defectRoutes from "./modules/defects/routes.ts"
+import reportRoutes from "./modules/reports/routes.ts"
 import usersRoutes from "./modules/users/routes.ts"
 import me from "./routes/me.ts"
 
@@ -101,6 +102,7 @@ export async function buildApp({
   await app.register(caseRoutes, { prefix: "/api" })
   await app.register(runRoutes, { prefix: "/api" })
   await app.register(defectRoutes, { prefix: "/api" })
+  await app.register(reportRoutes, { prefix: "/api" })
 
   return app
 }

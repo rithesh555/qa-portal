@@ -3,6 +3,7 @@ import { diff, recordActivity } from "../../lib/activity.ts"
 import { isUniqueViolation } from "../../lib/db-errors.ts"
 import { httpError } from "../../lib/http-error.ts"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
+import { snapshotRelease } from "../reports/service.ts"
 import { lockForWrite, type ProjectAccess } from "./access.ts"
 
 export interface ReleaseFields {
@@ -50,6 +51,9 @@ function data(input: ReleaseFields) {
   }
 }
 
+/** Taking a sign-off snapshot computes a whole report inside the transaction. */
+const SNAPSHOT_TX = { timeout: 30_000 }
+
 const DUPLICATE = () =>
   httpError(409, "This project already has a release with that name")
 
@@ -92,8 +96,11 @@ export async function createRelease(
         action: "created",
         changes: { name: created.name, status: created.status },
       })
+      // Created as Released: it gets its sign-off snapshot straight away.
+      if (created.status === "released")
+        await snapshotRelease(tx, access, created.id)
       return created
-    })
+    }, SNAPSHOT_TX)
     return toRelease(row)
   } catch (err) {
     if (isUniqueViolation(err)) throw DUPLICATE()
@@ -143,11 +150,17 @@ export async function updateRelease(
           changes: { name: input.name, ...changes },
         })
       }
-      return tx.release.findUniqueOrThrow({
+      const after = await tx.release.findUniqueOrThrow({
         where: { id },
         select: RELEASE_SELECT,
       })
-    })
+      // Marked Released: freeze its report as it stands now, in this
+      // transaction and under the project lock, so no result recorded later
+      // can slip in (live numbers stay a click away).
+      if (before.status !== "released" && after.status === "released")
+        await snapshotRelease(tx, access, id)
+      return after
+    }, SNAPSHOT_TX)
     return toRelease(row)
   } catch (err) {
     if (isUniqueViolation(err)) throw DUPLICATE()

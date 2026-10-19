@@ -17,39 +17,40 @@ datasource db {
 }
 
 model User {
-  id              String               @id
+  id              String                  @id
   name            String
   email           String
-  emailVerified   Boolean              @default(false) @map("email_verified")
+  emailVerified   Boolean                 @default(false) @map("email_verified")
   image           String?
-  createdAt       DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt       DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime                @updatedAt @map("updated_at") @db.Timestamptz(3)
   username        String?
-  displayUsername String?              @map("display_username")
+  displayUsername String?                 @map("display_username")
   role            String?
-  banned          Boolean?             @default(false)
-  banReason       String?              @map("ban_reason")
-  banExpires      DateTime?            @map("ban_expires") @db.Timestamptz(3)
+  banned          Boolean?                @default(false)
+  banReason       String?                 @map("ban_reason")
+  banExpires      DateTime?               @map("ban_expires") @db.Timestamptz(3)
   sessions        Session[]
   accounts        Account[]
   activities      ActivityLog[]
-  memberships     ProjectMember[]      @relation("member")
-  addedMembers    ProjectMember[]      @relation("addedBy")
+  memberships     ProjectMember[]         @relation("member")
+  addedMembers    ProjectMember[]         @relation("addedBy")
   createdProjects Project[]
   createdReleases Release[]
   createdSuites   Suite[]
-  createdCases    TestCase[]           @relation("caseCreatedBy")
-  updatedCases    TestCase[]           @relation("caseUpdatedBy")
+  createdCases    TestCase[]              @relation("caseCreatedBy")
+  updatedCases    TestCase[]              @relation("caseUpdatedBy")
   importBatches   ImportBatch[]
-  createdRuns     TestRun[]            @relation("runCreatedBy")
-  closedRuns      TestRun[]            @relation("runClosedBy")
+  createdRuns     TestRun[]               @relation("runCreatedBy")
+  closedRuns      TestRun[]               @relation("runClosedBy")
   assignedCases   RunCase[]
   recordedResults TestResult[]
-  reportedDefects Defect[]             @relation("defectReporter")
-  assignedDefects Defect[]             @relation("defectAssignee")
+  reportedDefects Defect[]                @relation("defectReporter")
+  assignedDefects Defect[]                @relation("defectAssignee")
   defectChanges   DefectStatusChange[]
   defectComments  DefectComment[]
   defectLinks     DefectResultLink[]
+  reportSnapshots ReleaseReportSnapshot[]
 
   @@unique([email])
   @@unique([username])
@@ -227,6 +228,8 @@ model Release {
   runs         TestRun[]
   foundDefects Defect[]  @relation("defectFoundIn")
   fixedDefects Defect[]  @relation("defectFixedIn")
+
+  reportSnapshot ReleaseReportSnapshot?
 
   @@unique([projectId, name])
   @@index([projectId, status])
@@ -462,6 +465,8 @@ model RunCase {
   assignee      User?              @relation(fields: [assigneeId], references: [id], onDelete: Restrict)
   status        RunCaseStatus      @default(untested)
   /// Bumped on every result, re-copy or assignment: concurrent recording check.
+  /// When its latest result was recorded; null while untested. Reports pick each case's latest result by it.
+  resultAt      DateTime?          @map("result_at") @db.Timestamptz(3)
   version       Int                @default(1)
   createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt     DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -471,6 +476,7 @@ model RunCase {
   @@unique([runId, caseId])
   @@index([runId, position])
   @@index([runId, status])
+  @@index([caseId, resultAt(sort: Desc)])
   @@index([caseId])
   @@index([assigneeId])
   @@map("run_cases")
@@ -613,6 +619,7 @@ model Defect {
   @@index([foundInReleaseId])
   @@index([fixedInReleaseId])
   @@index([duplicateOfId])
+  @@index([projectId, foundInReleaseId, status])
   @@map("defects")
 }
 
@@ -674,4 +681,17 @@ model DefectResultLink {
   @@index([caseId])
   @@index([linkedById])
   @@map("defect_result_links")
+}
+
+/// The release report as it stood when the release was marked Released, so later edits can't rewrite the sign-off.
+model ReleaseReportSnapshot {
+  releaseId String   @id @map("release_id") @db.Uuid
+  release   Release  @relation(fields: [releaseId], references: [id], onDelete: Restrict)
+  report    Json
+  takenAt   DateTime @default(now()) @map("taken_at") @db.Timestamptz(3)
+  takenById String   @map("taken_by_id")
+  takenBy   User     @relation(fields: [takenById], references: [id], onDelete: Restrict)
+
+  @@index([takenById])
+  @@map("release_report_snapshots")
 }

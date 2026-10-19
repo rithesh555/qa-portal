@@ -35,6 +35,14 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  /* Report charts: one line hue, a de-emphasised second, recessive grid and axis. */
+  --color-chart-line: var(--chart-line);
+  --color-chart-deemph: var(--chart-deemph);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+  --color-chart-bar: var(--chart-bar);
+  --color-tip: var(--tip-bg);
+  --color-tip-foreground: var(--tip-fg);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -120,6 +128,13 @@
   --defect-fixed-ink: oklch(0.38 0.12 300);
   --defect-reopened: oklch(0.95 0.035 340);
   --defect-reopened-ink: oklch(0.38 0.12 340);
+  --chart-line: oklch(0.45 0.095 246);
+  --chart-deemph: oklch(0.6 0.015 256);
+  --chart-grid: oklch(0.93 0.008 250);
+  --chart-axis: oklch(0.88 0.012 250);
+  --chart-bar: oklch(0.45 0.095 246);
+  --tip-bg: oklch(0.23 0.022 256);
+  --tip-fg: oklch(0.98 0.004 250);
 }
 
 .dark {
@@ -171,6 +186,13 @@
   --defect-fixed-ink: oklch(0.86 0.08 300);
   --defect-reopened: oklch(0.3 0.05 340);
   --defect-reopened-ink: oklch(0.86 0.08 340);
+  --chart-line: oklch(0.74 0.1 240);
+  --chart-deemph: oklch(0.62 0.015 256);
+  --chart-grid: oklch(1 0 0 / 8%);
+  --chart-axis: oklch(1 0 0 / 18%);
+  --chart-bar: oklch(0.74 0.1 240);
+  --tip-bg: oklch(0.95 0.006 250);
+  --tip-fg: oklch(0.2 0.02 256);
 }
 
 /* Fail and blocked carry stripes, so they never depend on colour alone. */
@@ -192,5 +214,16 @@
   html {
     @apply font-sans;
     font-variant-numeric: tabular-nums;
+  }
+}
+
+/* The printable release report: one A4 page, no app chrome. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  .print-page {
+    break-inside: avoid;
   }
 }

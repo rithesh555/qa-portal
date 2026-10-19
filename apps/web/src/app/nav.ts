@@ -5,6 +5,7 @@ import {
   FlagIcon,
   FolderKanbanIcon,
   HouseIcon,
+  LayersIcon,
   LayoutDashboardIcon,
   ListChecksIcon,
   PlayIcon,
@@ -19,6 +20,8 @@ export interface NavItem {
   icon: LucideIcon
   /** Portal-wide action needed to open this module; none = every signed-in user. */
   permission?: Action
+  /** Only for people who oversee several projects: admins, and QA Leads of two or more. */
+  overseers?: boolean
   /** Phase in which the page gets built (for placeholder pages). */
   phase: number
 }
@@ -28,6 +31,13 @@ export const NAV: readonly NavItem[] = [
   { title: "Home", path: "/", icon: HouseIcon, phase: 7 },
   { title: "Projects", path: "/projects", icon: FolderKanbanIcon, phase: 3 },
   {
+    title: "All releases",
+    path: "/releases",
+    icon: LayersIcon,
+    overseers: true,
+    phase: 7,
+  },
+  {
     title: "Users",
     path: "/users",
     icon: UsersIcon,
@@ -36,9 +46,12 @@ export const NAV: readonly NavItem[] = [
   },
 ]
 
-export function navFor(role: PortalRole): NavItem[] {
+/** The workspace links a person sees; `projectsLed` counts the projects they're QA Lead of. */
+export function navFor(role: PortalRole, projectsLed = 0): NavItem[] {
   return NAV.filter(
-    (item) => !item.permission || can(item.permission, { portalRole: role })
+    (item) =>
+      (!item.permission || can(item.permission, { portalRole: role })) &&
+      (!item.overseers || role === "admin" || projectsLed >= 2)
   )
 }
 

@@ -34,7 +34,7 @@ import {
 import { ChangePasswordDialog } from "@/features/auth/change-password-dialog"
 import { useSession } from "@/features/auth/session"
 import { useSignOut } from "@/features/auth/use-sign-out"
-import { useProject } from "@/features/projects/api"
+import { useProject, useProjects } from "@/features/projects/api"
 import {
   useLastProjectKey,
   useRouteProjectKey,
@@ -272,7 +272,13 @@ function headerTitle(pathname: string, project: CurrentProject | null) {
 export function AppShell() {
   const { data: user } = useSession()
   const { pathname } = useLocation()
-  const items = user ? navFor(user.role) : []
+  // Non-admins see "All releases" once they lead two or more projects.
+  const mine = useProjects(
+    { pageSize: 100 },
+    { enabled: !!user && user.role !== "admin" }
+  )
+  const led = mine.data?.items.filter((p) => p.myRole === "lead").length ?? 0
+  const items = user ? navFor(user.role, led) : []
   const project = useSidebarProject()
 
   return (

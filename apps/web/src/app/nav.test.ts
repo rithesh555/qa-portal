@@ -1,16 +1,26 @@
 import { describe, expect, it } from "vitest"
 import { navFor, PROJECT_NAV, projectPath } from "./nav.ts"
 
-const titles = (role: Parameters<typeof navFor>[0]) =>
-  navFor(role).map((item) => item.title)
+const titles = (role: Parameters<typeof navFor>[0], projectsLed = 0) =>
+  navFor(role, projectsLed).map((item) => item.title)
 
 describe("navFor", () => {
   it("shows admins user management", () => {
-    expect(titles("admin")).toEqual(["Home", "Projects", "Users"])
+    expect(titles("admin")).toEqual([
+      "Home",
+      "Projects",
+      "All releases",
+      "Users",
+    ])
   })
 
   it("gives members the workspace links only", () => {
     expect(titles("user")).toEqual(["Home", "Projects"])
+    expect(titles("user", 1)).toEqual(["Home", "Projects"])
+  })
+
+  it("shows all releases to QA Leads of two or more projects", () => {
+    expect(titles("user", 2)).toEqual(["Home", "Projects", "All releases"])
   })
 })
 

@@ -98,7 +98,7 @@ export async function readSpreadsheet(file: File): Promise<SheetTable[]> {
   return usable
 }
 
-function save(blob: Blob, fileName: string) {
+export function save(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url

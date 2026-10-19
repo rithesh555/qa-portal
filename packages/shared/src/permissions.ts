@@ -22,6 +22,8 @@ const MATRIX = {
   "defects:edit": ["lead", "tester"],
   // Confirm or reject new defects, set priority, reopen closed or rejected ones.
   "defects:triage": ["lead"],
+  // Untested cases per person: for balancing work, not for ranking people.
+  "reports:workload": ["lead"],
 } as const satisfies Record<string, readonly ProjectRole[]>
 
 export type Action = keyof typeof MATRIX

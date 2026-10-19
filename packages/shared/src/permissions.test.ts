@@ -23,6 +23,8 @@ const EXPECTED: Record<Action, ProjectRole[]> = {
   "defects:edit": ["lead", "tester"],
   // Confirm, reject, set priority, reopen a closed or rejected defect.
   "defects:triage": ["lead"],
+  // Untested cases per person: for balancing work, not for ranking people.
+  "reports:workload": ["lead"],
 }
 
 describe("can", () => {

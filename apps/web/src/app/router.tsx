@@ -14,6 +14,10 @@ import { ProjectOverviewPage } from "@/features/projects/overview-page"
 import { ProjectLayout } from "@/features/projects/project-layout"
 import { ProjectsPage } from "@/features/projects/projects-page"
 import { ReleasesPage } from "@/features/projects/releases-page"
+import { HomePage } from "@/features/reports/home-page"
+import { PrintReportPage } from "@/features/reports/print-page"
+import { ReleasesOverviewPage } from "@/features/reports/releases-overview-page"
+import { ReportsPage } from "@/features/reports/reports-page"
 import { NewRunPage } from "@/features/runs/new-run-page"
 import { RunPage } from "@/features/runs/run-page"
 import { RunsPage } from "@/features/runs/runs-page"
@@ -21,7 +25,7 @@ import { UsersPage } from "@/features/users/users-page"
 import { ModulePlaceholder } from "@/pages/module-placeholder"
 import { NotFound } from "@/pages/not-found"
 import { AppShell } from "./app-shell"
-import { NAV, PROJECT_NAV } from "./nav"
+import { PROJECT_NAV } from "./nav"
 
 const BUILT: Partial<Record<string, ReactNode>> = {
   "": <ProjectOverviewPage />,
@@ -29,6 +33,7 @@ const BUILT: Partial<Record<string, ReactNode>> = {
   defects: <DefectsPage />,
   members: <MembersPage />,
   releases: <ReleasesPage />,
+  reports: <ReportsPage />,
   runs: <RunsPage />,
 }
 
@@ -42,19 +47,20 @@ const projectPages = PROJECT_NAV.map((item) =>
     : { index: true, element: BUILT[""] }
 )
 
-const home = NAV.find((item) => item.path === "/")!
-
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   {
     element: <RequireAuth />,
     children: [
+      // The printable report has no app chrome: it's one A4 page.
+      { path: "/projects/:key/reports/print", element: <PrintReportPage /> },
       {
         path: "/",
         element: <AppShell />,
         children: [
-          { index: true, element: <ModulePlaceholder item={home} /> },
+          { index: true, element: <HomePage /> },
           { path: "projects", element: <ProjectsPage /> },
+          { path: "releases", element: <ReleasesOverviewPage /> },
           {
             path: "projects/:key",
             element: <ProjectLayout />,

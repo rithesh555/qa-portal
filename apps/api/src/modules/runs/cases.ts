@@ -220,7 +220,12 @@ export async function recordResult(
     })
     await tx.runCase.update({
       where: { id: rc.id },
-      data: { status: input.status, version: { increment: 1 } },
+      data: {
+        status: input.status,
+        // Undo back to untested clears it; reports pick the latest result by it.
+        resultAt: input.status === "untested" ? null : new Date(),
+        version: { increment: 1 },
+      },
     })
     await touchRun(tx, run.id)
   })
@@ -254,7 +259,11 @@ export async function bulkResults(
       })
       await tx.runCase.updateMany({
         where: { id: { in: rcs.map((rc) => rc.id) } },
-        data: { status: input.status, version: { increment: 1 } },
+        data: {
+          status: input.status,
+          resultAt: new Date(),
+          version: { increment: 1 },
+        },
       })
       await touchRun(tx, run.id)
       await recordActivity(tx, {
@@ -438,6 +447,7 @@ export async function refreshCase(
       data: {
         ...snapshotData(latest),
         status: "untested",
+        resultAt: null,
         version: { increment: 1 },
       },
     })

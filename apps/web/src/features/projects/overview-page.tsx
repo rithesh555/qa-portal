@@ -90,10 +90,14 @@ function CurrentRelease() {
             No release is {RELEASE_STATUS_LABELS.in_progress.toLowerCase()}.
           </p>
         )}
-        <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-          Run progress and defect counts for the release appear here once test
-          runs and defects are built.
-        </p>
+        {current && (
+          <Link
+            to={`reports?release=${current.id}`}
+            className="text-sm text-primary underline-offset-4 hover:underline"
+          >
+            Can it ship? See the release report
+          </Link>
+        )}
       </CardContent>
     </Card>
   )
