@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -217,24 +218,30 @@ export function ReportsPage() {
               <ChevronDownIcon data-icon="inline-end" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
-                CSV files of live numbers, stamped with “{scope}” and the time.
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() =>
-                  void exportRows("cases", "latest result per case")
-                }
-              >
-                Latest result per case
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => void exportRows("defects", "defects")}
-              >
-                Defects
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => void exportRows("runs", "runs")}>
-                Runs
-              </DropdownMenuItem>
+              {/* A Base UI menu label must sit inside a group. */}
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
+                  CSV files of live numbers, stamped with “{scope}” and the
+                  time.
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() =>
+                    void exportRows("cases", "latest result per case")
+                  }
+                >
+                  Latest result per case
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => void exportRows("defects", "defects")}
+                >
+                  Defects
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => void exportRows("runs", "runs")}
+                >
+                  Runs
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

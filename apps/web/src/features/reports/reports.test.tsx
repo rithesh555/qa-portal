@@ -310,6 +310,40 @@ describe("ReportsPage", () => {
     expect(within(table).getByText("Open")).toBeInTheDocument()
   })
 
+  it("downloads the rows behind the report as CSV", async () => {
+    routes["GET /api/projects/PAY/reports"] = () => json(200, report())
+    routes["GET /api/projects/PAY/reports/export"] = () =>
+      json(200, {
+        asOf: "2026-10-19T09:14:00.000Z",
+        scope: "Payments · Release 4.2",
+        columns: ["Defect", "Title"],
+        rows: [["PAY-D-14", "Spinner never stops"]],
+      })
+    const createObjectURL = vi.fn(() => "blob:csv")
+    vi.stubGlobal(
+      "URL",
+      Object.assign(URL, { createObjectURL, revokeObjectURL: vi.fn() })
+    )
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {})
+    renderReports("/projects/PAY/reports", "viewer")
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Download data" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Defects" })
+    )
+    await waitFor(() =>
+      expect(calls).toContain(
+        `GET /api/projects/PAY/reports/export?release=${R42}&kind=defects`
+      )
+    )
+    await waitFor(() => expect(click).toHaveBeenCalled())
+    expect(createObjectURL).toHaveBeenCalled()
+    click.mockRestore()
+  })
+
   it("shows the workload to QA Leads", async () => {
     routes["GET /api/projects/PAY/reports"] = () =>
       json(
