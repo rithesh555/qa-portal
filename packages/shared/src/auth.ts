@@ -19,6 +19,16 @@ export const sessionUserSchema = z.object({
   name: z.string(),
   email: z.string(),
   role: portalRoleSchema,
+  /** An admin chose their password: they must pick their own before anything else. */
+  mustChangePassword: z.boolean(),
 })
 
 export type SessionUser = z.infer<typeof sessionUserSchema>
+
+/** GET /api/me: the session user plus what the app chrome needs about them. */
+export const meSchema = sessionUserSchema.extend({
+  /** Active projects they're QA Lead of ("All releases" shows from 2). */
+  projectsLed: z.number().int(),
+})
+
+export type Me = z.infer<typeof meSchema>

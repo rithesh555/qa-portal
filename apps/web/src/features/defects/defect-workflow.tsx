@@ -382,8 +382,17 @@ export function DefectWorkflow({ defect }: { defect: Defect }) {
         version: defect.version,
       })
       setAnnounce(`Status changed to ${DEFECT_STATUS_LABELS[move.to]}`)
+      // The clicked button is gone with the old status: keep focus here, on
+      // the next move (or the group itself when there's none).
+      requestAnimationFrame(() =>
+        (
+          buttons.current?.querySelector<HTMLElement>("button") ??
+          buttons.current
+        )?.focus()
+      )
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't change the status",
         description: errorMessage(err),
       })
@@ -396,6 +405,7 @@ export function DefectWorkflow({ defect }: { defect: Defect }) {
       <div className="flex flex-col items-end gap-1.5">
         <div
           ref={buttons}
+          tabIndex={-1}
           role="group"
           aria-label="Move this defect on"
           className="flex flex-wrap justify-end gap-2"

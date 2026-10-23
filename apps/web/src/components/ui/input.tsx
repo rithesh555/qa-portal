@@ -1,8 +1,13 @@
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 import { cn } from "cn"
+import { useFieldDescribedBy } from "./field-context"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  const describedBy = useFieldDescribedBy(
+    props["aria-invalid"],
+    props["aria-describedby"]
+  )
   return (
     <InputPrimitive
       type={type}
@@ -12,6 +17,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         className
       )}
       {...props}
+      aria-describedby={describedBy}
     />
   )
 }

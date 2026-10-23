@@ -310,6 +310,11 @@ describe("export", () => {
     expect(safeCell("plain")).toBe("plain")
   })
 
+  it("also guards full-width formula characters, which some spreadsheets accept", () => {
+    for (const c of ["\uFF1D", "\uFF0B", "\uFF0D", "\uFF20"])
+      expect(safeCell(`${c}SUM(A1)`)).toBe(`'${c}SUM(A1)`)
+  })
+
   it("writes a row in header order with numbered steps", () => {
     const row = caseExportRow(testCase)
     expect(EXPORT_HEADERS).toEqual([

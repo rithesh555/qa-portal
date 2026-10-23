@@ -428,13 +428,22 @@ export function CasesPage() {
                     allMatching: true,
                   })
                 }
-                onClear={() =>
+                onClear={() => {
                   setSelected({
                     key: filterKey,
                     ids: new Set(),
                     allMatching: false,
                   })
-                }
+                  // The bar (and the button just used) goes away: continue
+                  // from where the selection started.
+                  requestAnimationFrame(() =>
+                    document
+                      .querySelector<HTMLElement>(
+                        '[aria-label="Select all on this page"]'
+                      )
+                      ?.focus()
+                  )
+                }}
                 canArchive={canArchive}
                 suites={suites}
                 labels={labelsQuery.data ?? []}
@@ -457,7 +466,7 @@ export function CasesPage() {
                 </AlertDescription>
               </Alert>
             ) : page && page.total === 0 ? (
-              <Empty>
+              <Empty role="status">
                 <EmptyHeader>
                   <EmptyTitle>
                     {filtersOn || !selectedSuite

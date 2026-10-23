@@ -10,7 +10,7 @@ import {
   type SessionUser,
   type UpdateProjectInput,
 } from "@qa/shared"
-import { diff, recordActivity } from "../../lib/activity.ts"
+import { diff, recordActivity, staleChange } from "../../lib/activity.ts"
 import { isUniqueViolation } from "../../lib/db-errors.ts"
 import { httpError } from "../../lib/http-error.ts"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
@@ -204,12 +204,6 @@ export async function createProject(
   }
 }
 
-const STALE = () =>
-  httpError(
-    409,
-    "Someone else changed this project. Reload to see their changes."
-  )
-
 export async function updateProject(
   prisma: PrismaClient,
   access: ProjectAccess,
@@ -230,7 +224,7 @@ export async function updateProject(
         version: { increment: 1 },
       },
     })
-    if (count === 0) throw STALE()
+    if (count === 0) throw await staleChange(tx, "project", id, "project")
     const changes = diff(before, input, ["name", "description"])
     if (Object.keys(changes).length > 0) {
       await recordActivity(tx, {

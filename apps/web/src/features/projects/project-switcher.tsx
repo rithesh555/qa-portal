@@ -20,6 +20,7 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { useProjects } from "./api"
+import { InlineError } from "@/components/inline-error"
 
 function roleText(project: Pick<ProjectSummary, "myRole">) {
   return project.myRole ? PROJECT_ROLE_LABELS[project.myRole] : "Admin"
@@ -131,6 +132,13 @@ export function ProjectSwitcher({
               <div className="flex justify-center p-4">
                 <Spinner />
               </div>
+            ) : projects.isError ? (
+              <InlineError
+                what="Couldn't load your projects."
+                error={projects.error}
+                onRetry={() => void projects.refetch()}
+                className="p-3"
+              />
             ) : (
               <CommandEmpty>No projects match.</CommandEmpty>
             )}

@@ -1,4 +1,5 @@
 import { trackerUrlSchema } from "@qa/shared"
+import { ArchivedNotice } from "@/components/archived-notice"
 import { CircleAlertIcon } from "lucide-react"
 import { useId, useState } from "react"
 import { Link, useNavigate } from "react-router"
@@ -61,6 +62,14 @@ export function NewDefectPage() {
       ? (trackerCheck.error.issues[0]?.message ?? "Use a full link")
       : null
 
+  if (project.archived)
+    return (
+      <ArchivedNotice
+        title="You can't log a defect here"
+        backTo={projectPath(project.key, "defects")}
+        backLabel="Back to defects"
+      />
+    )
   if (!allowed("defects:edit")) return <NoAccess />
   const errors = tried ? draftErrors(draft) : {}
 

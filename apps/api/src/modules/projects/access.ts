@@ -66,31 +66,82 @@ export function assertWritable(access: ProjectAccess) {
   }
 }
 
+const projectKey = (projectId: string) => `qa-portal:project:${projectId}`
+
 /**
  * Serialises every change to one project (members, releases, details,
  * archiving), so rules like "at least one active QA Lead" and "archived is
- * read-only" can't be beaten by two requests at once. Held until the
- * transaction ends.
+ * read-only" can't be beaten by two requests at once. Excludes every other
+ * write in the project, content writes included. Held until the transaction
+ * ends.
  */
 export async function lockProject(
   tx: Prisma.TransactionClient,
   projectId: string
 ) {
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${"qa-portal:project:" + projectId}))`
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${projectKey(projectId)}))`
 }
 
 /**
- * Takes the project lock, then re-checks the caller against the state as it
- * is now: the role they had when the request arrived may have been changed
- * or removed, or the project archived, while they waited for the lock.
+ * What a write locks.
+ * - "project": a project-level change (members, releases, details,
+ *   archiving): excludes every other write in the project.
+ * - otherwise, content locks: a shared hold on the project (so they still
+ *   wait for project-level changes, and the role and archived checks hold),
+ *   plus any of these, taken in this order so two writes can't deadlock:
+ *   - cases: "write" for changing cases, suites and imports (archiving a
+ *     suite vs moving a case into it); "read" for snapshotting them into a
+ *     run (no snapshot of cases being archived).
+ *   - run: one run, "write" for its results and details, "read" for
+ *     linking a defect to one of its results (not one being replaced).
+ *   - defects: "write" for changing defects (no duplicate chains).
+ * - "content": the shared project hold only.
+ */
+export type WriteScope =
+  | "project"
+  | "content"
+  | {
+      cases?: "read" | "write"
+      run?: { number: number | null; mode: "read" | "write" }
+      defects?: "write"
+    }
+
+async function lockScope(
+  tx: Prisma.TransactionClient,
+  projectId: string,
+  scope: WriteScope
+) {
+  if (scope === "project") return lockProject(tx, projectId)
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock_shared(hashtext(${projectKey(projectId)}))`
+  if (scope === "content") return
+  const take = async (part: string, mode: "read" | "write") => {
+    const key = `${projectKey(projectId)}:${part}`
+    if (mode === "read")
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock_shared(hashtext(${key}))`
+    else await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`
+  }
+  // Always cases, then the run, then defects.
+  if (scope.cases) await take("cases", scope.cases)
+  if (scope.run) await take(`run:${scope.run.number ?? 0}`, scope.run.mode)
+  if (scope.defects) await take("defects", scope.defects)
+}
+
+/**
+ * Takes the write's lock (the whole project unless a narrower scope is
+ * given), then re-checks the caller against the state as it is now: the role
+ * they had when the request arrived may have been changed or removed, or the
+ * project archived, while they waited.
  */
 export async function lockForWrite(
   tx: Prisma.TransactionClient,
   access: ProjectAccess,
   action: Action,
-  { writable = true }: { writable?: boolean } = {}
+  {
+    writable = true,
+    scope = "project",
+  }: { writable?: boolean; scope?: WriteScope } = {}
 ): Promise<ProjectAccess> {
-  await lockProject(tx, access.project.id)
+  await lockScope(tx, access.project.id, scope)
   // The caller's portal role and status as they are now, not as they were
   // when the request arrived.
   const current = await tx.user.findUnique({

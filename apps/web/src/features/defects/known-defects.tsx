@@ -37,6 +37,7 @@ function CloseVerified({
               toast.add({ title: `${defect.key} closed as verified` }),
             onError: (err) =>
               toast.add({
+                type: "error",
                 title: `Couldn't close ${defect.key}`,
                 description: errorMessage(err),
               }),

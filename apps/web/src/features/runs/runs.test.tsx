@@ -25,6 +25,7 @@ const user: SessionUser = {
   name: "Me Myself",
   email: "me@example.com",
   role: "user",
+  mustChangePassword: false,
 }
 
 const project = (myRole: ProjectRole): Project => ({
@@ -224,6 +225,58 @@ describe("RunsPage", () => {
 })
 
 describe("RunPage", () => {
+  it("recovers from an edit conflict: says who, then saves over their version on request", async () => {
+    // No release: the fixture's release id isn't a real uuid, which the form rejects.
+    let current = run({ release: null })
+    const patches: { version: number; environment: string }[] = []
+    serveRun(current, [rc(1)])
+    routes["GET /api/projects/PAY/runs/PAY-R-12"] = () => json(200, current)
+    routes["PATCH /api/projects/PAY/runs/PAY-R-12"] = (init) => {
+      const body = JSON.parse(String(init!.body)) as {
+        version: number
+        environment: string
+      }
+      patches.push(body)
+      // Tom saved just before the first attempt.
+      if (patches.length === 1)
+        current = { ...current, environment: "Safari 18", version: 2 }
+      if (body.version !== current.version)
+        return json(409, {
+          statusCode: 409,
+          message:
+            "Tom Reyes changed this run meanwhile. Load their version to continue.",
+          reason: "stale",
+        })
+      current = { ...current, ...body, version: current.version + 1 }
+      return json(200, current)
+    }
+    renderAt("/projects/PAY/runs/PAY-R-12", "lead")
+    await screen.findByRole("heading", { name: "Case number 1" })
+
+    await userEvent.click(screen.getByRole("button", { name: /Run actions/ }))
+    await userEvent.click(
+      await screen.findByRole("menuitem", {
+        name: /Edit details and environment/,
+      })
+    )
+    const dialog = await screen.findByRole("dialog")
+    const env = within(dialog).getByLabelText(/Environment/)
+    await userEvent.clear(env)
+    await userEvent.type(env, "Chrome 130")
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Save changes" })
+    )
+
+    expect(
+      await within(dialog).findByText(/Tom Reyes changed this run meanwhile/)
+    ).toBeInTheDocument()
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Save mine anyway" })
+    )
+    await waitFor(() => expect(current.environment).toBe("Chrome 130"))
+    expect(patches.map((p) => p.version)).toEqual([1, 2])
+  })
+
   it("records Passed with P and moves to the next untested case", async () => {
     const cases = [rc(1), rc(2, { status: "passed" }), rc(3)]
     serveRun(run(), cases)

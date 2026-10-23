@@ -14,11 +14,15 @@ import {
   type updateRunSchema,
 } from "@qa/shared"
 import type { z } from "zod"
-import { recordActivity } from "../../lib/activity.ts"
+import { recordActivity, staleChange } from "../../lib/activity.ts"
 import { nextNumbers } from "../../lib/counters.ts"
 import { httpError } from "../../lib/http-error.ts"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
-import { lockForWrite, type ProjectAccess } from "../projects/access.ts"
+import {
+  lockForWrite,
+  type ProjectAccess,
+  type WriteScope,
+} from "../projects/access.ts"
 import { LONG_TX } from "../cases/bulk.ts"
 import {
   currentCases,
@@ -55,6 +59,17 @@ const RUN_SELECT = {
 type RunRow = Prisma.TestRunGetPayload<{ select: typeof RUN_SELECT }>
 
 /** The run behind `:ref` (PAY-R-12 or 12) in this project, or 404. */
+/** A run's own write lock (results, edits, close, reopen): other runs aren't held up. */
+export const runScope = (
+  access: ProjectAccess,
+  ref: string,
+  { readCases = false }: { readCases?: boolean } = {}
+): WriteScope => ({
+  // Snapshotting cases into the run: not while they're being changed.
+  ...(readCases ? { cases: "read" as const } : {}),
+  run: { number: parseRunRef(access.project.key, ref), mode: "write" },
+})
+
 export async function findRun(db: Db, access: ProjectAccess, ref: string) {
   const number = parseRunRef(access.project.key, ref)
   const run = number
@@ -344,7 +359,10 @@ export async function createRun(
   input: CreateRun
 ): Promise<TestRun> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      // Snapshots cases: not while they are being changed.
+      scope: { cases: "read" },
+    })
     const projectId = access.project.id
     await checkRelease(tx, projectId, input.releaseId)
     await checkAssignees(tx, projectId, input.assigneeIds)
@@ -373,7 +391,9 @@ export async function updateRun(
   input: UpdateRun
 ): Promise<TestRun> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     assertCanManage(access, run)
     assertOpen(run)
@@ -389,10 +409,7 @@ export async function updateRun(
       },
     })
     if (count === 0) {
-      throw httpError(
-        409,
-        "Someone else changed this run. Reload to see their changes."
-      )
+      throw await staleChange(tx, "run", run.id, "run")
     }
     await recordActivity(tx, {
       actorId: access.user.id,
@@ -420,7 +437,9 @@ export async function closeRun(
   ref: string
 ): Promise<TestRun> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:close")
+    access = await lockForWrite(tx, access, "runs:close", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     if (run.state === "closed")
       throw httpError(409, "This run is already closed")
@@ -474,7 +493,9 @@ export async function reopenRun(
   ref: string
 ): Promise<TestRun> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:reopen")
+    access = await lockForWrite(tx, access, "runs:reopen", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     if (run.state === "open") throw httpError(409, "This run is already open")
     await tx.testRun.update({
@@ -511,7 +532,10 @@ export async function copyRun(
   input: CopyRun
 ): Promise<TestRun> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      // Snapshots cases: not while they are being changed.
+      scope: { cases: "read" },
+    })
     const source = await findRun(tx, access, ref)
     await checkRelease(tx, access.project.id, input.releaseId)
     const runCases = await tx.runCase.findMany({

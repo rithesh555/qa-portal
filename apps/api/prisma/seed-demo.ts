@@ -12,6 +12,7 @@ import { demoOutcome, demoRuns } from "../src/demo/runs.ts"
 import { demoUsers } from "../src/demo/users.ts"
 import { recordActivity } from "../src/lib/activity.ts"
 import { loadEnv } from "../src/env.ts"
+import { assertLocalDevDatabase } from "./dev-guard.ts"
 import { nextNumbers } from "../src/lib/counters.ts"
 import { createPrisma, type Prisma } from "../src/lib/prisma.ts"
 import { currentCases, snapshotData } from "../src/modules/runs/select.ts"
@@ -30,12 +31,7 @@ const resultStamp = (started: Date, position: number) =>
   )
 
 const env = loadEnv()
-if (env.NODE_ENV !== "development") {
-  console.error(
-    `db:seed:demo only runs with NODE_ENV=development (got ${env.NODE_ENV}).`
-  )
-  process.exit(1)
-}
+assertLocalDevDatabase(env, "db:seed:demo")
 
 const { DEMO_USER_PASSWORD } = z
   .object({ DEMO_USER_PASSWORD: z.string().min(12) })
@@ -64,6 +60,11 @@ try {
         role: user.role,
         data: { username: user.username, displayUsername: user.username },
       },
+    })
+    // Demo accounts share a known password on purpose: no forced change.
+    await prisma.user.update({
+      where: { id: row.id },
+      data: { mustChangePassword: false },
     })
     if (user.deactivated) {
       await prisma.user.update({

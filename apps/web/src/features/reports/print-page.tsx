@@ -36,8 +36,13 @@ export function PrintReportPage() {
   const p = project.data
 
   useEffect(() => {
-    if (r && p)
-      document.title = `Release report — ${p.name} ${r.release?.name ?? "no release"}`
+    if (!r || !p) return
+    const before = document.title
+    document.title = `Release report — ${p.name} ${r.release?.name ?? "no release"}`
+    // Leaving the print view gives the tab its usual title back.
+    return () => {
+      document.title = before
+    }
   }, [r, p])
 
   const back = `/projects/${key}/reports?release=${release}${live ? "&live=true" : ""}`
@@ -45,15 +50,27 @@ export function PrintReportPage() {
   if (report.isError || project.isError) {
     return (
       <main className="mx-auto flex max-w-xl flex-col gap-4 p-8">
-        <p className="text-destructive">
+        <h1 className="text-xl font-semibold">Couldn&apos;t load the report</h1>
+        <p role="alert" className="text-destructive">
           {errorMessage(report.error ?? project.error)}
         </p>
-        <Link
-          to={back}
-          className="text-primary underline-offset-4 hover:underline"
-        >
-          Back to reports
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              void report.refetch()
+              void project.refetch()
+            }}
+          >
+            Try again
+          </Button>
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={<Link to={back} />}
+          >
+            Back to reports
+          </Button>
+        </div>
       </main>
     )
   }

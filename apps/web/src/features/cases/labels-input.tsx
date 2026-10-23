@@ -1,6 +1,6 @@
 import { labelSchema, MAX_LABELS } from "@qa/shared"
 import { XIcon } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 /**
@@ -31,6 +31,7 @@ export function LabelsInput({
     onErrorChange?.(message !== null)
   }
   const full = value.length >= MAX_LABELS
+  const input = useRef<HTMLInputElement>(null)
 
   function add(raw: string) {
     const parsed = labelSchema.safeParse(raw)
@@ -67,14 +68,19 @@ export function LabelsInput({
             <button
               type="button"
               aria-label={`Remove label ${label}`}
-              onClick={() => onChange(value.filter((l) => l !== label))}
-              className="grid size-5 place-items-center rounded-sm text-muted-foreground outline-none hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => {
+                onChange(value.filter((l) => l !== label))
+                // The chip (and this button) goes: carry on typing labels.
+                requestAnimationFrame(() => input.current?.focus())
+              }}
+              className="grid size-6 place-items-center rounded-sm text-muted-foreground outline-none hover:bg-background hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               <XIcon className="size-3" />
             </button>
           </span>
         ))}
         <input
+          ref={input}
           id={id}
           value={draft}
           disabled={full}

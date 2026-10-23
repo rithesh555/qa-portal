@@ -46,6 +46,8 @@ import {
   suitePath,
 } from "./case-badges"
 import { describeCaseChange } from "./case-activity-text"
+import { PageLoading } from "@/components/page-loading"
+import { InlineError } from "@/components/inline-error"
 
 const exact = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -61,7 +63,11 @@ function History({ caseKey }: { caseKey: string }) {
   if (history.isPending) return <Skeleton className="h-24" />
   if (history.isError) {
     return (
-      <p className="text-sm text-destructive">{errorMessage(history.error)}</p>
+      <InlineError
+        what="Couldn't load the history."
+        error={history.error}
+        onRetry={() => void history.refetch()}
+      />
     )
   }
   return (
@@ -231,11 +237,14 @@ export function CaseDetails({
 
   if (query.isPending) {
     return (
-      <div className="flex flex-col gap-3 p-4">
+      <PageLoading
+        label="Loading the test case…"
+        className="flex flex-col gap-3 p-4"
+      >
         <Skeleton className="h-5 w-24" />
         <Skeleton className="h-7 w-3/4" />
         <Skeleton className="h-40" />
-      </div>
+      </PageLoading>
     )
   }
   if (query.isError) {

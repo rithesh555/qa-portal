@@ -1,4 +1,4 @@
-import { sessionUserSchema, type SessionUser } from "@qa/shared"
+import { type Me, meSchema } from "@qa/shared"
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { ApiError, apiGet } from "@/lib/api"
 
@@ -8,9 +8,9 @@ async function fetchSession({
   signal,
 }: {
   signal: AbortSignal
-}): Promise<SessionUser | null> {
+}): Promise<Me | null> {
   try {
-    return await apiGet("/me", sessionUserSchema, { signal })
+    return await apiGet("/me", meSchema, { signal })
   } catch (err) {
     if (err instanceof ApiError && err.status === 401) return null
     throw err

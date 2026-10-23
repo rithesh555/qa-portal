@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useContext, useId, useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { FieldErrorIdContext } from "./field-context"
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
@@ -74,14 +75,17 @@ function Field({
   orientation = "vertical",
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
+  const errorId = useId()
   return (
-    <div
-      role="group"
-      data-slot="field"
-      data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
-      {...props}
-    />
+    <FieldErrorIdContext.Provider value={errorId}>
+      <div
+        role="group"
+        data-slot="field"
+        data-orientation={orientation}
+        className={cn(fieldVariants({ orientation }), className)}
+        {...props}
+      />
+    </FieldErrorIdContext.Provider>
   )
 }
 
@@ -181,6 +185,7 @@ function FieldError({
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
 }) {
+  const fieldErrorId = useContext(FieldErrorIdContext)
   const content = useMemo(() => {
     if (children) {
       return children
@@ -215,6 +220,7 @@ function FieldError({
   return (
     <div
       role="alert"
+      id={fieldErrorId ?? undefined}
       data-slot="field-error"
       className={cn("text-sm font-normal text-destructive", className)}
       {...props}

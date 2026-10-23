@@ -1,5 +1,5 @@
 import type { Release, ReleaseStatus } from "@qa/shared"
-import { diff, recordActivity } from "../../lib/activity.ts"
+import { diff, recordActivity, staleChange } from "../../lib/activity.ts"
 import { isUniqueViolation } from "../../lib/db-errors.ts"
 import { httpError } from "../../lib/http-error.ts"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
@@ -128,10 +128,7 @@ export async function updateRelease(
         data: { ...data(input), version: { increment: 1 } },
       })
       if (count === 0) {
-        throw httpError(
-          409,
-          "Someone else changed this release. Reload to see their changes."
-        )
+        throw await staleChange(tx, "release", id, "release")
       }
       const changes = diff(toRelease(before), input, [
         "name",

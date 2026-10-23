@@ -97,11 +97,25 @@ export function HomePage() {
               <FolderKanbanIcon />
             </EmptyMedia>
             <EmptyTitle>
-              <h2>You&apos;re not in any project yet</h2>
+              <h2>
+                {me?.role === "admin"
+                  ? "No projects yet"
+                  : "You're not in any project yet"}
+              </h2>
             </EmptyTitle>
             <EmptyDescription>
-              Ask an admin or a project&apos;s QA Lead to add you. Your runs,
-              defects and project summaries will show up here.
+              {me?.role === "admin" ? (
+                <>
+                  Create the first one on the{" "}
+                  <Link to="/projects" className="underline">
+                    Projects
+                  </Link>{" "}
+                  page and give it a QA Lead. Its runs, defects and release
+                  summaries will show up here.
+                </>
+              ) : (
+                "Ask an admin or a project's QA Lead to add you. Your runs, defects and project summaries will show up here."
+              )}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

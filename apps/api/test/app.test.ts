@@ -84,14 +84,36 @@ describe("app", () => {
       message: "That value is already in use",
     })
   })
+})
 
-  it("serves the OpenAPI document", async () => {
-    const res = await app.inject({ method: "GET", url: "/api/docs/json" })
-    expect(res.statusCode).toBe(200)
-    expect(res.json()).toMatchObject({
-      openapi: expect.stringMatching(/^3\./),
-      info: { title: "QA Portal API" },
-    })
-    expect(Object.keys(res.json().paths)).toContain("/api/health")
+describe("API docs", () => {
+  it("are served in development", async () => {
+    const dev = await buildTestApp({ env: { NODE_ENV: "development" } })
+    try {
+      const res = await dev.inject({ method: "GET", url: "/api/docs/json" })
+      expect(res.statusCode).toBe(200)
+      expect(res.json()).toMatchObject({
+        openapi: expect.stringMatching(/^3\./),
+        info: { title: "QA Portal API" },
+      })
+      expect(Object.keys(res.json().paths)).toContain("/api/health")
+    } finally {
+      await dev.close()
+    }
   })
+
+  it.each(["production", "test"] as const)(
+    "are not served in %s (no route list for anyone)",
+    async (NODE_ENV) => {
+      const other = await buildTestApp({ env: { NODE_ENV } })
+      try {
+        for (const url of ["/api/docs", "/api/docs/json"])
+          expect((await other.inject({ method: "GET", url })).statusCode).toBe(
+            404
+          )
+      } finally {
+        await other.close()
+      }
+    }
+  )
 })

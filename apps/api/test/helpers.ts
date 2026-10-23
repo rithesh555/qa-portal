@@ -40,6 +40,15 @@ export async function createUser(
       data: { username: user.username },
     },
   })
+  await choosePassword(app, user.username)
+}
+
+/** As if the user had picked their own password (new accounts must, first). */
+export async function choosePassword(app: FastifyInstance, username: string) {
+  await app.prisma.user.update({
+    where: { username },
+    data: { mustChangePassword: false },
+  })
 }
 
 /** Signs in and returns the Cookie header value for later requests. */

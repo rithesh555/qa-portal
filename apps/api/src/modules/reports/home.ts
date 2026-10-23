@@ -10,6 +10,7 @@ import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
 import { computeReport } from "./service.ts"
 
 const ACTIVITY_SHOWN = 8
+const SUMMARY_CONCURRENCY = 4
 const LIST_SHOWN = 20
 
 /** Projects the person can open (admins: all), not archived. */
@@ -19,7 +20,7 @@ const visible = (user: SessionUser): Prisma.ProjectWhereInput => ({
 })
 
 /** Active (not yet released) releases of these projects, each summarised by its own report. */
-async function summarise(
+async function summariseReleases(
   prisma: PrismaClient,
   projects: Prisma.ProjectWhereInput,
   now: Date
@@ -40,8 +41,7 @@ async function summarise(
           members: {
             where: {
               role: "lead",
-              // banned is nullable: "not true" would also drop NULL rows.
-              user: { OR: [{ banned: false }, { banned: null }] },
+              user: { banned: false },
             },
             orderBy: { createdAt: "asc" },
             take: 1,
@@ -51,16 +51,15 @@ async function summarise(
       },
     },
   })
-  const out: ReleaseSummary[] = []
-  // One at a time: each report runs several queries of its own.
-  for (const r of releases) {
+  const summarise = async (r: (typeof releases)[number]) => {
     const report = await computeReport(prisma, {
       project: r.project,
       releaseId: r.id,
       workload: false,
+      summary: true,
       now,
     })
-    out.push({
+    return {
       project: { key: r.project.key, name: r.project.name },
       release: report.release!,
       lead: r.project.members[0]?.user.name ?? null,
@@ -72,8 +71,23 @@ async function summarise(
       testedReady: report.kpis.testedReady,
       openCritical: report.kpis.openCritical,
       openMajor: report.kpis.openMajor,
-    })
+    }
   }
+  // A few at a time: each summary runs several queries of its own, and the
+  // connection pool is shared with every other request.
+  const out: ReleaseSummary[] = new Array(releases.length)
+  let next = 0
+  await Promise.all(
+    Array.from(
+      { length: Math.min(SUMMARY_CONCURRENCY, releases.length) },
+      async () => {
+        while (next < releases.length) {
+          const i = next++
+          out[i] = await summarise(releases[i]!)
+        }
+      }
+    )
+  )
   return out
 }
 
@@ -235,7 +249,9 @@ export async function getHome(
     readyToRetest: readyToRetest.map(toHomeDefect),
     toTriage: toTriage ? toTriage.map(toHomeDefect) : null,
     triageProjects: led.map((p) => p.name),
-    releases: hasProjects ? await summarise(prisma, projects, new Date()) : [],
+    releases: hasProjects
+      ? await summariseReleases(prisma, projects, new Date())
+      : [],
     activity: activity.map(({ project, ...row }) => ({
       ...row,
       changes: (row.changes as Record<string, unknown> | null) ?? null,
@@ -261,5 +277,5 @@ export async function releasesOverview(
       ? {}
       : { members: { some: { userId: user.id, role: "lead" } } }),
   }
-  return summarise(prisma, projects, new Date())
+  return summariseReleases(prisma, projects, new Date())
 }

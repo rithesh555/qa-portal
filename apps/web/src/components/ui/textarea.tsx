@@ -1,7 +1,12 @@
 import * as React from "react"
 import { cn } from "cn"
+import { useFieldDescribedBy } from "./field-context"
 
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  const describedBy = useFieldDescribedBy(
+    props["aria-invalid"],
+    props["aria-describedby"]
+  )
   return (
     <textarea
       data-slot="textarea"
@@ -10,6 +15,7 @@ function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
         className
       )}
       {...props}
+      aria-describedby={describedBy}
     />
   )
 }

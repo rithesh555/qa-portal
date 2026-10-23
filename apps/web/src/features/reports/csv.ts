@@ -14,7 +14,9 @@ export interface CsvTable {
 
 /** A report table as CSV: a "scope · as of" line, then the header and rows, formula-safe. */
 export function reportCsv(t: CsvTable): string {
-  const text = (c: Cell) => (c === null ? "" : safeCell(String(c)))
+  // Numbers stay numbers (a guarded "-3" would turn into text); only text is guarded.
+  const text = (c: Cell) =>
+    c === null ? "" : typeof c === "number" ? String(c) : safeCell(c)
   return toCsv([
     [safeCell(`${t.scope} · as of ${t.asOf}`)],
     t.columns.map(text),

@@ -1,5 +1,6 @@
 import { type Action, can } from "@qa/shared"
 import { CloudOffIcon } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Navigate, Outlet, useLocation } from "react-router"
 import { FullPageSpinner } from "@/components/full-page-spinner"
 import { NoAccess } from "@/components/no-access"
@@ -13,7 +14,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Spinner } from "@/components/ui/spinner"
-import { useSession } from "./session"
+import { ChoosePasswordDialog } from "./change-password-dialog"
+import { sessionQueryKey, useSession } from "./session"
 
 function SessionCheckFailed({
   onRetry,
@@ -48,9 +50,20 @@ function SessionCheckFailed({
 /** Renders child routes only for a signed-in user. */
 export function RequireAuth() {
   const { data: user, isPending, isError, isRefetching, refetch } = useSession()
+  const queryClient = useQueryClient()
   const location = useLocation()
 
   if (isPending) return <FullPageSpinner label="Checking your session" />
+  // An admin chose this password: pick your own before anything else (the
+  // API refuses everything else until then).
+  if (user?.mustChangePassword)
+    return (
+      <ChoosePasswordDialog
+        onDone={() =>
+          void queryClient.invalidateQueries({ queryKey: sessionQueryKey })
+        }
+      />
+    )
   // A failed background check keeps the cached user; only a 401 (null) signs out.
   if (user) return <Outlet />
   if (isError) {

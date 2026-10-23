@@ -288,7 +288,9 @@ export async function createCase(
   input: CaseFields
 ): Promise<TestCase> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     return insertCase(tx, access, input)
   })
   return refetch(prisma, access, id)
@@ -300,7 +302,9 @@ export async function duplicateCase(
   ref: string
 ): Promise<TestCase> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     const source = await findCaseForWrite(tx, access, ref)
     if (source.archivedAt)
       throw httpError(409, "Restore this test case before duplicating it")
@@ -375,7 +379,9 @@ export async function updateCase(
   input: CaseFields & { version: number; overwrite: boolean }
 ): Promise<TestCase> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     const before = await findCaseForWrite(tx, access, ref)
     if (before.archivedAt) throw ARCHIVED()
     if (before.version !== input.version) throw STALE()
@@ -448,7 +454,9 @@ export async function archiveCase(
   reason: string
 ): Promise<TestCase> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:archive")
+    access = await lockForWrite(tx, access, "cases:archive", {
+      scope: { cases: "write" },
+    })
     const row = await findCaseForWrite(tx, access, ref)
     if (row.archivedAt) return row.id
     await tx.testCase.update({
@@ -484,7 +492,9 @@ export async function restoreCase(
   ref: string
 ): Promise<TestCase> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:archive")
+    access = await lockForWrite(tx, access, "cases:archive", {
+      scope: { cases: "write" },
+    })
     const row = await findCaseForWrite(tx, access, ref)
     if (!row.archivedAt) return row.id
     let suiteId = row.suiteId

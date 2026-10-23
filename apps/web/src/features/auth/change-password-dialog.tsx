@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
+import { useSignOut } from "./use-sign-out"
 
 const FIELDS = [
   {
@@ -46,7 +47,15 @@ function changeErrorMessage(status: number): string {
   return "We couldn't reach the server. Try again in a moment."
 }
 
-function ChangePasswordForm({ onDone }: { onDone: () => void }) {
+function ChangePasswordForm({
+  onDone,
+  required,
+}: {
+  onDone: () => void
+  /** An admin chose the current password: the user must pick their own. */
+  required: boolean
+}) {
+  const signOut = useSignOut()
   const [formError, setFormError] = useState<string | null>(null)
   const form = useForm<ChangePasswordInput>({
     resolver: zodResolver(changePasswordSchema),
@@ -75,7 +84,7 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
       return
     }
     toast.add({
-      title: "Password changed",
+      title: required ? "Password saved" : "Password changed",
       description: "You've been signed out on your other devices.",
     })
     onDone()
@@ -84,9 +93,13 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <DialogHeader>
-        <DialogTitle>Change password</DialogTitle>
+        <DialogTitle>
+          {required ? "Choose your own password" : "Change password"}
+        </DialogTitle>
         <DialogDescription>
-          Use at least 12 characters. Other devices are signed out.
+          {required
+            ? "An admin set your current password. Pick one only you know to continue: at least 12 characters."
+            : "Use at least 12 characters. Other devices are signed out."}
         </DialogDescription>
       </DialogHeader>
       <FieldGroup className="py-4">
@@ -121,9 +134,18 @@ function ChangePasswordForm({ onDone }: { onDone: () => void }) {
         ))}
       </FieldGroup>
       <DialogFooter>
+        {required && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void signOut()}
+          >
+            Sign out
+          </Button>
+        )}
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting && <Spinner data-icon="inline-start" />}
-          Change password
+          {required ? "Save my password" : "Change password"}
         </Button>
       </DialogFooter>
     </form>
@@ -140,7 +162,30 @@ export function ChangePasswordDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
-        {open && <ChangePasswordForm onDone={() => onOpenChange(false)} />}
+        {open && (
+          <ChangePasswordForm
+            required={false}
+            onDone={() => onOpenChange(false)}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/**
+ * Over the app while an admin-chosen password is unchanged: it can't be
+ * dismissed (the API refuses everything else meanwhile), only completed or
+ * left by signing out.
+ */
+export function ChoosePasswordDialog({ onDone }: { onDone: () => void }) {
+  return (
+    <Dialog open disablePointerDismissal onOpenChange={() => {}}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md"
+      >
+        <ChangePasswordForm required onDone={onDone} />
       </DialogContent>
     </Dialog>
   )

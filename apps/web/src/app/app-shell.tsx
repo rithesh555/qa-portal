@@ -3,6 +3,7 @@ import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router"
 import { BrandMark } from "@/components/brand-mark"
+import { useTheme } from "@/components/theme-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -10,6 +11,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -34,14 +37,21 @@ import {
 import { ChangePasswordDialog } from "@/features/auth/change-password-dialog"
 import { useSession } from "@/features/auth/session"
 import { useSignOut } from "@/features/auth/use-sign-out"
-import { useProject, useProjects } from "@/features/projects/api"
+import { useProject } from "@/features/projects/api"
 import {
   useLastProjectKey,
   useRouteProjectKey,
 } from "@/features/projects/current-project"
 import { ProjectSwitcher } from "@/features/projects/project-switcher"
 import { ApiError } from "@/lib/api"
-import { NAV, type NavItem, navFor, PROJECT_NAV, projectPath } from "./nav"
+import {
+  NAV,
+  type NavItem,
+  navFor,
+  pageTitle,
+  PROJECT_NAV,
+  projectPath,
+} from "./nav"
 
 function initials(name: string): string {
   return name
@@ -63,6 +73,7 @@ function UserMenu() {
   const { data: user } = useSession()
   const signOut = useSignOut()
   const [changingPassword, setChangingPassword] = useState(false)
+  const { theme, setTheme } = useTheme()
   if (!user) return null
 
   return (
@@ -99,6 +110,20 @@ function UserMenu() {
                 @{user.username}
               </span>
             </DropdownMenuLabel>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Theme</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={theme}
+              onValueChange={(v) => setTheme(v as typeof theme)}
+            >
+              <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">
+                Same as my device
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
@@ -153,7 +178,7 @@ function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent role="navigation" aria-label="Main">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -273,16 +298,22 @@ export function AppShell() {
   const { data: user } = useSession()
   const { pathname } = useLocation()
   // Non-admins see "All releases" once they lead two or more projects.
-  const mine = useProjects(
-    { pageSize: 100 },
-    { enabled: !!user && user.role !== "admin" }
-  )
-  const led = mine.data?.items.filter((p) => p.myRole === "lead").length ?? 0
-  const items = user ? navFor(user.role, led) : []
+  const items = user ? navFor(user.role, user.projectsLed) : []
   const project = useSidebarProject()
+
+  useEffect(() => {
+    document.title = pageTitle(pathname, project)
+  }, [pathname, project])
 
   return (
     <SidebarProvider>
+      {/* First thing a keyboard reaches: past the sidebar to the page. */}
+      <a
+        href="#content"
+        className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium shadow ring-2 ring-ring focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+      >
+        Skip to content
+      </a>
       <AppSidebar items={items} pathname={pathname} project={project} />
       {/* min-w-0: wide tables scroll inside the page instead of widening it. */}
       <SidebarInset className="min-w-0">
@@ -296,7 +327,11 @@ export function AppShell() {
             {headerTitle(pathname, project)}
           </span>
         </header>
-        <div className="flex flex-1 flex-col p-4 md:p-6">
+        <div
+          id="content"
+          tabIndex={-1}
+          className="flex flex-1 flex-col p-4 outline-none md:p-6"
+        >
           <Outlet />
         </div>
       </SidebarInset>

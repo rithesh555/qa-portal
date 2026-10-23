@@ -43,6 +43,7 @@ import { useActivity, useReleases, useSetArchived } from "./api"
 import { EditProjectDialog } from "./edit-project-dialog"
 import { useProjectContext } from "./project-layout"
 import { ReleaseStatusBadge, formatDay } from "./release-status"
+import { InlineError } from "@/components/inline-error"
 
 function CurrentRelease() {
   const { project } = useProjectContext()
@@ -164,9 +165,11 @@ function RecentActivity() {
         {activity.isPending ? (
           <Skeleton className="h-24" />
         ) : activity.isError ? (
-          <p className="text-sm text-destructive">
-            {errorMessage(activity.error)}
-          </p>
+          <InlineError
+            what="Couldn't load the activity."
+            error={activity.error}
+            onRetry={() => void activity.refetch()}
+          />
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing yet.</p>
         ) : (
@@ -239,7 +242,10 @@ function AdminMenu() {
             </DropdownMenuItem>
           )}
           {project.archived ? (
-            <DropdownMenuItem onClick={() => void apply(false)}>
+            <DropdownMenuItem
+              disabled={setArchived.isPending}
+              onClick={() => void apply(false)}
+            >
               <ArchiveRestoreIcon />
               Restore project
             </DropdownMenuItem>

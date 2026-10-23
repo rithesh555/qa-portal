@@ -9,7 +9,7 @@ import {
   type UserListQuery,
 } from "@qa/shared"
 import type { Auth } from "../../auth/auth.ts"
-import { diff, recordActivity } from "../../lib/activity.ts"
+import { diff, recordActivity, staleChange } from "../../lib/activity.ts"
 import { isUniqueViolation } from "../../lib/db-errors.ts"
 import { httpError } from "../../lib/http-error.ts"
 import { hashPassword } from "better-auth/crypto"
@@ -194,9 +194,6 @@ export async function createUser(
   return getUser({ prisma, auth }, user.id)
 }
 
-const STALE = () =>
-  httpError(409, "Someone else changed this user. Reload to see their changes.")
-
 export async function updateUser(
   { prisma }: UsersDeps,
   actor: ActingAdmin,
@@ -220,7 +217,7 @@ export async function updateUser(
         where: { id, updatedAt: new Date(input.updatedAt) },
         data: { name: input.name, email: input.email, role: input.role },
       })
-      if (count === 0) throw STALE()
+      if (count === 0) throw await staleChange(tx, "user", id, "user")
       const changes = diff(current, input, ["name", "email", "role"])
       if (Object.keys(changes).length > 0) {
         await recordActivity(tx, {
@@ -272,6 +269,8 @@ export async function resetPassword(
       })
     }
     await tx.session.deleteMany({ where: { userId: id } })
+    // The admin knows this one: the user must pick their own first.
+    await tx.user.update({ where: { id }, data: { mustChangePassword: true } })
     await recordActivity(tx, {
       actorId: actor.id,
       entityType: "user",

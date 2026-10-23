@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import {
   buildTestApp,
+  choosePassword,
   createUser,
   nextIp,
   PASSWORD,
@@ -279,6 +280,94 @@ describe("users API", () => {
     })
   })
 
+  describe("password set by an admin", () => {
+    const changePassword = (cookie: string, current: string) =>
+      call(cookie, "POST", "/api/auth/change-password", {
+        currentPassword: current,
+        newPassword: "my-own-secret-pass",
+        revokeOtherSessions: true,
+      })
+
+    it("must be changed before the user can do anything else", async () => {
+      await call(admin, "POST", "/api/users", {
+        name: "Dave Doe",
+        username: "dave",
+        email: "dave@example.com",
+        password: PASSWORD,
+        role: "user",
+      })
+      const dave = await signIn(app, "dave")
+      const me = await call(dave, "GET", "/api/me")
+      expect(me.statusCode).toBe(200)
+      expect(me.json().mustChangePassword).toBe(true)
+      const blocked = await call(dave, "GET", "/api/projects")
+      expect(blocked.statusCode).toBe(403)
+      expect(blocked.json().message).toMatch(/change your password/i)
+
+      const changed = await changePassword(dave, PASSWORD)
+      expect(changed.statusCode).toBe(200)
+      const fresh = changed.cookies
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ")
+      expect(
+        (await call(fresh, "GET", "/api/me")).json().mustChangePassword
+      ).toBe(false)
+      expect((await call(fresh, "GET", "/api/projects")).statusCode).toBe(200)
+    })
+
+    it("is set again by a password reset", async () => {
+      const id = await idOf("bob")
+      await call(admin, "POST", `/api/users/${id}/reset-password`, {
+        password: NEW_PASSWORD,
+      })
+      const bob = await signIn(app, "bob", NEW_PASSWORD)
+      expect(
+        (await call(bob, "GET", "/api/me")).json().mustChangePassword
+      ).toBe(true)
+      expect((await call(bob, "GET", "/api/users/directory")).statusCode).toBe(
+        403
+      )
+    })
+
+    it("is on for any new account, even one made without our follow-up step (fails safe)", async () => {
+      await app.auth.api.createUser({
+        body: {
+          email: "erin@test.local",
+          name: "erin",
+          password: PASSWORD,
+          role: "user",
+          data: { username: "erin" },
+        },
+      })
+      expect(
+        (
+          await app.prisma.user.findUniqueOrThrow({
+            where: { username: "erin" },
+          })
+        ).mustChangePassword
+      ).toBe(true)
+    })
+
+    it("can't be cleared by the user through the API", async () => {
+      await call(
+        admin,
+        "POST",
+        `/api/users/${await idOf("bob")}/reset-password`,
+        {
+          password: NEW_PASSWORD,
+        }
+      )
+      const bob = await signIn(app, "bob", NEW_PASSWORD)
+      // A failed change leaves it set.
+      expect(
+        (await changePassword(bob, "not-my-password!")).statusCode
+      ).not.toBe(200)
+      expect(
+        (await call(bob, "GET", "/api/me")).json().mustChangePassword
+      ).toBe(true)
+    })
+  })
+
   describe("deactivate / reactivate", () => {
     it("deactivation ends sessions and blocks sign-in; reactivation restores it", async () => {
       const id = await idOf("bob")
@@ -321,6 +410,23 @@ describe("users API", () => {
     })
   })
 
+  describe("active flag", () => {
+    it("is never unknown: the database refuses NULL, so 'not deactivated' filters can't drop people", async () => {
+      await expect(
+        app.prisma
+          .$executeRaw`UPDATE users SET banned = NULL WHERE username = 'bob'`
+      ).rejects.toThrow()
+      // Users made by Better Auth start out active.
+      expect(
+        (
+          await app.prisma.user.findUniqueOrThrow({
+            where: { username: "bob" },
+          })
+        ).banned
+      ).toBe(false)
+    })
+  })
+
   describe("directory", () => {
     it("returns active non-admin users with minimal fields", async () => {
       await call(admin, "POST", `/api/users/${await idOf("carol")}/deactivate`)
@@ -354,6 +460,7 @@ describe("users API", () => {
           data: { username },
         },
       })
+      await choosePassword(app, username)
       return signIn(app, username)
     }
 

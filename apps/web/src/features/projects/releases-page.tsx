@@ -52,6 +52,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { toast } from "@/components/ui/toast"
+import { ConflictAlert, isEditConflict } from "@/components/conflict-alert"
 import { ApiError, errorMessage } from "@/lib/api"
 import { useCreateRelease, useReleases, useUpdateRelease } from "./api"
 import { useProjectContext } from "./project-layout"
@@ -74,7 +75,11 @@ function ReleaseForm({
   const { project } = useProjectContext()
   const create = useCreateRelease(project.key)
   const update = useUpdateRelease(project.key)
+  const releases = useReleases(project.key)
   const [formError, setFormError] = useState<string | null>(null)
+  const [conflict, setConflict] = useState<string | null>(null)
+  // The version this edit builds on; a conflict moves it to the latest.
+  const [version, setVersion] = useState(release?.version ?? 0)
   const form = useForm<
     FormValues,
     unknown,
@@ -90,13 +95,16 @@ function ReleaseForm({
     },
   })
 
-  async function onSubmit(values: ReleaseInput) {
+  const onSubmit = (values: ReleaseInput) => save(values, version)
+
+  async function save(values: ReleaseInput, onVersion: number) {
     setFormError(null)
+    setConflict(null)
     try {
       if (release) {
         await update.mutateAsync({
           id: release.id,
-          input: { ...values, version: release.version },
+          input: { ...values, version: onVersion },
         })
         toast.add({ title: `Release ${values.name} saved` })
       } else {
@@ -108,7 +116,7 @@ function ReleaseForm({
       if (
         err instanceof ApiError &&
         err.status === 409 &&
-        /name/i.test(err.message)
+        /already has a release with that name/i.test(err.message)
       ) {
         form.setError(
           "name",
@@ -120,8 +128,18 @@ function ReleaseForm({
         )
         return
       }
-      setFormError(errorMessage(err))
+      if (release && isEditConflict(err)) setConflict(errorMessage(err))
+      else setFormError(errorMessage(err))
     }
+  }
+
+  /** The release as saved now (someone else changed it meanwhile). */
+  async function latest() {
+    const { data, error } = await releases.refetch()
+    const fresh = data?.items.find((r) => r.id === release?.id)
+    if (!fresh) throw error ?? new Error("Couldn't load the release")
+    setVersion(fresh.version)
+    return fresh
   }
 
   return (
@@ -140,6 +158,26 @@ function ReleaseForm({
             <CircleAlertIcon />
             <AlertDescription>{formError}</AlertDescription>
           </Alert>
+        )}
+        {conflict && (
+          <ConflictAlert
+            message={conflict}
+            onLoadTheirs={async () => {
+              const fresh = await latest()
+              form.reset({
+                name: fresh.name,
+                description: fresh.description,
+                status: fresh.status,
+                startDate: fresh.startDate ?? "",
+                targetDate: fresh.targetDate ?? "",
+              })
+              setConflict(null)
+            }}
+            onSaveMine={async () => {
+              const fresh = await latest()
+              await form.handleSubmit((values) => save(values, fresh.version))()
+            }}
+          />
         )}
         <Controller
           name="name"

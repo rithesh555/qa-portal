@@ -5,7 +5,7 @@ import {
   RUN_CASE_STATUS_LABELS,
 } from "@qa/shared"
 import { CircleAlertIcon } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Link, useParams } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -47,6 +47,8 @@ import { describeDefectActivity } from "./defect-activity-text"
 import { DefectStatusBadge } from "./defect-badges"
 import { DefectFields } from "./defect-fields"
 import { DefectWorkflow } from "./defect-workflow"
+import { PageLoading } from "@/components/page-loading"
+import { InlineError } from "@/components/inline-error"
 
 function Section({
   label,
@@ -74,6 +76,14 @@ function Details({ defect }: { defect: Defect }) {
   const [conflict, setConflict] = useState(false)
   const [tried, setTried] = useState(false)
   const detail = useDefect(project.key, defect.key)
+  const editButton = useRef<HTMLButtonElement>(null)
+  /** The section swaps between reading and editing; focus follows it. */
+  const focusAfter = (target: () => HTMLElement | null | undefined) =>
+    requestAnimationFrame(() => target()?.focus())
+  const stopEditing = () => {
+    setEditing(false)
+    focusAfter(() => editButton.current)
+  }
   const missing = {
     title: !draft.title.trim(),
     steps: !draft.steps.trim(),
@@ -82,7 +92,13 @@ function Details({ defect }: { defect: Defect }) {
 
   async function save() {
     setTried(true)
-    if (missing.title || missing.steps || missing.actual) return
+    const firstEmpty = (["title", "steps", "actual"] as const).find(
+      (k) => missing[k]
+    )
+    if (firstEmpty) {
+      focusAfter(() => document.getElementById(`defect-${firstEmpty}`))
+      return
+    }
     setError(null)
     try {
       await update.mutateAsync({
@@ -93,7 +109,7 @@ function Details({ defect }: { defect: Defect }) {
         actual: draft.actual,
         version: defect.version,
       })
-      setEditing(false)
+      stopEditing()
       toast.add({ title: "Details saved" })
     } catch (err) {
       setConflict(err instanceof ApiError && err.status === 409)
@@ -138,12 +154,14 @@ function Details({ defect }: { defect: Defect }) {
         </h2>
         {allowed("defects:edit") && !editing && (
           <Button
+            ref={editButton}
             size="sm"
             variant="outline"
             onClick={() => {
               setDraft(defect)
               setTried(false)
               setEditing(true)
+              focusAfter(() => document.getElementById("defect-title"))
             }}
           >
             Edit
@@ -173,7 +191,7 @@ function Details({ defect }: { defect: Defect }) {
                     onClick={() => {
                       setError(null)
                       setConflict(false)
-                      setEditing(false)
+                      stopEditing()
                       void detail.refetch()
                     }}
                   >
@@ -205,11 +223,7 @@ function Details({ defect }: { defect: Defect }) {
             </div>
           </FieldGroup>
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setEditing(false)}
-            >
+            <Button type="button" variant="outline" onClick={stopEditing}>
               Cancel
             </Button>
             <Button type="submit" disabled={update.isPending}>
@@ -242,6 +256,13 @@ function LinkedResults({ defect }: { defect: Defect }) {
   const { project, allowed } = useProjectContext()
   const unlink = useUnlink(project.key, defect.key)
   const relink = useLinkResult(project.key, defect.key)
+  // Results unlinked here, kept as rows with an Undo until this page is left
+  // (not a timed toast: it can be reached whenever someone gets to it).
+  const [removed, setRemoved] = useState<Defect["links"]>([])
+  const focusUndo = (id: string) =>
+    requestAnimationFrame(() =>
+      document.getElementById(`undo-unlink-${id}`)?.focus()
+    )
   return (
     <section
       aria-labelledby="defect-links"
@@ -289,42 +310,64 @@ function LinkedResults({ defect }: { defect: Defect }) {
                 onClick={() =>
                   unlink.mutate(l.id, {
                     onSuccess: () => {
-                      const id = toast.add({
-                        title: `Unlinked ${l.runKey} › ${l.caseKey}`,
-                        timeout: 10_000,
-                        actionProps: {
-                          children: "Undo",
-                          onClick: () => {
-                            toast.close(id)
-                            relink.mutate(l.resultId, {
-                              onError: (err) =>
-                                toast.add({
-                                  title: "Couldn't link it again",
-                                  description: errorMessage(err),
-                                }),
-                            })
-                          },
-                        },
-                      })
+                      setRemoved((r) => [...r, l])
+                      focusUndo(l.id)
                     },
                     onError: (err) =>
                       toast.add({
+                        type: "error",
                         title: "Couldn't unlink",
                         description: errorMessage(err),
                       }),
                   })
                 }
               >
-                Unlink
+                Unlink{" "}
                 <span className="sr-only">
-                  {" "}
                   {l.runKey} › {l.caseKey}
                 </span>
               </Button>
             )}
           </li>
         ))}
-        {defect.links.length === 0 && (
+        {removed.map((l) => (
+          <li
+            key={`removed-${l.id}`}
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t py-2.5 text-sm text-muted-foreground"
+          >
+            <span>
+              Unlinked{" "}
+              <span className="font-mono text-xs">
+                {l.runKey} › {l.caseKey}
+              </span>
+            </span>
+            <Button
+              id={`undo-unlink-${l.id}`}
+              size="sm"
+              variant="outline"
+              disabled={relink.isPending}
+              focusableWhenDisabled
+              onClick={() =>
+                relink.mutate(l.resultId, {
+                  onSuccess: () =>
+                    setRemoved((r) => r.filter((x) => x.id !== l.id)),
+                  onError: (err) =>
+                    toast.add({
+                      type: "error",
+                      title: "Couldn't link it again",
+                      description: errorMessage(err),
+                    }),
+                })
+              }
+            >
+              Undo{" "}
+              <span className="sr-only">
+                unlinking {l.runKey} › {l.caseKey}
+              </span>
+            </Button>
+          </li>
+        ))}
+        {defect.links.length === 0 && removed.length === 0 && (
           <li className="border-t py-3 text-sm text-muted-foreground">
             No run results are linked.
           </li>
@@ -351,6 +394,7 @@ function Activity({ defect }: { defect: Defect }) {
       setBody("")
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't post the comment",
         description: errorMessage(err),
       })
@@ -379,7 +423,15 @@ function Activity({ defect }: { defect: Defect }) {
         </Tabs>
       </div>
       {activity.isPending ? (
-        <Skeleton className="h-24" />
+        <PageLoading label="Loading the activity…">
+          <Skeleton className="h-24" />
+        </PageLoading>
+      ) : activity.isError ? (
+        <InlineError
+          what="Couldn't load the activity."
+          error={activity.error}
+          onRetry={() => void activity.refetch()}
+        />
       ) : (
         <ol className="flex flex-col gap-4">
           {shown.map((e) => (
@@ -412,7 +464,11 @@ function Activity({ defect }: { defect: Defect }) {
             </li>
           ))}
           {shown.length === 0 && (
-            <li className="text-sm text-muted-foreground">No comments yet.</li>
+            <li className="text-sm text-muted-foreground">
+              {tab === "comments"
+                ? "No comments yet."
+                : "Nothing has happened yet."}
+            </li>
           )}
         </ol>
       )}
@@ -475,7 +531,12 @@ export function DefectPage() {
       </Alert>
     )
   }
-  if (!query.data) return <Skeleton className="h-96 rounded-xl" />
+  if (!query.data)
+    return (
+      <PageLoading label="Loading the defect…">
+        <Skeleton className="h-96 rounded-xl" />
+      </PageLoading>
+    )
   const defect = query.data
   const firstLink = defect.links[0]
 

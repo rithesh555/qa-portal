@@ -27,9 +27,13 @@ model User {
   username        String?
   displayUsername String?                 @map("display_username")
   role            String?
-  banned          Boolean?                @default(false)
+  /// Never NULL: "not deactivated" filters (NOT banned) would silently drop NULL rows.
+  banned          Boolean                 @default(false)
   banReason       String?                 @map("ban_reason")
   banExpires      DateTime?               @map("ban_expires") @db.Timestamptz(3)
+  /// On for every new account (an admin chose its password) and after a reset;
+  /// cleared once the user picks their own. Defaults on so a missed step fails safe.
+  mustChangePassword Boolean              @default(true) @map("must_change_password")
   sessions        Session[]
   accounts        Account[]
   activities      ActivityLog[]

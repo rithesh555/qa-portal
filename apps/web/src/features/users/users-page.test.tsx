@@ -14,6 +14,7 @@ const me: SessionUser = {
   name: "Ada Admin",
   email: "admin@example.com",
   role: "admin",
+  mustChangePassword: false,
 }
 
 const user = (overrides: Partial<User>): User => ({

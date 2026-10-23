@@ -86,6 +86,7 @@ import { casePagePath } from "./case-details"
 import { LabelsInput } from "./labels-input"
 import { StepsEditor } from "./steps-editor"
 import { suiteOptions } from "./suite-tree"
+import { PageLoading } from "@/components/page-loading"
 
 type FormValues = z.input<typeof caseInputSchema>
 
@@ -163,7 +164,11 @@ function ConflictPanel({
       className="overflow-hidden rounded-xl border border-amber-500/50"
     >
       <div className="flex flex-col gap-1 bg-amber-50 px-4 py-3 dark:bg-amber-950/40">
-        <h2 id="conflict-title" className="font-semibold">
+        <h2
+          id="conflict-title"
+          tabIndex={-1}
+          className="font-semibold outline-none"
+        >
           {author} saved a newer version (version {version}) while you were
           editing.
         </h2>
@@ -346,11 +351,13 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
             return
           }
           setConflict(latest)
-          requestAnimationFrame(() =>
-            document
-              .getElementById("conflict-title")
-              ?.scrollIntoView({ block: "center" })
-          )
+          // Focus, not just scroll: Save is disabled meanwhile, and the
+          // conflict is what needs reading next.
+          requestAnimationFrame(() => {
+            const title = document.getElementById("conflict-title")
+            title?.scrollIntoView({ block: "center" })
+            title?.focus({ preventScroll: true })
+          })
           return
         } catch {
           // Fall through to the plain message.
@@ -825,7 +832,11 @@ export function CaseEditorPage() {
       </Alert>
     )
   } else if ((editing && query.isPending) || suites.isPending) {
-    body = <Skeleton className="h-96" />
+    body = (
+      <PageLoading label="Loading the test case…">
+        <Skeleton className="h-96" />
+      </PageLoading>
+    )
   } else if (editing && !loaded && query.isError) {
     body = (
       <Alert variant="destructive">

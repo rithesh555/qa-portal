@@ -324,7 +324,8 @@ function SuiteRow(props: RowProps) {
                   variant="ghost"
                   size="icon-xs"
                   aria-label={`Actions for ${suite.name}`}
-                  className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 data-popup-open:opacity-100"
+                  // Hidden until hover only where hovering exists; always shown on touch.
+                  className="[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100 [@media(hover:hover)]:data-popup-open:opacity-100"
                 />
               }
             >

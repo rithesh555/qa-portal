@@ -667,6 +667,40 @@ describe("reports API", () => {
     })
   })
 
+  describe("rate limits on expensive routes", () => {
+    it("holds one person to 30 home loads and 20 exports a minute", async () => {
+      await createUser(app, { username: "rita", role: "user" })
+      cookie.rita = await signIn(app, "rita")
+      const statuses = async (url: string, n: number) => {
+        const out: number[] = []
+        for (let i = 0; i < n; i++)
+          out.push((await call("rita", "GET", url)).statusCode)
+        return out
+      }
+      const home = await statuses("/api/home", 31)
+      expect(new Set(home.slice(0, 30))).toEqual(new Set([200]))
+      expect(home[30]).toBe(429)
+      // Counted before the project check, so probing costs the same.
+      const exp = await statuses(
+        `${P}/reports/export?release=none&kind=runs`,
+        21
+      )
+      expect(new Set(exp.slice(0, 20))).toEqual(new Set([404]))
+      expect(exp[20]).toBe(429)
+      // Someone else isn't held back.
+      expect((await call("vera", "GET", "/api/home")).statusCode).toBe(200)
+      // Imports count before their (large) body is even read, valid or not.
+      const imports: number[] = []
+      for (let i = 0; i < 11; i++)
+        imports.push(
+          (await call("rita", "POST", `${P}/imports/check`, { junk: true }))
+            .statusCode
+        )
+      expect(new Set(imports.slice(0, 10))).toEqual(new Set([404]))
+      expect(imports[10]).toBe(429)
+    })
+  })
+
   describe("deactivated member", () => {
     it("is refused (401)", async () => {
       await ok("alice", "POST", `/api/users/${id.tim}/deactivate`)

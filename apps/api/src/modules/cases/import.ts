@@ -208,7 +208,9 @@ export async function runImport(
   request: ImportRequest
 ): Promise<ImportResult> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     const { check, cases, newSuites } = await plan(tx, access, request)
     if (check.errorRows > 0) {
@@ -352,7 +354,9 @@ export async function archiveImport(
   number: number
 ): Promise<{ archivedCases: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:archive")
+    access = await lockForWrite(tx, access, "cases:archive", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     const batch = await tx.importBatch.findUnique({
       where: { projectId_number: { projectId, number } },
@@ -441,7 +445,9 @@ export async function restoreImport(
   number: number
 ): Promise<{ restoredCases: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:archive")
+    access = await lockForWrite(tx, access, "cases:archive", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     const batch = await tx.importBatch.findUnique({
       where: { projectId_number: { projectId, number } },

@@ -32,6 +32,16 @@ describe("reportCsv", () => {
     })
     expect(csv.split("\r\n")[2]).toBe("'=HYPERLINK(1),3")
   })
+
+  it("writes negative numbers as numbers, not guarded text", () => {
+    const csv = reportCsv({
+      scope: "S",
+      asOf: "2026-10-19T00:00:00.000Z",
+      columns: ["Week of", "Net"],
+      rows: [["2026-10-12", -3]],
+    })
+    expect(csv.split("\r\n")[2]).toBe("2026-10-12,-3")
+  })
 })
 
 describe("csvFileName", () => {

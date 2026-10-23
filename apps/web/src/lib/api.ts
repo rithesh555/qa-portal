@@ -2,18 +2,22 @@ import type { z } from "zod"
 
 export class ApiError extends Error {
   readonly status: number
-  constructor(status: number, message: string) {
+  /** A machine-readable cause the API adds to some errors, e.g. "stale". */
+  readonly reason: string | undefined
+  constructor(status: number, message: string, reason?: string) {
     super(message)
     this.name = "ApiError"
     this.status = status
+    this.reason = reason
   }
 }
 
 async function toApiError(res: Response): Promise<ApiError> {
   const body = (await res.json().catch(() => null)) as {
     message?: string
+    reason?: string
   } | null
-  return new ApiError(res.status, body?.message ?? res.statusText)
+  return new ApiError(res.status, body?.message ?? res.statusText, body?.reason)
 }
 
 /** GET a JSON endpoint on our API and validate the response. */

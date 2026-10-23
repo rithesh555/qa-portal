@@ -6,7 +6,7 @@ export function FullPageSpinner({ label }: { label: string }) {
       role="status"
       className="flex min-h-svh items-center justify-center gap-2 text-sm text-muted-foreground"
     >
-      <Spinner />
+      <Spinner aria-hidden />
       {label}
     </div>
   )

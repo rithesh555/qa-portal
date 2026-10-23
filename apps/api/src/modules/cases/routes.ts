@@ -18,7 +18,7 @@ import {
   updateCaseSchema,
   updateSuiteSchema,
 } from "@qa/shared"
-import type { FastifyRequest } from "fastify"
+import type { FastifyReply, FastifyRequest } from "fastify"
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { z } from "zod"
 import { requireAuth } from "../../plugins/auth.ts"
@@ -31,6 +31,7 @@ import { bulkCases } from "./bulk.ts"
 import * as imports from "./import.ts"
 import * as cases from "./service.ts"
 import * as suites from "./suites.ts"
+import { EXPORT_LIMIT, IMPORT_LIMIT } from "../../lib/rate-limits.ts"
 
 const keyParams = z.object({ key: z.string().min(1).max(16) })
 const suiteParams = keyParams.extend({ id: z.uuid() })
@@ -162,6 +163,7 @@ const caseRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/projects/:key/cases/export",
     {
+      preValidation: EXPORT_LIMIT,
       schema: {
         tags,
         summary: "Every case matching the filters, for CSV/Excel export",
@@ -356,9 +358,11 @@ const caseRoutes: FastifyPluginAsyncZod = async (app) => {
    */
   const mayImport = async (
     request: FastifyRequest,
-    _reply: unknown,
+    reply: FastifyReply,
     payload: unknown
   ) => {
+    // Counted before the (up to 12 MB) body is read, invalid or not.
+    await IMPORT_LIMIT.call(app, request, reply)
     const { key } = request.params as { key: string }
     const a = await loadProjectAccess(prisma, request.user!, String(key))
     assertCan(a, "cases:edit")

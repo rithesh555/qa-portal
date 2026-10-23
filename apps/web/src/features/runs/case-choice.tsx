@@ -44,6 +44,7 @@ import { useCases, useLabels, useSuites } from "@/features/cases/api"
 import { suitePath } from "@/features/cases/case-badges"
 import { childrenOf, topLevel } from "@/features/cases/suite-tree"
 import { useProjectContext } from "@/features/projects/project-layout"
+import { InlineError } from "@/components/inline-error"
 
 const ANY = "__any__"
 
@@ -261,6 +262,15 @@ function CasePickerDialog({
             <li className="px-2 py-2 text-xs text-muted-foreground">
               Showing the first {items.length} of {total}. Search to find
               others.
+            </li>
+          )}
+          {cases.isError && (
+            <li className="px-2 py-4">
+              <InlineError
+                what="Couldn't load the cases."
+                error={cases.error}
+                onRetry={() => void cases.refetch()}
+              />
             </li>
           )}
           {cases.isSuccess && items.length === 0 && (

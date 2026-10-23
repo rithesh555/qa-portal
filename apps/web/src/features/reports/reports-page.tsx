@@ -48,6 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
 import {
   DefectStatusBadge,
@@ -151,6 +152,7 @@ export function ReportsPage() {
       downloadCsv(csvFileName(project.key, releaseName, what), e)
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't download the CSV",
         description: errorMessage(err),
       })
@@ -212,9 +214,16 @@ export function ReportsPage() {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="outline" disabled={!r || !!busy} />}
+              render={
+                <Button
+                  variant="outline"
+                  disabled={!r || !!busy}
+                  focusableWhenDisabled
+                />
+              }
             >
-              Download data
+              {busy && <Spinner data-icon="inline-start" />}
+              {busy ? "Preparing CSV…" : "Download data"}
               <ChevronDownIcon data-icon="inline-end" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">

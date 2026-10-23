@@ -24,7 +24,7 @@ import {
   UploadIcon,
 } from "lucide-react"
 import { type DragEvent, useEffect, useId, useRef, useState } from "react"
-import { Link } from "react-router"
+import { Link, useBlocker } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -92,6 +92,7 @@ import {
   SpreadsheetError,
 } from "./spreadsheet"
 import { suiteOptions } from "./suite-tree"
+import { InlineError } from "@/components/inline-error"
 
 type Step = "upload" | "map" | "check" | "done"
 
@@ -189,6 +190,14 @@ function RecentImports() {
   const [confirming, setConfirming] = useState<ImportBatch | null>(null)
   const [restoring, setRestoring] = useState<ImportBatch | null>(null)
   const items = imports.data ?? []
+  if (imports.isError)
+    return (
+      <InlineError
+        what="Couldn't load recent imports."
+        error={imports.error}
+        onRetry={() => void imports.refetch()}
+      />
+    )
   if (items.length === 0) return null
 
   async function confirm() {
@@ -381,6 +390,19 @@ export function ImportPage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [step, setStep] = useState<Step>("upload")
+  // Mapping or checking: leaving now loses the file and the mapping, so ask
+  // first (in the app, and when closing the tab).
+  const midWizard = step === "map" || step === "check"
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      midWizard && currentLocation.pathname !== nextLocation.pathname
+  )
+  useEffect(() => {
+    if (!midWizard) return
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    window.addEventListener("beforeunload", warn)
+    return () => window.removeEventListener("beforeunload", warn)
+  }, [midWizard])
   const [reading, setReading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -534,7 +556,9 @@ export function ImportPage() {
         <CircleAlertIcon />
         <AlertTitle>You can&apos;t import test cases here</AlertTitle>
         <AlertDescription>
-          Only QA Leads and Testers can import.{" "}
+          {project.archived
+            ? "This project is archived, so it's read-only."
+            : "Only QA Leads and Testers can import."}{" "}
           <Link to={listPath} className="underline">
             Back to test cases
           </Link>
@@ -837,6 +861,14 @@ export function ImportPage() {
                         >
                           <SelectTrigger
                             aria-label={`${header} imports as`}
+                            aria-invalid={
+                              field && dupes.has(field) ? true : undefined
+                            }
+                            aria-describedby={
+                              field && dupes.has(field)
+                                ? `dupe-${encodeURIComponent(header)}`
+                                : undefined
+                            }
                             className="w-52"
                           >
                             <SelectValue />
@@ -850,7 +882,10 @@ export function ImportPage() {
                           </SelectContent>
                         </Select>
                         {field && dupes.has(field) && (
-                          <p className="mt-1 text-xs text-destructive">
+                          <p
+                            id={`dupe-${encodeURIComponent(header)}`}
+                            className="mt-1 text-xs text-destructive"
+                          >
                             Another column already imports as this.
                           </p>
                         )}
@@ -1302,6 +1337,29 @@ export function ImportPage() {
           )}
         </section>
       )}
+      <AlertDialog
+        open={blocker.state === "blocked"}
+        onOpenChange={(open) => !open && blocker.reset?.()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave the import?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Nothing has been imported yet. Your file and column choices will
+              be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => blocker.proceed?.()}
+            >
+              Leave
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

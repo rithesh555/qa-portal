@@ -15,7 +15,8 @@
     "db:seed:demo": "node prisma/seed-demo.ts",
     "db:studio": "prisma studio",
     "auth:generate": "auth generate --config src/auth/cli-config.ts --output prisma/schema.prisma",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed:stress": "node prisma/seed-stress.ts"
   },
   "dependencies": {
     "@fastify/cors": "11.3.1",

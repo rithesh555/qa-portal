@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ArchivedNotice } from "@/components/archived-notice"
 import { countTotal, type CreateRunInput, createRunSchema } from "@qa/shared"
 import { CircleAlertIcon } from "lucide-react"
 import { useId, useState } from "react"
@@ -49,6 +50,7 @@ import {
   toSelection,
 } from "./case-choice"
 import { AssigneePicker, useAssignable } from "./run-people"
+import { PageLoading } from "@/components/page-loading"
 
 const NONE = "__none__"
 
@@ -144,7 +146,12 @@ function CopyRunForm({
   const envId = useId()
   const releaseId = useId()
 
-  if (source.isPending) return <Skeleton className="h-96 rounded-xl" />
+  if (source.isPending)
+    return (
+      <PageLoading label="Loading the run to copy…">
+        <Skeleton className="h-96 rounded-xl" />
+      </PageLoading>
+    )
   if (source.isError)
     return (
       <div className="flex max-w-2xl flex-col gap-6">
@@ -614,7 +621,15 @@ function NewRunForm() {
 export function NewRunPage() {
   const { project, allowed } = useProjectContext()
   const [params] = useSearchParams()
-  if (!allowed("runs:execute") || project.archived) return <NoAccess />
+  if (project.archived)
+    return (
+      <ArchivedNotice
+        title="You can't start a run here"
+        backTo={projectPath(project.key, "runs")}
+        backLabel="Back to test runs"
+      />
+    )
+  if (!allowed("runs:execute")) return <NoAccess />
   const from = params.get("from")
   if (from) {
     const only =

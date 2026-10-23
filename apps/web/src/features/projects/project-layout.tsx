@@ -22,6 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/auth/session"
 import { ApiError, errorMessage } from "@/lib/api"
 import { useProject } from "./api"
+import { PageLoading } from "@/components/page-loading"
 
 export interface ProjectContext {
   project: Project
@@ -82,10 +83,10 @@ export function ProjectLayout() {
 
   if (project.isPending) {
     return (
-      <div className="flex flex-col gap-4">
+      <PageLoading label="Loading the project…" className="flex flex-col gap-4">
         <Skeleton className="h-12 w-72" />
         <Skeleton className="h-40 w-full" />
-      </div>
+      </PageLoading>
     )
   }
   if (project.error instanceof ApiError && project.error.status === 404) {

@@ -6,7 +6,7 @@ import type {
   SessionUser,
 } from "@qa/shared"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, within } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { createMemoryRouter, useLocation } from "react-router"
 import { RouterProvider } from "react-router/dom"
@@ -15,6 +15,7 @@ import { sessionQueryKey } from "@/features/auth/session"
 import { MembersPage } from "./members-page"
 import { ProjectLayout } from "./project-layout"
 import { ProjectsPage } from "./projects-page"
+import { ReleasesPage } from "./releases-page"
 
 const me = (role: SessionUser["role"]): SessionUser => ({
   id: "u-me",
@@ -22,6 +23,7 @@ const me = (role: SessionUser["role"]): SessionUser => ({
   name: "Me Myself",
   email: "me@example.com",
   role,
+  mustChangePassword: false,
 })
 
 const summary = (overrides: Partial<ProjectSummary> = {}): ProjectSummary => ({
@@ -102,6 +104,7 @@ function renderAt(path: string, user: SessionUser) {
         children: [
           { index: true, element: <p>overview</p> },
           { path: "members", element: <MembersPage /> },
+          { path: "releases", element: <ReleasesPage /> },
         ],
       },
     ],
@@ -231,6 +234,68 @@ describe("ProjectLayout", () => {
     expect(
       await screen.findByText("This project is archived")
     ).toBeInTheDocument()
+  })
+})
+
+describe("ReleasesPage", () => {
+  it("recovers from an edit conflict: names who, and loads their version on request", async () => {
+    let current = {
+      id: "0199c0de-0000-7000-8000-0000000000a1",
+      name: "4.2",
+      description: "",
+      status: "planned",
+      startDate: null,
+      targetDate: null,
+      version: 1,
+      createdAt: "2026-10-01T10:00:00.000Z",
+    }
+    const saves: { version: number; description: string }[] = []
+    routes["/api/projects/PAY"] = () => json(200, project("lead"))
+    routes["/api/projects/PAY/releases"] = () => json(200, { items: [current] })
+    routes[`/api/projects/PAY/releases/${current.id}`] = (init) => {
+      const body = JSON.parse(String(init!.body)) as {
+        version: number
+        description: string
+      }
+      saves.push(body)
+      // Lena saved a moment before the first attempt.
+      if (saves.length === 1)
+        current = { ...current, description: "Lena's notes", version: 2 }
+      if (body.version !== current.version)
+        return json(409, {
+          statusCode: 409,
+          message:
+            "Lena Ortiz changed this release meanwhile. Load their version to continue.",
+          reason: "stale",
+        })
+      current = { ...current, ...body, version: current.version + 1 }
+      return json(200, current)
+    }
+    renderAt("/projects/PAY/releases", me("user"))
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Edit release 4.2" })
+    )
+    const dialog = await screen.findByRole("dialog")
+    await userEvent.type(within(dialog).getByLabelText(/^Summary/), "Mine")
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Save changes" })
+    )
+    expect(
+      await within(dialog).findByText(/Lena Ortiz changed this release/)
+    ).toBeInTheDocument()
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Load their version" })
+    )
+    await waitFor(() =>
+      expect(within(dialog).getByLabelText(/^Summary/)).toHaveValue(
+        "Lena's notes"
+      )
+    )
+    // Saving now builds on their version, so it goes through.
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Save changes" })
+    )
+    await waitFor(() => expect(saves.map((s) => s.version)).toEqual([1, 2]))
   })
 })
 

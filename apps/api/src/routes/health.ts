@@ -1,5 +1,6 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { z } from "zod"
+import { PROBE_LIMIT } from "../lib/rate-limits.ts"
 
 const health: FastifyPluginAsyncZod = async (app) => {
   app.get(
@@ -18,7 +19,8 @@ const health: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/ready",
     {
-      config: { rateLimit: false },
+      // Limited: each probe queries the database.
+      config: PROBE_LIMIT,
       schema: {
         tags: ["system"],
         summary: "Readiness: the database is reachable",

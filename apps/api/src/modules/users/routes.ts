@@ -14,7 +14,11 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod"
 import { z } from "zod"
 import { httpError } from "../../lib/http-error.ts"
 import { requireAuth, requirePermission } from "../../plugins/auth.ts"
-import { assertCan, loadProjectAccess } from "../projects/access.ts"
+import {
+  assertCan,
+  assertWritable,
+  loadProjectAccess,
+} from "../projects/access.ts"
 import * as users from "./service.ts"
 
 const idParams = z.object({ id: z.string().min(1).max(64) })
@@ -54,9 +58,8 @@ const usersRoutes: FastifyPluginAsyncZod = async (app) => {
           request.query.project
         )
         assertCan(access, "members:manage")
-        if (access.project.archivedAt) {
-          throw httpError(403, "This project is archived")
-        }
+        // Same answer as every other change to an archived project (409).
+        assertWritable(access)
         projectId = access.project.id
       } else if (request.user!.role !== "admin") {
         throw httpError(403, "You don't have permission to do that")

@@ -13,6 +13,7 @@ import { assertCan, loadProjectAccess } from "../projects/access.ts"
 import { exportReport } from "./export.ts"
 import { getHome, releasesOverview } from "./home.ts"
 import { getReport } from "./service.ts"
+import { EXPORT_LIMIT, REPORT_LIMIT } from "../../lib/rate-limits.ts"
 
 const keyParams = z.object({ key: z.string().min(1).max(16) })
 
@@ -24,6 +25,7 @@ const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/home",
     {
+      preValidation: REPORT_LIMIT,
       schema: {
         tags,
         summary: "My work across my projects, and how their releases are doing",
@@ -36,6 +38,7 @@ const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/releases/overview",
     {
+      preValidation: REPORT_LIMIT,
       schema: {
         tags,
         summary:
@@ -51,6 +54,7 @@ const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/projects/:key/reports",
     {
+      preValidation: REPORT_LIMIT,
       schema: {
         tags,
         summary:
@@ -74,6 +78,7 @@ const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/projects/:key/reports/export",
     {
+      preValidation: EXPORT_LIMIT,
       schema: {
         tags,
         summary: "The rows behind a release's report, for CSV",

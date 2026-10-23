@@ -8,3 +8,18 @@ allowBuilds:
   msw: false
   prisma@7.10.0: true
   "@prisma/engines@7.10.0": true
+
+# Security fixes for transitive packages (Phase 8 review, 2026-10-19).
+overrides:
+  # Pulled in by prisma 7.10.0 and better-auth; never loaded here (Postgres
+  # via @prisma/adapter-pg). 3.24.4 fixes GHSA-3f6p-5ww8-9rcr and
+  # GHSA-rgwj-5xj2-c3m3, and is what prisma 7.10.1 ships.
+  mysql2: 3.24.4
+
+auditConfig:
+  ignoreGhsas:
+    # deepmerge-ts 7.x (stack exhaustion on recursive objects): only used by
+    # @prisma/config to merge our own prisma.config.ts in CLI runs; no user
+    # input reaches it. Fixed by prisma 7.10.1 (deepmerge-ts 8), pinned out
+    # until the user agrees to upgrade (released 2026-10-15). Review by 2026-11-01.
+    - GHSA-ggr8-5vv4-36mx

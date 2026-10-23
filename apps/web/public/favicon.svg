@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The QA Portal mark: a run's result bar (passed, failed, blocked, skipped) on a tile. -->
+  <rect width="32" height="32" rx="7" fill="#1f2a37"/>
+  <g transform="translate(4 13)">
+    <clipPath id="bar"><rect width="24" height="6" rx="3"/></clipPath>
+    <g clip-path="url(#bar)">
+      <rect x="0" width="13.4" height="6" fill="#3fbf7f"/>
+      <rect x="14" width="3" height="6" fill="#d23f3f"/>
+      <rect x="17.6" width="2" height="6" fill="#f1c24b"/>
+      <rect x="20.2" width="3.8" height="6" fill="#7b8494"/>
+    </g>
+  </g>
+</svg>

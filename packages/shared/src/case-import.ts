@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { FORMULA_START } from "./case-export.ts"
 import {
   CASE_PRIORITIES,
   CASE_PRIORITY_LABELS,
@@ -290,7 +291,9 @@ export function applyValueMap<
 
 /** Our export prefixes formula-like cells with ' so spreadsheets don't run them; undo that. */
 function unescapeCell(value: string): string {
-  return /^'[=+\-@\t\r]/.test(value) ? value.slice(1) : value
+  return value.startsWith("'") && FORMULA_START.test(value.slice(1))
+    ? value.slice(1)
+    : value
 }
 
 const cell = z.string().max(32_767).default("")

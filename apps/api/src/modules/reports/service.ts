@@ -35,6 +35,12 @@ interface Scope {
   releaseId: string | null
   /** May see the per-person workload (QA Leads, admins). */
   workload: boolean
+  /**
+   * Only what a cross-project summary row needs (exit checks and their
+   * numbers): the lists, charts, coverage and previous-release deltas come
+   * back empty. Same code path, so the numbers can't disagree.
+   */
+  summary?: boolean
   now: Date
 }
 
@@ -163,9 +169,9 @@ export async function computeReport(db: Db, scope: Scope): Promise<Report> {
       },
     },
   })
-  const previous = release
-    ? await previousRelease(db, project.id, release)
-    : null
+  const full = !scope.summary
+  const previous =
+    release && full ? await previousRelease(db, project.id, release) : null
 
   // --- Results: latest per case ------------------------------------------------
   const latestByCase = new Map(latest.map((l) => [l.case_id, l]))
@@ -270,38 +276,41 @@ export async function computeReport(db: Db, scope: Scope): Promise<Report> {
   }
 
   // Failing cases, with an active defect on the case if there is one.
-  const caseDefects = await db.defect.findMany({
-    where: {
-      projectId: project.id,
-      status: { in: ACTIVE },
-      OR: [
-        { caseId: { in: failingRows.map((f) => f.case_id) } },
-        {
-          links: {
-            some: { caseId: { in: failingRows.map((f) => f.case_id) } },
-          },
+  const caseDefects = !full
+    ? []
+    : await db.defect.findMany({
+        where: {
+          projectId: project.id,
+          status: { in: ACTIVE },
+          OR: [
+            { caseId: { in: failingRows.map((f) => f.case_id) } },
+            {
+              links: {
+                some: { caseId: { in: failingRows.map((f) => f.case_id) } },
+              },
+            },
+          ],
         },
-      ],
-    },
-    select: {
-      number: true,
-      status: true,
-      caseId: true,
-      links: { select: { caseId: true } },
-    },
-    orderBy: { number: "desc" },
-  })
+        select: {
+          number: true,
+          status: true,
+          caseId: true,
+          links: { select: { caseId: true } },
+        },
+        orderBy: { number: "desc" },
+      })
   const defectForCase = (caseId: string) =>
     caseDefects.find(
       (d) => d.caseId === caseId || d.links.some((l) => l.caseId === caseId)
     )
   const failedSteps = new Map(
-    (
-      await db.testResult.findMany({
-        where: { runCaseId: { in: failingRows.map((f) => f.run_case_id) } },
-        orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
-        select: { runCaseId: true, failedStep: true },
-      })
+    (!full
+      ? []
+      : await db.testResult.findMany({
+          where: { runCaseId: { in: failingRows.map((f) => f.run_case_id) } },
+          orderBy: [{ recordedAt: "desc" }, { id: "desc" }],
+          select: { runCaseId: true, failedStep: true },
+        })
     )
       .reverse()
       .map((r) => [r.runCaseId, r.failedStep])
@@ -326,11 +335,13 @@ export async function computeReport(db: Db, scope: Scope): Promise<Report> {
     })
 
   // Runs, with their counts.
-  const grouped = await db.runCase.groupBy({
-    by: ["runId", "status"],
-    where: { runId: { in: runs.map((r) => r.id) } },
-    _count: { _all: true },
-  })
+  const grouped = !full
+    ? []
+    : await db.runCase.groupBy({
+        by: ["runId", "status"],
+        where: { runId: { in: runs.map((r) => r.id) } },
+        _count: { _all: true },
+      })
   const countsFor = (runId: string): RunCounts => {
     const c = emptyCounts()
     for (const g of grouped) if (g.runId === runId) c[g.status] = g._count._all
@@ -338,10 +349,12 @@ export async function computeReport(db: Db, scope: Scope): Promise<Report> {
   }
 
   // Coverage per suite (each suite's own Ready cases), least tested first.
-  const suites = await db.suite.findMany({
-    where: { projectId: project.id, archivedAt: null },
-    select: { id: true, name: true, parentId: true },
-  })
+  const suites = !full
+    ? []
+    : await db.suite.findMany({
+        where: { projectId: project.id, archivedAt: null },
+        select: { id: true, name: true, parentId: true },
+      })
   const casesBySuite = new Map<string | null, typeof readyCases>()
   for (const c of readyCases) {
     const list = casesBySuite.get(c.suiteId) ?? []
@@ -385,7 +398,7 @@ export async function computeReport(db: Db, scope: Scope): Promise<Report> {
 
   // Carry-over: active defects from earlier releases.
   const carriedOver =
-    release === null
+    release === null || !full
       ? []
       : (
           await db.defect.findMany({

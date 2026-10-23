@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "cn"
+import { useFieldDescribedBy } from "./field-context"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
 const Select = SelectPrimitive.Root
@@ -35,6 +36,10 @@ function SelectTrigger({
 }: SelectPrimitive.Trigger.Props & {
   size?: "sm" | "default"
 }) {
+  const describedBy = useFieldDescribedBy(
+    props["aria-invalid"],
+    props["aria-describedby"]
+  )
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
@@ -44,6 +49,7 @@ function SelectTrigger({
         className
       )}
       {...props}
+      aria-describedby={describedBy}
     >
       {children}
       <SelectPrimitive.Icon

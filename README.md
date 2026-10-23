@@ -4,7 +4,7 @@ Internal portal for QA work: projects, test cases, test runs, defects and
 (soon) dashboards and reports.
 
 - **Web:** React + Vite (`apps/web`), http://localhost:5173
-- **API:** Fastify (`apps/api`), http://localhost:3000 (`/api/health`, API docs at `/api/docs`)
+- **API:** Fastify (`apps/api`), http://localhost:3000 (`/api/health`; API docs at `/api/docs` in development only)
 - **Database:** PostgreSQL 17 in Docker, on port **5433**
 - **Shared code:** Zod schemas and rules in `packages/shared`
 
@@ -49,6 +49,41 @@ pnpm test        # shared, API (against the test database), web; one at a time
 
 The API tests reset one shared test database, so never run two API test runs
 at once.
+
+## Back up and restore the database
+
+The data lives in the `pgdata` Docker volume. Run these from the repository
+root while the database is up. They read the user and database names from
+`.env` inside the container, so nothing secret goes on the command line.
+
+```bash
+# Back up (custom format: compressed, restorable table by table)
+docker compose exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom' > qa-portal-$(date +%F).dump
+
+# Check a backup restores, into a throwaway database
+docker compose exec -T db sh -c 'createdb -U "$POSTGRES_USER" qa_portal_restore_check'
+docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d qa_portal_restore_check --no-owner' < qa-portal-2026-10-19.dump
+docker compose exec -T db sh -c 'dropdb -U "$POSTGRES_USER" qa_portal_restore_check'
+
+# Restore over the real database (stop `pnpm dev` first; this replaces everything)
+docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner' < qa-portal-2026-10-19.dump
+```
+
+A backup includes the migration history, so after restoring an older backup
+run `pnpm --filter @qa/api db:deploy` to bring it up to date. Keep backups
+out of the repository: they hold every user's data and password hashes.
+
+## Database changes and demo data
+
+- **New migration (developers):** edit `apps/api/prisma/schema.prisma`, then
+  `pnpm --filter @qa/api db:migrate` and `pnpm --filter @qa/api db:generate`
+  (Prisma 7 no longer regenerates the client on migrate).
+- **Migrations aren't undone automatically.** To back one out, restore the
+  backup taken before it, or write a new migration that reverses it.
+- **Fresh demo data:** `docker compose down -v` deletes the database volume
+  (everything in it), then follow "First time" again from `docker compose up -d`.
+  `db:seed:demo` only runs with `NODE_ENV=development` against a database on
+  this machine, so it can't create demo accounts on a real server.
 
 ## Troubleshooting
 

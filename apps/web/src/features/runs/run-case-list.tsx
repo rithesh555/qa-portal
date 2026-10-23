@@ -129,7 +129,10 @@ export function RunCaseList({
         </Select>
       </div>
       {shown.length === 0 ? (
-        <p className="p-6 text-center text-sm text-muted-foreground">
+        <p
+          role="status"
+          className="p-6 text-center text-sm text-muted-foreground"
+        >
           No cases match.
         </p>
       ) : (
@@ -192,9 +195,8 @@ export function RunCaseList({
                             <span className="line-clamp-2">{c.title}</span>
                             <span className="font-mono text-xs text-muted-foreground">
                               {c.caseKey}
-                            </span>
+                            </span>{" "}
                             <span className="sr-only">
-                              {" "}
                               — {RUN_CASE_STATUS_LABELS[c.status]},{" "}
                               {c.assignee
                                 ? `assigned to ${c.assignee.name}`

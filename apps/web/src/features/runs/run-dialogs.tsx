@@ -48,6 +48,7 @@ import {
   useAddCases,
   useAssign,
   useBulkResults,
+  useRun,
   useRunPreview,
   useUpdateRun,
 } from "./api"
@@ -59,6 +60,7 @@ import {
 } from "./case-choice"
 import { useSuites } from "@/features/cases/api"
 import { useAssignable } from "./run-people"
+import { ConflictAlert, isEditConflict } from "@/components/conflict-alert"
 
 const NONE = "__none__"
 
@@ -67,8 +69,10 @@ type EditValues = z.input<typeof updateRunSchema>
 function EditRunForm({ run, onDone }: { run: TestRun; onDone: () => void }) {
   const { project } = useProjectContext()
   const update = useUpdateRun(project.key, run.key)
+  const current = useRun(project.key, run.key)
   const releases = useReleases(project.key)
   const [formError, setFormError] = useState<string | null>(null)
+  const [conflict, setConflict] = useState<string | null>(null)
   const ids = { name: useId(), env: useId(), release: useId(), desc: useId() }
   const form = useForm<EditValues, unknown, UpdateRunInput>({
     resolver: zodResolver(updateRunSchema),
@@ -90,13 +94,22 @@ function EditRunForm({ run, onDone }: { run: TestRun; onDone: () => void }) {
 
   async function onSubmit(values: UpdateRunInput) {
     setFormError(null)
+    setConflict(null)
     try {
       await update.mutateAsync(values)
       toast.add({ title: "Run details saved" })
       onDone()
     } catch (err) {
-      setFormError(errorMessage(err))
+      if (isEditConflict(err)) setConflict(errorMessage(err))
+      else setFormError(errorMessage(err))
     }
+  }
+
+  /** The run as saved now (someone else changed it meanwhile). */
+  async function latest() {
+    const { data, error } = await current.refetch()
+    if (!data) throw error ?? new Error("Couldn't load the run")
+    return data
   }
 
   return (
@@ -113,6 +126,26 @@ function EditRunForm({ run, onDone }: { run: TestRun; onDone: () => void }) {
             <CircleAlertIcon />
             <AlertDescription>{formError}</AlertDescription>
           </Alert>
+        )}
+        {conflict && (
+          <ConflictAlert
+            message={conflict}
+            onLoadTheirs={async () => {
+              const fresh = await latest()
+              form.reset({
+                name: fresh.name,
+                description: fresh.description,
+                environment: fresh.environment,
+                releaseId: fresh.release?.id ?? null,
+                version: fresh.version,
+              })
+              setConflict(null)
+            }}
+            onSaveMine={async () => {
+              form.setValue("version", (await latest()).version)
+              await form.handleSubmit(onSubmit)()
+            }}
+          />
         )}
         <Controller
           name="name"

@@ -255,7 +255,8 @@ async function stale(tx: Tx, defectId: string) {
       ? `${who} moved it to ${DEFECT_STATUS_LABELS[to]} meanwhile. Check their change before making yours.`
       : who
         ? `${who} changed this defect meanwhile. Reload to see their change, then try again.`
-        : "This defect changed meanwhile. Reload it and try again."
+        : "This defect changed meanwhile. Reload it and try again.",
+    { reason: "stale" }
   )
 }
 
@@ -307,7 +308,9 @@ export async function createDefect(
   input: CreateDefect
 ): Promise<Defect> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { defects: "write" },
+    })
     const projectId = access.project.id
     await checkRelease(tx, projectId, input.foundInReleaseId)
     await checkCase(tx, projectId, input.caseId)
@@ -374,14 +377,42 @@ async function linkResult(
   })
 }
 
+/**
+ * The number of the run a run case (or result) belongs to, for its lock. Read
+ * before locking: a run case never moves to another run. Unknown ids give
+ * null and are reported as not found once locked.
+ */
+async function runNumberOf(
+  db: PrismaClient,
+  projectId: string,
+  of: { runCaseId: string } | { resultId: string }
+) {
+  const rc = await db.runCase.findFirst({
+    where: {
+      run: { projectId },
+      ...("runCaseId" in of
+        ? { id: of.runCaseId }
+        : { results: { some: { id: of.resultId } } }),
+    },
+    select: { run: { select: { number: true } } },
+  })
+  return rc?.run.number ?? null
+}
+
 /** "Log defect" on a failed or blocked result: a new defect, or a link (and maybe a reopen) of an existing one. */
 export async function logDefect(
   prisma: PrismaClient,
   access: ProjectAccess,
   input: LogDefect
 ): Promise<Defect> {
+  const runNumber = await runNumberOf(prisma, access.project.id, {
+    runCaseId: input.runCaseId,
+  })
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    // Its run too (shared): not while that result is being replaced.
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { run: { number: runNumber, mode: "read" }, defects: "write" },
+    })
     const { rc, run, result } = await findRunCaseWithResult(
       tx,
       access,
@@ -592,7 +623,9 @@ export async function transitionDefect(
   input: Transition
 ): Promise<Defect> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { defects: "write" },
+    })
     const defect = await findDefect(tx, access, ref)
     await applyTransition(tx, access, defect, input)
     return defect.id
@@ -623,7 +656,9 @@ export async function updateDefect(
   input: UpdateDefect
 ): Promise<Defect> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { defects: "write" },
+    })
     if (input.priority !== undefined)
       assertTriage(access, "set a defect's priority")
     const found = await findDefect(tx, access, ref)
@@ -689,7 +724,9 @@ export async function addComment(
   input: Comment
 ): Promise<DefectActivity> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { defects: "write" },
+    })
     const found = await findDefect(tx, access, ref)
     const row = await tx.defectComment.create({
       data: { defectId: found.id, authorId: access.user.id, body: input.body },
@@ -777,8 +814,11 @@ export async function addLink(
   ref: string,
   resultId: string
 ): Promise<Defect> {
+  const runNumber = await runNumberOf(prisma, access.project.id, { resultId })
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { run: { number: runNumber, mode: "read" }, defects: "write" },
+    })
     const found = await findDefect(tx, access, ref)
     const result = await tx.testResult.findFirst({
       where: {
@@ -818,7 +858,9 @@ export async function removeLink(
   linkId: string
 ): Promise<Defect> {
   const id = await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "defects:edit")
+    access = await lockForWrite(tx, access, "defects:edit", {
+      scope: { defects: "write" },
+    })
     const found = await findDefect(tx, access, ref)
     const link = await tx.defectResultLink.findFirst({
       where: { id: linkId, defectId: found.id },

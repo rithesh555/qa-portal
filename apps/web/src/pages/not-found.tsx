@@ -12,7 +12,9 @@ import {
 
 export function NotFound() {
   return (
-    <Empty className="min-h-svh">
+    // Fills the space it's given: the whole screen outside the app, the page
+    // area inside it, without scrolling.
+    <Empty className="flex-1">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <CompassIcon />

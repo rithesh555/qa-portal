@@ -19,7 +19,7 @@ export async function ensureAdmin(
   })
   if (existing) return "exists"
 
-  await auth.api.createUser({
+  const { user } = await auth.api.createUser({
     body: {
       email: seed.email,
       name: seed.name,
@@ -27,6 +27,11 @@ export async function ensureAdmin(
       role: "admin",
       data: { username: seed.username },
     },
+  })
+  // The operator chose this password in .env: no forced change.
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { mustChangePassword: false },
   })
   return "created"
 }

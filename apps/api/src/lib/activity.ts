@@ -1,3 +1,4 @@
+import { httpError } from "./http-error.ts"
 import type { Prisma, PrismaClient } from "./prisma.ts"
 
 type Db = PrismaClient | Prisma.TransactionClient
@@ -47,4 +48,27 @@ export function diff<T extends Record<string, unknown>>(
     }
   }
   return changes
+}
+
+/**
+ * The 409 for an edit made from an out-of-date version: names whoever
+ * changed it last (from the activity log), so the person knows whose change
+ * they'd be replacing.
+ */
+export async function staleChange(
+  db: Db,
+  entityType: string,
+  entityId: string,
+  noun: string
+) {
+  const last = await db.activityLog.findFirst({
+    where: { entityType, entityId },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { actor: { select: { name: true } } },
+  })
+  return httpError(
+    409,
+    `${last?.actor.name ?? "Someone else"} changed this ${noun} meanwhile. Load their version to continue.`,
+    { reason: "stale" }
+  )
 }

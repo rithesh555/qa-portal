@@ -266,6 +266,58 @@ describe("projects API", () => {
         version,
       })
       expect(stale.statusCode).toBe(409)
+      // Says who, so the person knows whose change they'd overwrite.
+      expect(stale.json().message).toMatch(
+        /^alice changed this project meanwhile/
+      )
+      // Machine-readable, so the web offers "load theirs / save mine" only for this.
+      expect(stale.json().reason).toBe("stale")
+    })
+
+    it("names who changed a release when an edit is stale", async () => {
+      const rel = (
+        await call("lena", "POST", "/api/projects/PAY/releases", {
+          name: "4.2",
+          status: "planned",
+        })
+      ).json()
+      const fields = {
+        name: "4.2",
+        description: "",
+        status: "planned",
+        startDate: null,
+        targetDate: null,
+      }
+      expect(
+        (
+          await call("lena", "PATCH", `/api/projects/PAY/releases/${rel.id}`, {
+            ...fields,
+            description: "Cards",
+            version: rel.version,
+          })
+        ).statusCode
+      ).toBe(200)
+      const stale = await call(
+        "alice",
+        "PATCH",
+        `/api/projects/PAY/releases/${rel.id}`,
+        { ...fields, version: rel.version }
+      )
+      expect(stale.statusCode).toBe(409)
+      expect(stale.json().message).toMatch(
+        /^lena changed this release meanwhile/
+      )
+      expect(stale.json().reason).toBe("stale")
+      // Other 409s carry no such reason.
+      await call("alice", "POST", "/api/projects/PAY/archive")
+      const archived = await call(
+        "lena",
+        "PATCH",
+        `/api/projects/PAY/releases/${rel.id}`,
+        { ...fields, version: rel.version + 1 }
+      )
+      expect(archived.statusCode).toBe(409)
+      expect(archived.json()).not.toHaveProperty("reason")
     })
 
     it("archives a project: read-only and listed under archived", async () => {
@@ -422,6 +474,20 @@ describe("projects API", () => {
     })
   })
 
+  describe("projects led, on /api/me", () => {
+    it("counts the active projects a person is QA Lead of", async () => {
+      const led = async (who: string) =>
+        (await call(who, "GET", "/api/me")).json().projectsLed
+      expect(await led("lena")).toBe(1)
+      expect(await led("tom")).toBe(0)
+      await createProject("MOB", "lena", "Mobile")
+      expect(await led("lena")).toBe(2)
+      // Archived projects don't count.
+      await call("alice", "POST", "/api/projects/MOB/archive")
+      expect(await led("lena")).toBe(1)
+    })
+  })
+
   describe("people directory", () => {
     it("marks each person's role in a project and leaves admins out", async () => {
       const res = await call(
@@ -489,7 +555,8 @@ describe("projects API", () => {
         "GET",
         "/api/users/directory?q=a&project=PAY"
       )
-      expect(res.statusCode).toBe(403)
+      // Like every other change to an archived project.
+      expect(res.statusCode).toBe(409)
     })
   })
 

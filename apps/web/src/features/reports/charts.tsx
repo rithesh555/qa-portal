@@ -51,7 +51,6 @@ export function ChartCard({
               <Button
                 variant="outline"
                 size="sm"
-                aria-pressed={asTable}
                 onClick={() => setAsTable((v) => !v)}
               >
                 {asTable ? (
@@ -201,7 +200,8 @@ function Tooltip({ tip, height }: { tip: Tip | null; height: number }) {
   const left = (tip.x / W) * 100
   return (
     <div
-      role="status"
+      // The focused point's own name already says this; don't read it twice.
+      aria-hidden
       className={cn(
         "pointer-events-none absolute z-10 rounded-md bg-tip px-2.5 py-1.5 text-xs whitespace-nowrap text-tip-foreground shadow-lg",
         left < 20
@@ -270,7 +270,8 @@ export function PassRateChart({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full overflow-visible text-[11px]"
-        role="img"
+        // A group (not img), so the focusable points inside keep their names.
+        role="group"
         aria-labelledby={titleId}
         onMouseLeave={() => setTip(null)}
       >
@@ -348,6 +349,7 @@ export function PassRateChart({
               height={H - TOP - BOTTOM}
               fill="transparent"
               tabIndex={0}
+              role="img"
               aria-label={`${p.key}: ${Math.round(p.rate * 100)}%, ${p.detail}`}
               className="outline-none focus-visible:stroke-ring"
               onMouseEnter={() =>
@@ -412,7 +414,8 @@ export function FlowChart({
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full overflow-visible text-[11px]"
-        role="img"
+        // A group (not img), so the focusable points inside keep their names.
+        role="group"
         aria-labelledby={titleId}
         onMouseLeave={() => setTip(null)}
       >
@@ -487,6 +490,7 @@ export function FlowChart({
               height={H - TOP - BOTTOM}
               fill="transparent"
               tabIndex={0}
+              role="img"
               aria-label={`Week of ${w.label}: ${w.found} found, ${w.closed} closed`}
               className="outline-none"
               onMouseEnter={() =>

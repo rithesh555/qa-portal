@@ -23,6 +23,7 @@ import {
   checkAssignees,
   findRun,
   type RunRef,
+  runScope,
 } from "./service.ts"
 
 type RecordResult = z.output<typeof recordResultSchema>
@@ -203,7 +204,9 @@ export async function recordResult(
   input: RecordResult
 ): Promise<RunCaseDetail> {
   await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     assertOpen(run, "recorded in")
     const rc = await findRunCase(tx, run, id)
@@ -240,7 +243,9 @@ export async function bulkResults(
   input: BulkResult
 ): Promise<{ recorded: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     assertOpen(run, "recorded in")
     const rcs = await tx.runCase.findMany({
@@ -290,7 +295,9 @@ export async function assignCases(
   input: Assign
 ): Promise<{ assigned: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     assertCanManage(access, run)
     assertOpen(run)
@@ -334,7 +341,9 @@ export async function addCases(
   input: AddCases
 ): Promise<{ added: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref, { readCases: true }),
+    })
     const run = await findRun(tx, access, ref)
     assertCanManage(access, run)
     assertOpen(run)
@@ -386,7 +395,9 @@ export async function removeCases(
   runCaseIds: string[]
 ): Promise<{ removed: number; kept: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref),
+    })
     const run = await findRun(tx, access, ref)
     assertCanManage(access, run)
     assertOpen(run)
@@ -429,7 +440,9 @@ export async function refreshCase(
   expectedVersion: number
 ): Promise<RunCaseDetail> {
   await prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "runs:execute")
+    access = await lockForWrite(tx, access, "runs:execute", {
+      scope: runScope(access, ref, { readCases: true }),
+    })
     const run = await findRun(tx, access, ref)
     assertOpen(run)
     const rc = await findRunCase(tx, run, id)

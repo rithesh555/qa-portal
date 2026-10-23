@@ -292,7 +292,7 @@ export function RunsPage() {
       ) : !page ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : page.total === 0 ? (
-        <Empty className="border">
+        <Empty role="status" className="border">
           <EmptyHeader>
             <EmptyTitle>
               {query.state === "open"

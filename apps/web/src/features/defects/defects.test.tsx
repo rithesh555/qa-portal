@@ -26,6 +26,7 @@ const user: SessionUser = {
   name: "Me Myself",
   email: "me@example.com",
   role: "user",
+  mustChangePassword: false,
 }
 
 const project = (myRole: ProjectRole): Project => ({
@@ -208,6 +209,54 @@ describe("DefectsPage", () => {
     expect(screen.queryByRole("button", { name: /New defect/ })).toBeNull()
     expect(
       screen.getByText(/once QA Leads and Testers log them/)
+    ).toBeInTheDocument()
+  })
+})
+
+describe("DefectPage links", () => {
+  it("unlinks a result with an Undo that stays put and takes focus", async () => {
+    const link = {
+      id: "link-1",
+      resultId: "result-1",
+      kind: "failed" as const,
+      runKey: "PAY-R-12",
+      runCaseId: "rc-1",
+      caseKey: "PAY-TC-3",
+      caseTitle: "Pay by card",
+      failedStep: 2,
+      note: "Spins",
+      recordedBy: tom,
+      recordedAt: "2026-10-14T10:00:00.000Z",
+      linkedBy: tom,
+      linkedAt: "2026-10-14T10:00:00.000Z",
+    }
+    let current = defect({ links: [link] })
+    routes["GET /api/projects/PAY/defects/PAY-D-14"] = () => json(200, current)
+    routes["DELETE /api/projects/PAY/defects/PAY-D-14/links/link-1"] = () => {
+      current = defect({ links: [] })
+      return json(200, current)
+    }
+    routes["POST /api/projects/PAY/defects/PAY-D-14/links"] = () => {
+      current = defect({ links: [link] })
+      return json(200, current)
+    }
+    renderAt("/projects/PAY/defects/PAY-D-14", "tester")
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Unlink PAY-R-12 › PAY-TC-3" })
+    )
+    const undo = await screen.findByRole("button", {
+      name: "Undo unlinking PAY-R-12 › PAY-TC-3",
+    })
+    await waitFor(() => expect(undo).toHaveFocus())
+    await userEvent.click(undo)
+    await waitFor(() =>
+      expect(
+        calls.find((c) => c.method === "POST" && c.path.endsWith("/links"))
+          ?.body
+      ).toEqual({ resultId: "result-1" })
+    )
+    expect(
+      await screen.findByRole("button", { name: "Unlink PAY-R-12 › PAY-TC-3" })
     ).toBeInTheDocument()
   })
 })

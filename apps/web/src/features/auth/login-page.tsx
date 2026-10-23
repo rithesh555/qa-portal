@@ -72,6 +72,8 @@ export function LoginPage() {
     if (error) {
       setFormError(signInErrorMessage(error.status))
       form.resetField("password")
+      // Straight back to retyping the password.
+      form.setFocus("password")
       return
     }
     await queryClient.invalidateQueries({ queryKey: sessionQueryKey })

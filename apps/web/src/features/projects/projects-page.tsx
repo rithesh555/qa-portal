@@ -243,7 +243,7 @@ export function ProjectsPage() {
           </div>
         )
       ) : page.total === 0 ? (
-        <Empty className="border border-dashed">
+        <Empty role="status" className="border border-dashed">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <FolderKanbanIcon />

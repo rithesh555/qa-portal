@@ -63,6 +63,7 @@ import { type ShortcutAction, useRunShortcuts } from "./use-run-shortcuts"
 import { useKnownDefects } from "@/features/defects/api"
 import { KnownDefects } from "@/features/defects/known-defects"
 import { LogDefectDialog } from "@/features/defects/log-defect-dialog"
+import { InlineError } from "@/components/inline-error"
 
 const RESULT_KEYS: Record<ResultStatus, string> = {
   passed: "P",
@@ -180,9 +181,11 @@ function CompareDialog({
         {latest.isPending ? (
           <Skeleton className="h-32" />
         ) : latest.isError ? (
-          <p className="text-sm text-destructive">
-            {errorMessage(latest.error)}
-          </p>
+          <InlineError
+            what="Couldn't load the latest version."
+            error={latest.error}
+            onRetry={() => void latest.refetch()}
+          />
         ) : rows.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             The title, preconditions and steps are the same; only details such
@@ -701,6 +704,9 @@ export function RunCasePane({
                       shortcutsOn ? RESULT_KEYS[status] : undefined
                     }
                     disabled={!detail || record.isPending}
+                    // Stays focused (announced as disabled) while saving, so
+                    // keyboard users aren't dropped to the page.
+                    focusableWhenDisabled
                     onClick={() => choose(status)}
                     className={cn(
                       "h-10 gap-2 px-3",
@@ -801,6 +807,7 @@ export function RunCasePane({
               <Button
                 type="submit"
                 disabled={record.isPending}
+                focusableWhenDisabled
                 aria-keyshortcuts="Control+Enter"
               >
                 {record.isPending && <Spinner data-icon="inline-start" />}

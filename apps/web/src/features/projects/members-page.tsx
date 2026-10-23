@@ -303,7 +303,7 @@ export function MembersPage() {
           </AlertDescription>
         </Alert>
       ) : page && page.total === 0 ? (
-        <Empty className="border border-dashed">
+        <Empty role="status" className="border border-dashed">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <UsersRoundIcon />

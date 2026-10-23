@@ -1,5 +1,5 @@
 import { formatCaseKey, type Suite, suiteKey } from "@qa/shared"
-import { diff, recordActivity } from "../../lib/activity.ts"
+import { diff, recordActivity, staleChange } from "../../lib/activity.ts"
 import { httpError } from "../../lib/http-error.ts"
 import type { Prisma, PrismaClient } from "../../lib/prisma.ts"
 import { lockForWrite, type ProjectAccess } from "../projects/access.ts"
@@ -113,7 +113,9 @@ export async function createSuite(
   input: { name: string; parentId: string | null }
 ): Promise<Suite> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     if (input.parentId) await checkParent(tx, projectId, input.parentId)
     await assertNameFree(tx, projectId, input.parentId, input.name)
@@ -145,7 +147,9 @@ export async function updateSuite(
   input: { name: string; parentId: string | null; version: number }
 ): Promise<Suite> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:edit")
+    access = await lockForWrite(tx, access, "cases:edit", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     const before = await tx.suite.findFirst({
       where: { id, projectId, archivedAt: null },
@@ -183,11 +187,7 @@ export async function updateSuite(
         version: { increment: 1 },
       },
     })
-    if (count === 0)
-      throw httpError(
-        409,
-        "Someone else changed this suite. Reload to see their changes."
-      )
+    if (count === 0) throw await staleChange(tx, "suite", id, "suite")
     const changes = diff(before, input, ["name", "parentId"])
     if (Object.keys(changes).length > 0) {
       await recordActivity(tx, {
@@ -217,7 +217,9 @@ export async function archiveSuite(
   id: string
 ): Promise<{ archivedCases: number }> {
   return prisma.$transaction(async (tx) => {
-    access = await lockForWrite(tx, access, "cases:archive")
+    access = await lockForWrite(tx, access, "cases:archive", {
+      scope: { cases: "write" },
+    })
     const projectId = access.project.id
     const suite = await tx.suite.findFirst({
       where: { id, projectId, archivedAt: null },

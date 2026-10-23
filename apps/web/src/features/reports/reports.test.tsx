@@ -28,6 +28,7 @@ const user: SessionUser = {
   name: "Demo Lead",
   email: "me@example.com",
   role: "user",
+  mustChangePassword: false,
 }
 
 const R42 = "0199c0de-0000-7000-8000-000000000042"
@@ -300,7 +301,13 @@ describe("ReportsPage", () => {
     const trend = await screen.findByRole("region", {
       name: "Pass rate by run",
     })
-    expect(within(trend).getByRole("img")).toBeInTheDocument()
+    const chart = within(trend).getByRole("group", {
+      name: /^Pass rate by run:/,
+    })
+    // Each point is reachable and named.
+    expect(within(chart).getAllByRole("img")[0]).toHaveAccessibleName(
+      /^PAY-R-11: 80%/
+    )
     await userEvent.click(
       within(trend).getByRole("button", { name: "Table for pass rate by run" })
     )

@@ -24,8 +24,9 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
+import { ConflictAlert, isEditConflict } from "@/components/conflict-alert"
 import { errorMessage } from "@/lib/api"
-import { useUpdateProject } from "./api"
+import { useProject, useUpdateProject } from "./api"
 import { useProjectContext } from "./project-layout"
 
 type FormValues = z.input<typeof updateProjectSchema>
@@ -33,7 +34,9 @@ type FormValues = z.input<typeof updateProjectSchema>
 function EditProjectForm({ onDone }: { onDone: () => void }) {
   const { project } = useProjectContext()
   const update = useUpdateProject(project.key)
+  const current = useProject(project.key)
   const [formError, setFormError] = useState<string | null>(null)
+  const [conflict, setConflict] = useState<string | null>(null)
   const form = useForm<FormValues, unknown, UpdateProjectInput>({
     resolver: zodResolver(updateProjectSchema),
     defaultValues: {
@@ -45,13 +48,22 @@ function EditProjectForm({ onDone }: { onDone: () => void }) {
 
   async function onSubmit(values: UpdateProjectInput) {
     setFormError(null)
+    setConflict(null)
     try {
       await update.mutateAsync(values)
       toast.add({ title: "Project details saved" })
       onDone()
     } catch (err) {
-      setFormError(errorMessage(err))
+      if (isEditConflict(err)) setConflict(errorMessage(err))
+      else setFormError(errorMessage(err))
     }
+  }
+
+  /** The project as saved now (someone else changed it meanwhile). */
+  async function latest() {
+    const { data, error } = await current.refetch()
+    if (!data) throw error ?? new Error("Couldn't load the project")
+    return data
   }
 
   return (
@@ -69,6 +81,24 @@ function EditProjectForm({ onDone }: { onDone: () => void }) {
             <CircleAlertIcon />
             <AlertDescription>{formError}</AlertDescription>
           </Alert>
+        )}
+        {conflict && (
+          <ConflictAlert
+            message={conflict}
+            onLoadTheirs={async () => {
+              const fresh = await latest()
+              form.reset({
+                name: fresh.name,
+                description: fresh.description,
+                version: fresh.version,
+              })
+              setConflict(null)
+            }}
+            onSaveMine={async () => {
+              form.setValue("version", (await latest()).version)
+              await form.handleSubmit(onSubmit)()
+            }}
+          />
         )}
         <Controller
           name="name"

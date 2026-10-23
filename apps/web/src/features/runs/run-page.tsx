@@ -85,6 +85,7 @@ import {
 } from "./run-dialogs"
 import { ProgressBar, RunCaseStatusIcon } from "./run-status"
 import { useShortcutsSetting } from "./use-run-shortcuts"
+import { PageLoading } from "@/components/page-loading"
 
 const ADVANCE_KEY = "qa.run-advance"
 
@@ -354,7 +355,12 @@ export function RunPage() {
       </Alert>
     )
   }
-  if (!runQuery.data) return <Skeleton className="h-96 rounded-xl" />
+  if (!runQuery.data)
+    return (
+      <PageLoading label="Loading the run…">
+        <Skeleton className="h-96 rounded-xl" />
+      </PageLoading>
+    )
   const run = runQuery.data
   // /runs/12 and /runs/pay-r-12 work, but the caches are keyed on PAY-R-12.
   if (ref !== run.key)
@@ -431,7 +437,11 @@ export function RunPage() {
       )
       setLast(null)
     } catch (err) {
-      toast.add({ title: "Couldn't undo", description: errorMessage(err) })
+      toast.add({
+        type: "error",
+        title: "Couldn't undo",
+        description: errorMessage(err),
+      })
       setLast(null)
     }
   }
@@ -443,6 +453,7 @@ export function RunPage() {
       toast.add({ title: `${run.key} closed` })
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't close the run",
         description: errorMessage(err),
       })
@@ -455,6 +466,7 @@ export function RunPage() {
       toast.add({ title: `${run.key} reopened` })
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't reopen the run",
         description: errorMessage(err),
       })
@@ -475,6 +487,7 @@ export function RunPage() {
       })
     } catch (err) {
       toast.add({
+        type: "error",
         title: "Couldn't remove cases",
         description: errorMessage(err),
       })
@@ -828,6 +841,7 @@ export function RunPage() {
               disabled={remove.isPending}
               onClick={() => void doRemove()}
             >
+              {remove.isPending && <Spinner data-icon="inline-start" />}
               Remove
             </AlertDialogAction>
           </AlertDialogFooter>

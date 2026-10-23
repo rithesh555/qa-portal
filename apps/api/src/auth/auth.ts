@@ -30,6 +30,18 @@ export function createAuth({ prisma, baseURL, secret, webOrigin }: AuthConfig) {
       disableSignUp: true,
       minPasswordLength: 12,
     },
+    user: {
+      additionalFields: {
+        // Server-owned: set by admins' create/reset, cleared by change-password.
+        // No defaultValue here: the database default (true) applies, so a
+        // new account must pick its own password even if a later step fails.
+        mustChangePassword: {
+          type: "boolean",
+          required: false,
+          input: false,
+        },
+      },
+    },
     // Users sign in with a username only.
     disabledPaths: ["/sign-in/email", "/sign-up/email"],
     session: {
@@ -40,7 +52,9 @@ export function createAuth({ prisma, baseURL, secret, webOrigin }: AuthConfig) {
       enabled: true,
       storage: "database",
       customRules: {
-        "/sign-in/username": { window: 60, max: 5 },
+        // Per IP; loose because an office shares one address. Guessing one
+        // account is limited per username in plugins/auth.ts.
+        "/sign-in/username": { window: 60, max: 30 },
       },
     },
     advanced: {

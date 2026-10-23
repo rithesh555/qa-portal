@@ -1,11 +1,17 @@
 import type { SessionUser } from "@qa/shared"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { createMemoryRouter } from "react-router"
 import { RouterProvider } from "react-router/dom"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { authClient } from "@/lib/auth-client"
 import { RequireAuth, RequirePermission } from "./guards.tsx"
 import { sessionQueryKey } from "./session.ts"
+
+vi.mock("@/lib/auth-client", () => ({
+  authClient: { changePassword: vi.fn(), signOut: vi.fn() },
+}))
 
 function renderAt(path: string, session: SessionUser | null) {
   const queryClient = new QueryClient()
@@ -51,6 +57,7 @@ const user = (role: SessionUser["role"]): SessionUser => ({
   name: "Sam",
   email: "sam@test.local",
   role,
+  mustChangePassword: false,
 })
 
 describe("RequireAuth", () => {
@@ -65,6 +72,58 @@ describe("RequireAuth", () => {
   it("renders the page for a signed-in user", async () => {
     renderAt("/", user("user"))
     expect(await screen.findByText("home page")).toBeInTheDocument()
+  })
+
+  it("makes someone whose password an admin chose pick their own first", async () => {
+    let changed = false
+    vi.mocked(authClient.changePassword).mockImplementation((async () => {
+      changed = true
+      return { data: {}, error: null }
+    }) as never)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          ...user("user"),
+          mustChangePassword: !changed,
+          projectsLed: 0,
+        })
+      )
+    )
+    // Real keystrokes, without the pause between them.
+    const keys = userEvent.setup({ delay: null })
+    renderAt("/", { ...user("user"), mustChangePassword: true })
+    const dialog = await screen.findByRole("dialog", {
+      name: "Choose your own password",
+    })
+    expect(screen.queryByText("home page")).not.toBeInTheDocument()
+    // No way around it but signing out.
+    expect(
+      within(dialog).queryByRole("button", { name: "Close" })
+    ).not.toBeInTheDocument()
+    await userEvent.keyboard("{Escape}")
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole("button", { name: "Sign out" })
+    ).toBeInTheDocument()
+
+    await keys.type(
+      within(dialog).getByLabelText("Current password"),
+      "the-admins-choice!"
+    )
+    await keys.type(
+      within(dialog).getByLabelText("New password"),
+      "my-own-secret-pass"
+    )
+    await keys.type(
+      within(dialog).getByLabelText("Confirm new password"),
+      "my-own-secret-pass"
+    )
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Save my password" })
+    )
+    expect(await screen.findByText("home page")).toBeInTheDocument()
+    expect(changed).toBe(true)
   })
 
   it("keeps showing the page when a background session check fails", async () => {

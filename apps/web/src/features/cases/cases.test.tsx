@@ -26,6 +26,7 @@ const user: SessionUser = {
   name: "Me Myself",
   email: "me@example.com",
   role: "user",
+  mustChangePassword: false,
 }
 
 const project = (myRole: ProjectRole): Project => ({

@@ -1,89 +1,206 @@
-import type { ReactNode } from "react"
+import type { ComponentType } from "react"
 import { createBrowserRouter } from "react-router"
+import { FullPageSpinner } from "@/components/full-page-spinner"
 import { RequireAuth, RequirePermission } from "@/features/auth/guards"
 import { LoginPage } from "@/features/auth/login-page"
-import { CaseEditorPage } from "@/features/cases/case-editor-page"
-import { CasePage } from "@/features/cases/case-page"
-import { CasesPage } from "@/features/cases/cases-page"
-import { ImportPage } from "@/features/cases/import-page"
-import { DefectPage } from "@/features/defects/defect-page"
-import { DefectsPage } from "@/features/defects/defects-page"
-import { NewDefectPage } from "@/features/defects/new-defect-page"
-import { MembersPage } from "@/features/projects/members-page"
-import { ProjectOverviewPage } from "@/features/projects/overview-page"
 import { ProjectLayout } from "@/features/projects/project-layout"
-import { ProjectsPage } from "@/features/projects/projects-page"
-import { ReleasesPage } from "@/features/projects/releases-page"
-import { HomePage } from "@/features/reports/home-page"
-import { PrintReportPage } from "@/features/reports/print-page"
-import { ReleasesOverviewPage } from "@/features/reports/releases-overview-page"
-import { ReportsPage } from "@/features/reports/reports-page"
-import { NewRunPage } from "@/features/runs/new-run-page"
-import { RunPage } from "@/features/runs/run-page"
-import { RunsPage } from "@/features/runs/runs-page"
-import { UsersPage } from "@/features/users/users-page"
-import { ModulePlaceholder } from "@/pages/module-placeholder"
 import { NotFound } from "@/pages/not-found"
+import { RouteError } from "@/pages/route-error"
 import { AppShell } from "./app-shell"
-import { PROJECT_NAV } from "./nav"
 
-const BUILT: Partial<Record<string, ReactNode>> = {
-  "": <ProjectOverviewPage />,
-  cases: <CasesPage />,
-  defects: <DefectsPage />,
-  members: <MembersPage />,
-  releases: <ReleasesPage />,
-  reports: <ReportsPage />,
-  runs: <RunsPage />,
+/**
+ * A page whose code downloads the first time someone opens it, so the first
+ * load carries only the shell, sign-in and the page in the address bar.
+ * Function-form `lazy`: if the download fails (say, after an update), the
+ * error reaches the route's error page; the object form swallows it and
+ * leaves a blank page.
+ */
+function page<M>(load: () => Promise<M>, pick: (m: M) => ComponentType) {
+  return { lazy: async () => ({ Component: pick(await load()) }) }
 }
-
-// Project pages from later phases show a placeholder until they're built.
-const projectPages = PROJECT_NAV.map((item) =>
-  item.path
-    ? {
-        path: item.path,
-        element: BUILT[item.path] ?? <ModulePlaceholder item={item} />,
-      }
-    : { index: true, element: BUILT[""] }
-)
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
   {
     element: <RequireAuth />,
+    // Outside the shell (print view) or the shell itself failing.
+    errorElement: <RouteError />,
+    // Shown on a first visit while the opened page's code arrives.
+    hydrateFallbackElement: <FullPageSpinner label="Loading…" />,
     children: [
       // The printable report has no app chrome: it's one A4 page.
-      { path: "/projects/:key/reports/print", element: <PrintReportPage /> },
+      {
+        path: "/projects/:key/reports/print",
+        ...page(
+          () => import("@/features/reports/print-page"),
+          (m) => m.PrintReportPage
+        ),
+      },
       {
         path: "/",
         element: <AppShell />,
         children: [
-          { index: true, element: <HomePage /> },
-          { path: "projects", element: <ProjectsPage /> },
-          { path: "releases", element: <ReleasesOverviewPage /> },
           {
-            path: "projects/:key",
-            element: <ProjectLayout />,
+            // A page that fails to load or crashes: an error page in the shell.
+            errorElement: <RouteError />,
             children: [
-              ...projectPages,
-              { path: "cases/new", element: <CaseEditorPage /> },
-              { path: "cases/import", element: <ImportPage /> },
-              { path: "cases/:ref", element: <CasePage /> },
-              { path: "cases/:ref/edit", element: <CaseEditorPage /> },
-              { path: "runs/new", element: <NewRunPage /> },
-              { path: "runs/:ref", element: <RunPage /> },
-              { path: "defects/new", element: <NewDefectPage /> },
-              { path: "defects/:ref", element: <DefectPage /> },
-              { path: "*", element: <NotFound /> },
+              {
+                index: true,
+                ...page(
+                  () => import("@/features/reports/home-page"),
+                  (m) => m.HomePage
+                ),
+              },
+              {
+                path: "projects",
+                ...page(
+                  () => import("@/features/projects/projects-page"),
+                  (m) => m.ProjectsPage
+                ),
+              },
+              {
+                path: "releases",
+                ...page(
+                  () => import("@/features/reports/releases-overview-page"),
+                  (m) => m.ReleasesOverviewPage
+                ),
+              },
+              {
+                path: "projects/:key",
+                element: <ProjectLayout />,
+                children: [
+                  {
+                    index: true,
+                    ...page(
+                      () => import("@/features/projects/overview-page"),
+                      (m) => m.ProjectOverviewPage
+                    ),
+                  },
+                  {
+                    path: "cases",
+                    ...page(
+                      () => import("@/features/cases/cases-page"),
+                      (m) => m.CasesPage
+                    ),
+                  },
+                  {
+                    path: "cases/new",
+                    ...page(
+                      () => import("@/features/cases/case-editor-page"),
+                      (m) => m.CaseEditorPage
+                    ),
+                  },
+                  {
+                    path: "cases/import",
+                    ...page(
+                      () => import("@/features/cases/import-page"),
+                      (m) => m.ImportPage
+                    ),
+                  },
+                  {
+                    path: "cases/:ref",
+                    ...page(
+                      () => import("@/features/cases/case-page"),
+                      (m) => m.CasePage
+                    ),
+                  },
+                  {
+                    path: "cases/:ref/edit",
+                    ...page(
+                      () => import("@/features/cases/case-editor-page"),
+                      (m) => m.CaseEditorPage
+                    ),
+                  },
+                  {
+                    path: "runs",
+                    ...page(
+                      () => import("@/features/runs/runs-page"),
+                      (m) => m.RunsPage
+                    ),
+                  },
+                  {
+                    path: "runs/new",
+                    ...page(
+                      () => import("@/features/runs/new-run-page"),
+                      (m) => m.NewRunPage
+                    ),
+                  },
+                  {
+                    path: "runs/:ref",
+                    ...page(
+                      () => import("@/features/runs/run-page"),
+                      (m) => m.RunPage
+                    ),
+                  },
+                  {
+                    path: "defects",
+                    ...page(
+                      () => import("@/features/defects/defects-page"),
+                      (m) => m.DefectsPage
+                    ),
+                  },
+                  {
+                    path: "defects/new",
+                    ...page(
+                      () => import("@/features/defects/new-defect-page"),
+                      (m) => m.NewDefectPage
+                    ),
+                  },
+                  {
+                    path: "defects/:ref",
+                    ...page(
+                      () => import("@/features/defects/defect-page"),
+                      (m) => m.DefectPage
+                    ),
+                  },
+                  {
+                    path: "releases",
+                    ...page(
+                      () => import("@/features/projects/releases-page"),
+                      (m) => m.ReleasesPage
+                    ),
+                  },
+                  {
+                    path: "reports",
+                    ...page(
+                      () => import("@/features/reports/reports-page"),
+                      (m) => m.ReportsPage
+                    ),
+                  },
+                  {
+                    path: "members",
+                    ...page(
+                      () => import("@/features/projects/members-page"),
+                      (m) => m.MembersPage
+                    ),
+                  },
+                  { path: "*", element: <NotFound /> },
+                ],
+              },
+              {
+                element: <RequirePermission action="users:manage" />,
+                children: [
+                  {
+                    path: "users",
+                    ...page(
+                      () => import("@/features/users/users-page"),
+                      (m) => m.UsersPage
+                    ),
+                  },
+                ],
+              },
             ],
-          },
-          {
-            element: <RequirePermission action="users:manage" />,
-            children: [{ path: "users", element: <UsersPage /> }],
           },
         ],
       },
     ],
   },
-  { path: "*", element: <NotFound /> },
+  {
+    path: "*",
+    element: (
+      <div className="flex min-h-svh flex-col">
+        <NotFound />
+      </div>
+    ),
+  },
 ])

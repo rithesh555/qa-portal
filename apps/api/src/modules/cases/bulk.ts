@@ -32,7 +32,10 @@ export async function bulkCases(
     access = await lockForWrite(
       tx,
       access,
-      action.kind === "archive" ? "cases:archive" : "cases:edit"
+      action.kind === "archive" ? "cases:archive" : "cases:edit",
+      {
+        scope: { cases: "write" },
+      }
     )
     const projectId = access.project.id
     const { selection } = input

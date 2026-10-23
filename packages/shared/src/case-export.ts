@@ -56,13 +56,16 @@ export interface ExportableCase {
   steps: CaseStep[]
 }
 
+/** = + - @ tab CR, and their full-width forms (＝＋－＠), which some spreadsheets also run. */
+export const FORMULA_START = /^[=+\-@\t\r\uFF1D\uFF0B\uFF0D\uFF20]/
+
 /**
  * Spreadsheet apps run cells starting with = + - @ (or a tab/CR) as formulas,
  * so a malicious title could execute when someone opens the export. A leading
  * ' makes them plain text; import strips it again.
  */
 export function safeCell(value: string): string {
-  return /^[=+\-@\t\r]/.test(value) ? `'${value}` : value
+  return FORMULA_START.test(value) ? `'${value}` : value
 }
 
 /** A case's cells in EXPORT_HEADERS order, as plain text (for .xlsx, where text cells never run). */
