@@ -101,7 +101,14 @@ test("E2E-AUTH-014 change password refuses a wrong current password", async ({
   await d.getByLabel("New password", { exact: true }).fill(chosen)
   await d.getByLabel("Confirm new password").fill(chosen)
   await d.getByRole("button", { name: "Change password" }).click()
-  await expect(d.getByText("Your current password isn't right")).toBeVisible()
+  // F10: the message sits on the field, which is cleared, invalid and focused.
+  const current = d.getByLabel("Current password")
+  await expect(current).toHaveAccessibleDescription(
+    /Your current password isn't right/
+  )
+  await expect(current).toHaveAttribute("aria-invalid", "true")
+  await expect(current).toHaveValue("")
+  await expect(current).toBeFocused()
 })
 
 test("E2E-AUTH-015 changing the password signs out other devices", async ({

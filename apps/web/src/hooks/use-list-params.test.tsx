@@ -46,6 +46,23 @@ describe("useListParams", () => {
     expect(result.current.search).toBe("?q=car&page=2")
   })
 
+  it("keeps both changes when two land before the page re-renders (F5)", () => {
+    const { result } = setup("/users?status=all")
+    const { update } = result.current
+    act(() => {
+      update({ q: "car" })
+      update({ sort: "lastActive" })
+    })
+    expect(result.current.search).toBe("?status=all&q=car&sort=lastActive")
+  })
+
+  it("still follows the URL when it changes from outside", () => {
+    const { result } = setup("/users?q=car")
+    act(() => result.current.update({ status: "all" }))
+    act(() => result.current.update({ q: "" }))
+    expect(result.current.search).toBe("?status=all")
+  })
+
   it("removes cleared values", () => {
     const { result } = setup("/users?q=car&page=2")
     act(() => result.current.update({ q: "" }))

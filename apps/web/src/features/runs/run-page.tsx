@@ -17,13 +17,7 @@ import {
   PartyPopperIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import {
-  Link,
-  Navigate,
-  useBlocker,
-  useParams,
-  useSearchParams,
-} from "react-router"
+import { Link, Navigate, useBlocker, useParams } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -92,6 +86,7 @@ import {
 import { ProgressBar, RunCaseStatusIcon } from "./run-status"
 import { useShortcutsSetting } from "./use-run-shortcuts"
 import { PageLoading } from "@/components/page-loading"
+import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
 const ADVANCE_KEY = "qa.run-advance"
 
@@ -275,7 +270,7 @@ export function RunPage() {
   const me = useSession().data!.id
   const runQuery = useRun(project.key, ref)
   const casesQuery = useRunCases(project.key, ref)
-  const [params, setParams] = useSearchParams()
+  const [params, setParams] = useLatestSearchParams()
   const [q, setQ] = useState("")
   const [selecting, setSelecting] = useState(false)
   const [picked, setPicked] = useState<Set<string>>(new Set())

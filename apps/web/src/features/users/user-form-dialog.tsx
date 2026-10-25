@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "@/components/ui/toast"
-import { errorMessage } from "@/lib/api"
+import { ApiError, errorMessage } from "@/lib/api"
 import { useCreateUser, useUpdateUser } from "./api"
 import { PasswordField } from "./password-field"
 
@@ -137,6 +137,14 @@ function FormError({ message }: { message: string | null }) {
   )
 }
 
+/** The field a conflict is about (the API says which), if any. */
+function takenField(err: unknown): "username" | "email" | null {
+  if (!(err instanceof ApiError) || err.status !== 409) return null
+  if (err.reason === "username-taken") return "username"
+  if (err.reason === "email-taken") return "email"
+  return null
+}
+
 function CreateUserForm({ onDone }: { onDone: () => void }) {
   const createUser = useCreateUser()
   const [formError, setFormError] = useState<string | null>(null)
@@ -161,7 +169,15 @@ function CreateUserForm({ onDone }: { onDone: () => void }) {
       })
       onDone()
     } catch (err) {
-      setFormError(errorMessage(err))
+      // A taken username or email belongs on its field, focused.
+      const field = takenField(err)
+      if (field)
+        form.setError(
+          field,
+          { message: errorMessage(err) },
+          { shouldFocus: true }
+        )
+      else setFormError(errorMessage(err))
     }
   }
 
@@ -236,7 +252,13 @@ function EditUserForm({ user, onDone }: { user: User; onDone: () => void }) {
       toast.add({ title: `Saved changes to ${saved.name}` })
       onDone()
     } catch (err) {
-      setFormError(errorMessage(err))
+      if (takenField(err) === "email")
+        form.setError(
+          "email",
+          { message: errorMessage(err) },
+          { shouldFocus: true }
+        )
+      else setFormError(errorMessage(err))
     }
   }
 

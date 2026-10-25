@@ -85,7 +85,7 @@ const suites: CatalogueSuite[] = [
         steps: [
           [
             "Create a user with an existing username",
-            "That username is already taken",
+            "That username is already taken, on the Username field, which gets focus",
           ],
         ],
       },

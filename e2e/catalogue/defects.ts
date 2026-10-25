@@ -418,7 +418,7 @@ const suites: CatalogueSuite[] = [
             "Unlink the linked result",
             '"Unlinked <run> › <case>" with Undo, focused',
           ],
-          ["Undo", "The result is linked again"],
+          ["Undo", "The result is linked again and its Unlink has focus"],
         ],
       },
       {

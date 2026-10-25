@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react"
-import { useSearchParams } from "react-router"
 import type { z } from "zod"
+import { useLatestSearchParams } from "./use-latest-search-params"
 
 type Primitive = string | number | undefined
 
@@ -10,7 +10,7 @@ type Primitive = string | number | undefined
  * invalid values fall back to their defaults one field at a time.
  */
 export function useListParams<S extends z.ZodObject>(schema: S) {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useLatestSearchParams()
 
   const defaults = useMemo(
     () => schema.parse({}) as Record<string, Primitive>,

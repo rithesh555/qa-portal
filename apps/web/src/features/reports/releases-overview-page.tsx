@@ -1,6 +1,5 @@
 import { FlagIcon } from "lucide-react"
 import { useMemo } from "react"
-import { useSearchParams } from "react-router"
 import { SearchBox } from "@/components/search-box"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -32,6 +31,7 @@ import {
   verdictOf,
   verdictText,
 } from "./release-table"
+import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
 const WITHIN = [
   { value: "any", label: "Any target date" },
@@ -45,7 +45,7 @@ const RANK = { no: 0, na: 1, yes: 2 } as const
 export function ReleasesOverviewPage() {
   const me = useSession().data
   const overview = useReleasesOverview()
-  const [params, setParams] = useSearchParams()
+  const [params, setParams] = useLatestSearchParams()
   const q = params.get("q") ?? ""
   const notReady = params.get("notReady") === "true"
   const within = WITHIN.some((w) => w.value === params.get("within"))

@@ -7,7 +7,7 @@
 export function httpError(
   statusCode: number,
   message: string,
-  { reason }: { reason?: "stale" } = {}
+  { reason }: { reason?: "stale" | "username-taken" | "email-taken" } = {}
 ) {
   return Object.assign(new Error(message), {
     statusCode,

@@ -209,9 +209,11 @@ describe("RunsPage", () => {
     const row = link.closest("tr")!
     // passed ÷ (passed + failed + blocked) = 6 ÷ 8
     expect(within(row).getByText("75%")).toBeInTheDocument()
+    // Twice: its column, and the copy folded under the name for phones
+    // (CSS shows one; jsdom applies none).
     expect(
-      within(row).getByRole("img", { name: /80% complete/ })
-    ).toBeInTheDocument()
+      within(row).getAllByRole("img", { name: /80% complete/ })
+    ).toHaveLength(2)
     expect(screen.getByRole("button", { name: /New run/ })).toBeInTheDocument()
   })
 

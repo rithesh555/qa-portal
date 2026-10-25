@@ -52,22 +52,14 @@ test("E2E-DEF-033 unlink a result and undo it", async ({ page, project }) => {
   const undo = links.getByRole("button", {
     name: `Undo unlinking ${r.runKey} › ${r.caseKey}`,
   })
-  await expect(undo).toBeVisible()
-  // F7 (findings/app-findings.md): focus moves to Undo via
-  // requestAnimationFrame, which can run before the row renders. Recorded,
-  // not asserted, until it's fixed.
-  const focused = await undo.evaluate((el) => el === document.activeElement)
-  test.info().annotations.push({
-    type: "finding",
-    description: `F7: Undo ${focused ? "focused" : "not focused"} this run`,
-  })
+  await expect(undo).toBeFocused()
   await undo.click()
   await expect(
     page.getByRole("region", { name: "Linked results (1)" })
   ).toBeVisible()
   await expect(
     links.getByRole("button", { name: `Unlink ${r.runKey} › ${r.caseKey}` })
-  ).toBeVisible()
+  ).toBeFocused()
 })
 
 test("E2E-DEF-034 a passed retest closes a fixed defect from the run", async ({

@@ -1,5 +1,6 @@
 import {
   formatPercent,
+  type Report,
   RUN_CASE_STATUS_LABELS,
   SEVERITY_LABELS,
   DEFECT_STATUS_LABELS,
@@ -18,6 +19,25 @@ import { useReport } from "./api"
 import { netOpenText, readinessTitle } from "./reports-page"
 
 const pct = (v: number | null) => (v === null ? "—" : formatPercent(v))
+
+/**
+ * Coverage rows as on screen, in the same order: each suite counts only its
+ * own cases, so sub-suites are printed too, named under their parent, and
+ * the Ready column adds up to the release's Ready cases (F12).
+ */
+export function printCoverageRows(coverage: Report["coverage"]): string[][] {
+  let parent = ""
+  return coverage.map((c) => {
+    if (c.depth === 0) parent = c.suite
+    return [
+      c.depth === 0 ? c.suite : `${parent} › ${c.suite}`,
+      String(c.ready),
+      `${c.tested} · ${c.ready ? formatPercent(c.tested / c.ready) : "—"}`,
+      pct(c.passRate),
+      String(c.openDefects),
+    ]
+  })
+}
 
 /**
  * One A4 page for sign-off meetings and email: the verdict, exit checks, key
@@ -90,6 +110,7 @@ export function PrintReportPage() {
       ? Math.round((k.passRate - k.passRatePrevious) * 100)
       : null
   const noDefect = r.failing.filter((f) => !f.defect)
+  const coverageRows = printCoverageRows(r.coverage)
   const lead = p.leads.map((l) => l.name).join(", ")
 
   return (
@@ -266,17 +287,8 @@ export function PrintReportPage() {
           empty="No Ready cases yet."
           head={["Suite", "Ready", "Tested", "Pass rate", "Open defects"]}
           numeric={[1, 2, 3, 4]}
-          rows={r.coverage
-            .filter((c) => c.depth === 0)
-            .slice(0, 6)
-            .map((c) => [
-              c.suite,
-              String(c.ready),
-              `${c.tested} · ${c.ready ? formatPercent(c.tested / c.ready) : "—"}`,
-              pct(c.passRate),
-              String(c.openDefects),
-            ])}
-          more={r.coverage.filter((c) => c.depth === 0).length - 6}
+          rows={coverageRows.slice(0, 8)}
+          more={coverageRows.length - 8}
         />
 
         <PrintTable

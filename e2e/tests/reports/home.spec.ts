@@ -87,9 +87,10 @@ test.describe("as a tester", () => {
     await expect(defects.getByRole("tabpanel")).toContainText(d.title)
   })
 
-  test("E2E-HOME-005 releases in my projects, with a link to all releases", async ({
+  test("E2E-HOME-005 releases in my projects; all releases is linked only for overseers", async ({
     page,
     project,
+    as,
   }) => {
     await project.lead.createRelease(project.key, {
       name: "7.0",
@@ -102,8 +103,14 @@ test.describe("as a tester", () => {
       "href",
       new RegExp(`/projects/${project.key}/reports\\?release=`)
     )
-    await page.getByRole("link", { name: "See all releases" }).click()
-    await expect(page).toHaveURL("/releases")
+    // F13: All releases is for admins and leads of several projects.
+    await expect(
+      page.getByRole("link", { name: "See all releases" })
+    ).toHaveCount(0)
+    const admin = await as("admin")
+    await admin.page.goto("/")
+    await admin.page.getByRole("link", { name: "See all releases" }).click()
+    await expect(admin.page).toHaveURL("/releases")
   })
 
   test("E2E-HOME-007 recent activity shows what happened in my projects", async ({

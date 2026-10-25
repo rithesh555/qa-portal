@@ -20,7 +20,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { type ReactNode, useState } from "react"
-import { Link, useSearchParams } from "react-router"
+import { Link } from "react-router"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -74,6 +74,7 @@ import {
   PassRateChart,
 } from "./charts"
 import { type CsvTable, csvFileName, downloadCsv } from "./csv"
+import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
 const NONE = "none"
 
@@ -97,7 +98,7 @@ export function runPassRate(c: RunCounts): number | null {
 function useReleaseParam() {
   const { project } = useProjectContext()
   const releases = useReleases(project.key)
-  const [params, setParams] = useSearchParams()
+  const [params, setParams] = useLatestSearchParams()
   const items = releases.data?.items ?? []
   const fromUrl = params.get("release")
   const valid =
@@ -413,7 +414,9 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
       <Readiness checks={r.checks} defectsUrl={defectsUrl} />
       <Kpis report={r} defectsUrl={defectsUrl} />
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      {/* Full width at every size: both are tables to read, and the defect
+          table's seven columns don't fit half the page (F14). */}
+      <div className="grid gap-6">
         <ChartCard
           id="blocking"
           title="Blocking defects"

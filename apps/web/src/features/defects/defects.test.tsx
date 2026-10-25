@@ -214,7 +214,7 @@ describe("DefectsPage", () => {
 })
 
 describe("DefectPage links", () => {
-  it("unlinks a result with an Undo that stays put and takes focus", async () => {
+  it("unlinks a result with an Undo that stays put and takes focus, and Undo hands focus back (F7, F9)", async () => {
     const link = {
       id: "link-1",
       resultId: "result-1",
@@ -237,7 +237,8 @@ describe("DefectPage links", () => {
       return json(200, current)
     }
     routes["POST /api/projects/PAY/defects/PAY-D-14/links"] = () => {
-      current = defect({ links: [link] })
+      // Linking again makes a new link for the same result.
+      current = defect({ links: [{ ...link, id: "link-2" }] })
       return json(200, current)
     }
     renderAt("/projects/PAY/defects/PAY-D-14", "tester")
@@ -255,9 +256,10 @@ describe("DefectPage links", () => {
           ?.body
       ).toEqual({ resultId: "result-1" })
     )
-    expect(
-      await screen.findByRole("button", { name: "Unlink PAY-R-12 › PAY-TC-3" })
-    ).toBeInTheDocument()
+    const unlinkAgain = await screen.findByRole("button", {
+      name: "Unlink PAY-R-12 › PAY-TC-3",
+    })
+    await waitFor(() => expect(unlinkAgain).toHaveFocus())
   })
 })
 

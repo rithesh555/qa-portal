@@ -16,7 +16,7 @@ import {
   UploadIcon,
 } from "lucide-react"
 import { type MouseEvent, useState } from "react"
-import { Link, useSearchParams } from "react-router"
+import { Link } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -64,6 +64,7 @@ import { CaseDetails, casePagePath } from "./case-details"
 import { ExportDialog } from "./export-dialog"
 import { downloadCases } from "./spreadsheet"
 import { SuiteTree, suiteOptions } from "./suite-tree"
+import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
 const shortDate = new Intl.DateTimeFormat(undefined, {
   month: "short",
@@ -127,7 +128,7 @@ function isPlainClick(event: MouseEvent) {
 export function CasesPage() {
   const { project, allowed } = useProjectContext()
   const [query, setQuery] = useListParams(caseListQuerySchema)
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useLatestSearchParams()
   const preview = searchParams.get("case")
   const suitesQuery = useSuites(project.key)
   const labelsQuery = useLabels(project.key)
@@ -530,7 +531,7 @@ export function CasesPage() {
                         <TableHead className="hidden md:table-cell">
                           ID
                         </TableHead>
-                        <TableHead className="md:min-w-60">Title</TableHead>
+                        <TableHead className="md:min-w-48">Title</TableHead>
                         <TableHead className="hidden md:table-cell">
                           Priority
                         </TableHead>

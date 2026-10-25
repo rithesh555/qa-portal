@@ -165,17 +165,19 @@ describe("users API", () => {
       expect(JSON.stringify(log[0]!.changes)).not.toContain(PASSWORD)
     })
 
-    it("rejects a taken username or email with 409", async () => {
+    it("rejects a taken username or email with 409, saying which", async () => {
       const dupName = await call(admin, "POST", "/api/users", {
         ...input,
         username: "BOB",
       })
       expect(dupName.statusCode).toBe(409)
+      expect(dupName.json()).toMatchObject({ reason: "username-taken" })
       const dupEmail = await call(admin, "POST", "/api/users", {
         ...input,
         email: "bob@test.local",
       })
       expect(dupEmail.statusCode).toBe(409)
+      expect(dupEmail.json()).toMatchObject({ reason: "email-taken" })
     })
 
     it("validates input", async () => {

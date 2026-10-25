@@ -87,10 +87,10 @@ function RunRow({ run }: { run: RunSummary }) {
   ].filter(Boolean)
   return (
     <TableRow>
-      <TableCell className="align-top font-mono text-xs whitespace-nowrap text-muted-foreground">
+      <TableCell className="hidden align-top font-mono text-xs whitespace-nowrap text-muted-foreground md:table-cell">
         {run.key}
       </TableCell>
-      <TableCell className="max-w-96 min-w-56 align-top whitespace-normal">
+      <TableCell className="align-top whitespace-normal md:max-w-96 md:min-w-56">
         <Link
           to={run.key}
           className="font-semibold underline-offset-4 hover:text-primary hover:underline"
@@ -111,22 +111,32 @@ function RunRow({ run }: { run: RunSummary }) {
               ` · ${run.counts.untested} left untested`}
           </p>
         )}
+        {/* On a phone the other columns fold in here (F15). */}
+        <div className="mt-2 flex flex-col gap-1.5 md:hidden">
+          <ProgressBar counts={run.counts} />
+          <p className="text-xs text-muted-foreground">
+            <span className="font-mono">{run.key}</span> ·{" "}
+            {formatPercent(completion(run.counts))} complete ·{" "}
+            {run.counts.failed} failed · pass rate{" "}
+            {formatPercent(passRate(run.counts))} · {timeAgo(run.updatedAt)}
+          </p>
+        </div>
       </TableCell>
-      <TableCell className="min-w-48 align-top">
+      <TableCell className="hidden min-w-48 align-top md:table-cell">
         <ProgressBar counts={run.counts} />
         <p className="mt-1.5 text-xs text-muted-foreground">
           {formatPercent(completion(run.counts))} complete · {run.counts.failed}{" "}
           failed · {run.counts.blocked} blocked
         </p>
       </TableCell>
-      <TableCell className="align-top font-medium tabular-nums">
+      <TableCell className="hidden align-top font-medium tabular-nums md:table-cell">
         {formatPercent(passRate(run.counts))}
       </TableCell>
-      <TableCell className="align-top">
+      <TableCell className="hidden align-top md:table-cell">
         <Assignees people={run.assignees} />
       </TableCell>
       <TableCell
-        className="align-top text-sm whitespace-nowrap text-muted-foreground"
+        className="hidden align-top text-sm whitespace-nowrap text-muted-foreground md:table-cell"
         title={exactTime.format(new Date(run.updatedAt))}
       >
         {timeAgo(run.updatedAt)}
@@ -334,12 +344,20 @@ export function RunsPage() {
             <Table aria-busy={runs.isFetching}>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  <TableHead className="hidden md:table-cell">ID</TableHead>
                   <TableHead>Run</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Pass rate</TableHead>
-                  <TableHead>Assigned</TableHead>
-                  <TableHead>Updated</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Progress
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Pass rate
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Assigned
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Updated
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

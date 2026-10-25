@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/toast"
 import { sessionQueryKey } from "@/features/auth/session"
 import { ProjectLayout } from "@/features/projects/project-layout"
 import { HomePage } from "./home-page"
+import { printCoverageRows } from "./print-page"
 import { daysUntil, targetText } from "./release-table"
 import { ReleasesOverviewPage } from "./releases-overview-page"
 import { readinessTitle, ReportsPage, runPassRate } from "./reports-page"
@@ -496,7 +497,28 @@ describe("HomePage", () => {
       "href",
       `/projects/PAY/reports?release=${R42}`
     )
-    expect(screen.getByText("Not ready · 3 checks fail")).toBeInTheDocument()
+    // Its column, and the copy folded under the name for phones.
+    expect(screen.getAllByText("Not ready · 3 checks fail")).toHaveLength(2)
+  })
+
+  it("links to All releases only for people who oversee several projects (F13)", async () => {
+    routes["GET /api/home"] = () => json(200, home())
+    at("/", <HomePage />)
+    await screen.findByRole("heading", { name: "Releases in your projects" })
+    expect(
+      screen.queryByRole("link", { name: "See all releases" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("offers All releases to a QA Lead of two projects", async () => {
+    routes["GET /api/home"] = () => json(200, home())
+    mount("/", [{ path: "/", element: <HomePage /> }], {
+      ...user,
+      projectsLed: 2,
+    } as SessionUser)
+    expect(
+      await screen.findByRole("link", { name: "See all releases" })
+    ).toHaveAttribute("href", "/releases")
   })
 
   it("gives a QA Lead a triage tab for the projects they lead", async () => {
@@ -577,6 +599,31 @@ describe("ReleasesOverviewPage", () => {
 })
 
 describe("report helpers", () => {
+  it("prints sub-suites under their parent so the counts add up (F12)", () => {
+    const row = (suite: string, depth: number, ready: number) => ({
+      suiteId: suite,
+      suite,
+      depth,
+      ready,
+      tested: ready,
+      passRate: 1,
+      openDefects: 0,
+    })
+    const rows = printCoverageRows([
+      row("Accounts", 0, 7),
+      row("Sign in", 1, 6),
+      row("Checkout", 0, 7),
+      row("No suite", 0, 6),
+    ])
+    expect(rows.map((r) => r[0])).toEqual([
+      "Accounts",
+      "Accounts › Sign in",
+      "Checkout",
+      "No suite",
+    ])
+    expect(rows.reduce((sum, r) => sum + Number(r[1]), 0)).toBe(26)
+  })
+
   it("titles the readiness panel", () => {
     const pass = exitChecks({
       passRate: 1,

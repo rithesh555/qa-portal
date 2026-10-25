@@ -140,9 +140,13 @@ test("E2E-USERS-006 a username that's taken is refused", async ({
     .fill(`dup.${unique().toLowerCase()}@e2e.qa-portal.local`)
   await d.getByRole("button", { name: "Generate" }).click()
   await d.getByRole("button", { name: "Create user" }).click()
-  await expect(d.getByRole("alert")).toContainText(
+  // F11: on the Username field, which is marked and focused.
+  const field = d.getByLabel("Username")
+  await expect(field).toHaveAccessibleDescription(
     "That username is already taken"
   )
+  await expect(field).toHaveAttribute("aria-invalid", "true")
+  await expect(field).toBeFocused()
 })
 
 test("E2E-USERS-007 edit a user's name, email and portal role", async ({

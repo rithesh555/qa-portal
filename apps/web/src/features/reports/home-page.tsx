@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { navFor } from "@/app/nav"
 import { useSession } from "@/features/auth/session"
 import {
   DefectStatusBadge,
@@ -53,6 +54,9 @@ export function HomePage() {
   const home = useHome()
   const h = home.data
   const firstName = me?.name.split(" ")[0] ?? ""
+  // Same rule as the sidebar: All releases is for people overseeing several projects.
+  const seesAllReleases =
+    !!me && navFor(me.role, me.projectsLed).some((i) => i.path === "/releases")
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,11 +137,13 @@ export function HomePage() {
               <CardTitle>
                 <h2>Releases in your projects</h2>
               </CardTitle>
-              <CardAction>
-                <Link to="/releases" className={linkCls}>
-                  See all releases
-                </Link>
-              </CardAction>
+              {seesAllReleases && (
+                <CardAction>
+                  <Link to="/releases" className={linkCls}>
+                    See all releases
+                  </Link>
+                </CardAction>
+              )}
             </CardHeader>
             <CardContent>
               {h.releases.length === 0 ? (

@@ -10,9 +10,7 @@ export async function expectAccessible(
   testInfo: TestInfo,
   label: string
 ) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze()
+  const results = await scan(page)
   const lines = results.violations.map(
     (v) =>
       `[${v.impact}] ${v.id}: ${v.help} — ${v.nodes.length} element(s): ${v.nodes
@@ -28,9 +26,27 @@ export async function expectAccessible(
       body: lines.join("\n"),
       contentType: "text/plain",
     })
-  const blocking = results.violations.filter(
+  let blocking = results.violations.filter(
     (v) => v.impact === "serious" || v.impact === "critical"
   )
+  // A colour caught mid-transition (a button fading while a preview reloads)
+  // isn't what anyone reads: count only problems a second scan still finds.
+  if (blocking.length) {
+    await page.waitForTimeout(500)
+    const again = new Set(
+      (await scan(page)).violations.flatMap((v) =>
+        v.nodes.map((n) => `${v.id} ${n.target.join(" ")}`)
+      )
+    )
+    blocking = blocking
+      .map((v) => ({
+        ...v,
+        nodes: v.nodes.filter((n) =>
+          again.has(`${v.id} ${n.target.join(" ")}`)
+        ),
+      }))
+      .filter((v) => v.nodes.length > 0)
+  }
   expect(
     blocking.map(
       (v) =>
@@ -41,4 +57,14 @@ export async function expectAccessible(
     ),
     `${label}: serious/critical axe violations`
   ).toEqual([])
+}
+
+async function scan(page: Page) {
+  // Let running transitions finish before measuring colours.
+  await page.evaluate(() =>
+    Promise.allSettled(document.getAnimations().map((a) => a.finished))
+  )
+  return new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze()
 }

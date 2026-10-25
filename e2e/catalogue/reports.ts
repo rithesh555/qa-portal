@@ -54,14 +54,16 @@ const suites: CatalogueSuite[] = [
       },
       {
         id: "E2E-HOME-005",
-        title: "Releases in my projects, with a link to all releases",
+        title:
+          "Releases in my projects; All releases is linked only for overseers",
         priority: "medium",
         steps: [
           [
             "Open Home",
             'The project\'s active release is in "Releases in your projects" and links to its report',
           ],
-          ["See all releases", "All releases opens"],
+          ["As a tester, look for See all releases", "It isn't offered"],
+          ["As an admin, See all releases", "All releases opens"],
         ],
       },
       {
@@ -292,6 +294,18 @@ const suites: CatalogueSuite[] = [
           [
             "Open Reports at phone width",
             "Readiness and key numbers stack; no sideways scrolling",
+          ],
+        ],
+      },
+      {
+        id: "E2E-RPT-017",
+        title: "The printed coverage lists sub-suites under their parent",
+        priority: "medium",
+        preconditions: "BASE: suite Accounts with sub-suite Sign in",
+        steps: [
+          [
+            "Open the print report",
+            'Coverage by suite has "Accounts › Sign in" right after Accounts',
           ],
         ],
       },

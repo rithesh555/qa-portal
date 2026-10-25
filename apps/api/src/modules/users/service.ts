@@ -153,9 +153,13 @@ async function assertAvailable(
   })
   if (!clash) return
   if (username && clash.username === username) {
-    throw httpError(409, "That username is already taken")
+    throw httpError(409, "That username is already taken", {
+      reason: "username-taken",
+    })
   }
-  throw httpError(409, "That email address is already in use")
+  throw httpError(409, "That email address is already in use", {
+    reason: "email-taken",
+  })
 }
 
 export async function createUser(
@@ -233,7 +237,9 @@ export async function updateUser(
     return toUser(row)
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw httpError(409, "That email address is already in use")
+      throw httpError(409, "That email address is already in use", {
+        reason: "email-taken",
+      })
     }
     throw err
   }

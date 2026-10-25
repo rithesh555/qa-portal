@@ -87,6 +87,7 @@ import { LabelsInput } from "./labels-input"
 import { StepsEditor } from "./steps-editor"
 import { suiteOptions } from "./suite-tree"
 import { PageLoading } from "@/components/page-loading"
+import { useStickyFooter } from "@/hooks/use-sticky-footer"
 
 type FormValues = z.input<typeof caseInputSchema>
 
@@ -246,6 +247,7 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
   const create = useCreateCase(project.key)
   const update = useUpdateCase(project.key, initial?.key ?? "")
   const [formError, setFormError] = useState<string | null>(null)
+  const stickyFooter = useStickyFooter<HTMLDivElement>()
   const [conflict, setConflict] = useState<TestCase | null>(null)
   const [baseVersion, setBaseVersion] = useState(initial?.version ?? 1)
   // The version the edits started from, for the three-way compare.
@@ -686,7 +688,10 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
           <StepsEditor />
         </section>
 
-        <div className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-end gap-2 border-t bg-background px-1 py-3">
+        <div
+          ref={stickyFooter}
+          className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-end gap-2 border-t bg-background px-1 py-3"
+        >
           {conflict ? (
             <span className="mr-auto text-sm font-medium text-amber-700 dark:text-amber-400">
               <TriangleAlertIcon className="mr-1 inline size-4" />A newer

@@ -5,7 +5,7 @@ import {
   RUN_CASE_STATUS_LABELS,
 } from "@qa/shared"
 import { CircleAlertIcon } from "lucide-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link, useParams } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -259,10 +259,17 @@ function LinkedResults({ defect }: { defect: Defect }) {
   // Results unlinked here, kept as rows with an Undo until this page is left
   // (not a timed toast: it can be reached whenever someone gets to it).
   const [removed, setRemoved] = useState<Defect["links"]>([])
-  const focusUndo = (id: string) =>
-    requestAnimationFrame(() =>
-      document.getElementById(`undo-unlink-${id}`)?.focus()
-    )
+  // Focus moves to the control that replaces the one just used (Undo after
+  // Unlink, Unlink after Undo) once that control has rendered: the refetch
+  // can land before or after the click's own update (F7, F9).
+  const focusTo = useRef<string | null>(null)
+  useEffect(() => {
+    if (!focusTo.current) return
+    const el = document.getElementById(focusTo.current)
+    if (!el) return
+    el.focus()
+    focusTo.current = null
+  })
   return (
     <section
       aria-labelledby="defect-links"
@@ -304,6 +311,7 @@ function LinkedResults({ defect }: { defect: Defect }) {
             </span>
             {allowed("defects:edit") && (
               <Button
+                id={`unlink-${l.resultId}`}
                 size="sm"
                 variant="ghost"
                 disabled={unlink.isPending}
@@ -311,7 +319,7 @@ function LinkedResults({ defect }: { defect: Defect }) {
                   unlink.mutate(l.id, {
                     onSuccess: () => {
                       setRemoved((r) => [...r, l])
-                      focusUndo(l.id)
+                      focusTo.current = `undo-unlink-${l.id}`
                     },
                     onError: (err) =>
                       toast.add({
@@ -349,8 +357,10 @@ function LinkedResults({ defect }: { defect: Defect }) {
               focusableWhenDisabled
               onClick={() =>
                 relink.mutate(l.resultId, {
-                  onSuccess: () =>
-                    setRemoved((r) => r.filter((x) => x.id !== l.id)),
+                  onSuccess: () => {
+                    setRemoved((r) => r.filter((x) => x.id !== l.id))
+                    focusTo.current = `unlink-${l.resultId}`
+                  },
                   onError: (err) =>
                     toast.add({
                       type: "error",

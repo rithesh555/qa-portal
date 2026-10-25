@@ -96,13 +96,14 @@ describe("UsersPage", () => {
     expect(url).toContain("q=bo")
   })
 
-  it("creates a user and shows the server's conflict message", async () => {
+  it("creates a user and puts a taken username on its field, focused (F11)", async () => {
     fetchMock.mockImplementation(async (_url: string, init?: RequestInit) => {
       if (init?.method === "POST") {
         return json(409, {
           statusCode: 409,
           error: "Conflict",
           message: "That username is already taken",
+          reason: "username-taken",
         })
       }
       return json(200, { items: [user({})], total: 1, page: 1, pageSize: 25 })
@@ -121,9 +122,12 @@ describe("UsersPage", () => {
     ).toHaveLength(16)
     await ui.click(within(dialog).getByRole("button", { name: "Create user" }))
 
-    expect(
-      await within(dialog).findByText("That username is already taken")
-    ).toBeInTheDocument()
+    const username = within(dialog).getByLabelText("Username")
+    await waitFor(() => expect(username).toHaveFocus())
+    expect(username).toHaveAttribute("aria-invalid", "true")
+    expect(username).toHaveAccessibleDescription(
+      /That username is already taken/
+    )
     await waitFor(() => {
       const post = fetchMock.mock.calls.find(
         ([, init]) => (init as RequestInit | undefined)?.method === "POST"

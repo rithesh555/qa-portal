@@ -178,7 +178,7 @@ const suites: CatalogueSuite[] = [
         steps: [
           [
             "User menu › Change password; enter a wrong current password",
-            "Your current password isn't right",
+            "Your current password isn't right, under Current password, which is cleared, marked invalid and focused",
           ],
         ],
       },

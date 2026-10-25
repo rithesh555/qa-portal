@@ -177,6 +177,23 @@ test.describe("as a viewer", () => {
     ).toBeVisible()
     await expect(page.getByText("Start a run")).toHaveCount(0)
   })
+
+  test("E2E-RPT-017 the printed coverage lists sub-suites under their parent", async ({
+    page,
+  }) => {
+    await page.goto(`/projects/${BASE.key}/reports/print`)
+    const coverage = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "Coverage by suite" }) })
+    const rows = coverage.getByRole("row")
+    await expect(rows.first()).toBeVisible()
+    const names = (await rows.allInnerTexts()).map((t) => t.split("\t")[0])
+    const accounts = names.indexOf(BASE.suites.accounts)
+    expect(accounts).toBeGreaterThan(0)
+    expect(names[accounts + 1]).toBe(
+      `${BASE.suites.accounts} › ${BASE.suites.signIn}`
+    )
+  })
 })
 
 test.describe("as a lead", () => {

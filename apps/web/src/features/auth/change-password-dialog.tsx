@@ -79,8 +79,16 @@ function ChangePasswordForm({
       error = { status: 0 }
     }
     if (error) {
-      setFormError(changeErrorMessage(error.status))
       form.resetField("currentPassword")
+      // A wrong password belongs to its field (cleared, marked, focused);
+      // anything else is about the whole form.
+      if (error.status === 400 || error.status === 401)
+        form.setError(
+          "currentPassword",
+          { message: changeErrorMessage(error.status) },
+          { shouldFocus: true }
+        )
+      else setFormError(changeErrorMessage(error.status))
       return
     }
     toast.add({

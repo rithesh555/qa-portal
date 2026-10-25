@@ -64,6 +64,7 @@ import { useKnownDefects } from "@/features/defects/api"
 import { KnownDefects } from "@/features/defects/known-defects"
 import { LogDefectDialog } from "@/features/defects/log-defect-dialog"
 import { InlineError } from "@/components/inline-error"
+import { useStickyFooter } from "@/hooks/use-sticky-footer"
 
 const RESULT_KEYS: Record<ResultStatus, string> = {
   passed: "P",
@@ -303,6 +304,7 @@ export function RunCasePane({
   const [comparing, setComparing] = useState(false)
   const [confirmLatest, setConfirmLatest] = useState(false)
   const noteRef = useRef<HTMLTextAreaElement>(null)
+  const stickyFooter = useStickyFooter<HTMLDivElement>()
   const headingRef = useRef<HTMLHeadingElement>(null)
   const detail = detailQuery.data
   const known = useKnownDefects(project.key, item.id)
@@ -644,6 +646,7 @@ export function RunCasePane({
       {/* The result bar stays in reach while the steps scroll. */}
       {/* Sticky while choosing; with the note open it scrolls, so it never covers the case on a phone. */}
       <div
+        ref={pending ? undefined : stickyFooter}
         className={cn(
           "mt-auto flex flex-col gap-3 rounded-b-xl border-t bg-card/95 p-4 backdrop-blur sm:px-6",
           !pending && "sticky bottom-0"
