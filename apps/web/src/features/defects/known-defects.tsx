@@ -89,7 +89,7 @@ export function KnownDefects({
               {retest ? "Retesting " : "Known defect "}
               <Link
                 to={projectPath(project.key, `defects/${d.key}`)}
-                className="font-semibold underline-offset-4 hover:underline"
+                className="font-semibold text-primary underline underline-offset-4"
               >
                 {d.key}
               </Link>{" "}

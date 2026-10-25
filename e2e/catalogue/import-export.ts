@@ -43,7 +43,7 @@ const suites: CatalogueSuite[] = [
           ],
           [
             "Change P2 to Low and Check rows",
-            "4 rows with errors; Import is disabled",
+            "4 rows with errors; Import is disabled, shows no count and points to the fix",
           ],
         ]
       ),

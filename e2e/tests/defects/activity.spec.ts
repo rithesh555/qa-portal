@@ -74,6 +74,11 @@ test("E2E-DEF-034 a passed retest closes a fixed defect from the run", async ({
   )
   const known = page.getByRole("region", { name: "Known defects on this case" })
   await expect(known).toContainText(`Retesting ${d.key}`)
+  // F21: the key reads as a link, not just bold text.
+  await expect(known.getByRole("link", { name: d.key, exact: true })).toHaveCSS(
+    "text-decoration-line",
+    "underline"
+  )
   await known
     .getByRole("button", { name: `Close ${d.key} as verified` })
     .click()

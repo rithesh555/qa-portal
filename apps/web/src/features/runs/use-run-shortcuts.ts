@@ -34,9 +34,10 @@ function keyIsTaken(event: KeyboardEvent): boolean {
       ))
   )
     return true
+  // One that's closing (fading out, marked data-closed) no longer counts (F20).
   return Boolean(
     document.querySelector(
-      "[role=dialog], [role=alertdialog], [role=menu], [data-slot=popover-content]"
+      ":is([role=dialog], [role=alertdialog], [role=menu], [data-slot=popover-content]):not([data-closed])"
     )
   )
 }

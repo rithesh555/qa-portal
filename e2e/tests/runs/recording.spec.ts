@@ -187,6 +187,20 @@ test("E2E-RUN-021 ? lists the shortcuts, and they can be switched off", async ({
   ).not.toBeChecked()
 })
 
+test("E2E-RUN-046 a shortcut pressed right after closing the help works", async ({
+  page,
+  project,
+}) => {
+  await openRun(page, project)
+  await page.keyboard.press("?")
+  const help = page.getByRole("dialog", { name: "Keyboard shortcuts" })
+  await expect(help).toBeVisible()
+  // F20: no waiting for the dialog to finish fading out.
+  await page.keyboard.press("Escape")
+  await page.keyboard.press("p")
+  await expect(stat(page, "1 passed")).toBeVisible()
+})
+
 test("E2E-RUN-022 with auto-advance off, saving stays on the case", async ({
   page,
   project,

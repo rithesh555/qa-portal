@@ -78,7 +78,10 @@ const suites: CatalogueSuite[] = [
         priority: "high",
         preconditions: "An open run; the browser goes offline",
         steps: [
-          ["Press P while offline", "Nothing is counted yet"],
+          [
+            "Press P while offline",
+            "Nothing is counted yet; a status says it will save when back online",
+          ],
           ["Go back online", "The result is recorded and the next case opens"],
         ],
       },

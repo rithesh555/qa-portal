@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { resetPasswordSchema, type User } from "@qa/shared"
 import { CircleAlertIcon } from "lucide-react"
-import { useState } from "react"
+import { type RefObject, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import type { z } from "zod"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -114,17 +114,28 @@ export function ResetPasswordDialog({
 export function DeactivateDialog({
   user,
   onClose,
+  focusAfter,
 }: {
   user: User | null
   onClose: () => void
+  /** Where focus goes once they're deactivated: their row (and its menu) is gone. */
+  focusAfter: RefObject<HTMLElement | null>
 }) {
   const setActive = useSetActive()
+  const deactivated = useRef(false)
 
   async function deactivate() {
     if (!user) return
     try {
       await setActive.mutateAsync({ user, active: false })
-      toast.add({ title: `${user.name} has been deactivated` })
+      deactivated.current = true
+      toast.add({
+        title: `${user.name} has been deactivated`,
+        actionProps: {
+          children: "Reactivate",
+          onClick: () => void reactivate(user),
+        },
+      })
       onClose()
     } catch (err) {
       toast.add({
@@ -135,12 +146,31 @@ export function DeactivateDialog({
     }
   }
 
+  async function reactivate(who: User) {
+    try {
+      await setActive.mutateAsync({ user: who, active: true })
+      toast.add({ title: `${who.name} can sign in again` })
+    } catch (err) {
+      toast.add({
+        type: "error",
+        title: `Couldn't reactivate ${who.name}`,
+        description: errorMessage(err),
+      })
+    }
+  }
+
   return (
     <AlertDialog
       open={user !== null}
       onOpenChange={(open) => !open && onClose()}
     >
-      <AlertDialogContent>
+      <AlertDialogContent
+        finalFocus={() => {
+          if (!deactivated.current) return true
+          deactivated.current = false
+          return focusAfter.current
+        }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Deactivate {user?.name}?</AlertDialogTitle>
           <AlertDialogDescription>

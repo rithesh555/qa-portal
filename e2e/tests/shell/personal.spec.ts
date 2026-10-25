@@ -41,6 +41,9 @@ test("E2E-SHELL-010 skip to content is the first thing the keyboard reaches", as
   const skip = page.getByRole("link", { name: "Skip to content" })
   await expect(skip).toBeFocused()
   await expect(skip).toBeVisible()
+  // F18: readable when shown — padded, not squeezed onto the logo.
+  await expect(skip).toHaveCSS("padding-left", "12px")
+  await expect(skip).toHaveCSS("padding-top", "8px")
   await page.keyboard.press("Enter")
   await expect(page.locator("#content")).toBeFocused()
 })

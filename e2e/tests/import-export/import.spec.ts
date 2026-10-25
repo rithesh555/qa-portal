@@ -147,9 +147,14 @@ test.describe("as a tester", () => {
     const check = page.getByRole("region", { name: "Check rows" })
     await expect(check.getByText("4 rows with errors")).toBeVisible()
     await expect(check.getByText("Fix 4 rows before importing")).toBeVisible()
-    await expect(
-      check.getByRole("button", { name: /^Import \d+ test cases$/ })
-    ).toBeDisabled()
+    // F25: a blocked import doesn't promise a count; it points at the fix.
+    const importButton = check.getByRole("button", {
+      name: "Import test cases",
+    })
+    await expect(importButton).toBeDisabled()
+    await expect(importButton).toHaveAccessibleDescription(
+      /Fix 4 rows before importing/
+    )
     await expect(
       check.getByRole("row", { name: /Upgrade plan charges the difference/ })
     ).toContainText("Low")

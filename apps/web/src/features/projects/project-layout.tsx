@@ -23,6 +23,7 @@ import { useSession } from "@/features/auth/session"
 import { ApiError, errorMessage } from "@/lib/api"
 import { useProject } from "./api"
 import { PageLoading } from "@/components/page-loading"
+import { usePageTitle } from "@/hooks/use-page-title"
 
 export interface ProjectContext {
   project: Project
@@ -36,6 +37,7 @@ export function useProjectContext() {
 }
 
 function ProjectNotFound({ isAdmin }: { isAdmin: boolean }) {
+  usePageTitle("Project not found")
   return (
     <Empty className="flex-1">
       <EmptyHeader>

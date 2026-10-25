@@ -1051,7 +1051,7 @@ export function ImportPage() {
           {check.errorRows > 0 && (
             <Alert variant="destructive" className="mx-5 mt-4 w-auto">
               <CircleAlertIcon />
-              <AlertTitle>
+              <AlertTitle id="import-blocked">
                 Fix {plural(check.errorRows, "row", "rows")} before importing
               </AlertTitle>
               <AlertDescription className="flex flex-col gap-2">
@@ -1196,10 +1196,16 @@ export function ImportPage() {
             </Button>
             <Button
               disabled={check.errorRows > 0 || run.isPending}
+              aria-describedby={
+                check.errorRows > 0 ? "import-blocked" : undefined
+              }
               onClick={() => void doImport()}
             >
               {run.isPending && <Spinner data-icon="inline-start" />}
-              Import {plural(check.total, "test case", "test cases")}
+              {/* Blocked: no count to promise; the alert says what to fix. */}
+              {check.errorRows > 0
+                ? "Import test cases"
+                : `Import ${plural(check.total, "test case", "test cases")}`}
             </Button>
           </div>
         </section>

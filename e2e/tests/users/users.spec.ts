@@ -240,6 +240,32 @@ test("E2E-USERS-010 deactivate someone after confirming", async ({
   await expect(rowWith(page, `@${user.username}`)).toContainText("Deactivated")
 })
 
+test("E2E-USERS-013 after deactivating, focus stays on the page and Reactivate undoes it", async ({
+  page,
+  slot,
+}) => {
+  const admin = new PortalApi(await apiContext(slot, "admin"))
+  const user = await freshUser(admin)
+  await openUsers(page, user.username)
+  await actionsFor(page, user.name).click()
+  await page.getByRole("menuitem", { name: "Deactivate" }).click()
+  await page
+    .getByRole("alertdialog", { name: `Deactivate ${user.name}?` })
+    .getByRole("button", { name: "Deactivate" })
+    .click()
+  // F22: their row is gone, so focus goes to the page heading, not nowhere.
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Users" })
+  ).toBeFocused()
+  const toast = page
+    .getByRole("region", { name: "Notifications" })
+    .getByRole("dialog")
+    .filter({ hasText: `${user.name} has been deactivated` })
+  await toast.getByRole("button", { name: "Reactivate" }).click()
+  await expect(page.getByText(`${user.name} can sign in again`)).toBeVisible()
+  await expect(rowWith(page, `@${user.username}`)).toBeVisible()
+})
+
 test("E2E-USERS-011 reactivate someone and they can sign in again", async ({
   page,
   browser,

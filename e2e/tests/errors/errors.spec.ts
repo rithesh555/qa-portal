@@ -101,11 +101,16 @@ test.describe("as a tester", () => {
 
     await page.context().setOffline(true)
     await page.keyboard.press("p")
-    // F26 (findings/app-findings.md): the save waits for the network with the
-    // result buttons disabled and no message saying why.
+    // F26: the save waits for the network and says so.
     await expect(resultButton(page, "Passed")).toBeDisabled()
+    await expect(
+      page.getByRole("status").filter({ hasText: "offline" })
+    ).toHaveText(
+      "You're offline. This result will save when you're back online."
+    )
     await expect(page.getByText("0% complete (0 of 2)")).toBeVisible()
     await page.context().setOffline(false)
+    await expect(page.getByText("You're offline.")).toBeHidden()
     await expect(page.getByText("50% complete (1 of 2)")).toBeVisible()
     await expect(currentCase(page)).toHaveText("Run case 2")
   })

@@ -14,7 +14,7 @@ import {
   UserXIcon,
   UsersIcon,
 } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -153,6 +153,7 @@ export function UsersPage() {
   const [query, setQuery] = useListParams(userListQuerySchema)
   const users = useUsers(query)
   const { data: me } = useSession()
+  const heading = useRef<HTMLHeadingElement>(null)
 
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<User | null>(null)
@@ -166,7 +167,13 @@ export function UsersPage() {
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
+          <h1
+            ref={heading}
+            tabIndex={-1}
+            className="text-2xl font-semibold tracking-tight outline-none"
+          >
+            Users
+          </h1>
           <p className="text-sm text-muted-foreground">
             Create accounts, reset passwords and deactivate people who&apos;ve
             left. Project access is set on each project.
@@ -346,6 +353,7 @@ export function UsersPage() {
       <DeactivateDialog
         user={deactivating}
         onClose={() => setDeactivating(null)}
+        focusAfter={heading}
       />
     </div>
   )

@@ -172,6 +172,20 @@ const suites: CatalogueSuite[] = [
           ],
         ],
       },
+      {
+        id: "E2E-USERS-013",
+        title:
+          "After deactivating, focus stays on the page and Reactivate undoes it",
+        priority: "medium",
+        type: "usability",
+        steps: [
+          ["Deactivate someone and confirm", "Focus is on the Users heading"],
+          [
+            "Select Reactivate in the confirmation",
+            '"<name> can sign in again"; they are back in Active',
+          ],
+        ],
+      },
     ],
   },
 ]

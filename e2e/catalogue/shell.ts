@@ -76,8 +76,11 @@ const suites: CatalogueSuite[] = [
         title: "Unknown pages and projects show not found",
         priority: "medium",
         steps: [
-          ["Open /no-such-page", "Page not found, with Go to home"],
-          ["Open /projects/NOPE9", "Project not found"],
+          [
+            "Open /no-such-page",
+            "Page not found, with Go to home; the tab says Page not found",
+          ],
+          ["Open /projects/NOPE9", "Project not found, in the tab too"],
         ],
       },
       {
@@ -116,7 +119,10 @@ const suites: CatalogueSuite[] = [
         priority: "medium",
         type: "usability",
         steps: [
-          ["Load a page and press Tab", '"Skip to content" appears, focused'],
+          [
+            "Load a page and press Tab",
+            '"Skip to content" appears, focused and padded at the top left',
+          ],
           ["Press Enter", "Focus moves to the page content"],
         ],
       },

@@ -5,6 +5,7 @@ export const loginSchema = z.object({
   username: z
     .string()
     .trim()
+    .min(1, "Enter your username")
     .min(3, "Usernames are at least 3 characters")
     .max(30, "Usernames are at most 30 characters"),
   password: z.string().min(1, "Enter your password"),

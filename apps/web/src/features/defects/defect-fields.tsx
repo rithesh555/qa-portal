@@ -468,7 +468,7 @@ export function DefectFields({ defect }: { defect: Defect }) {
           )}
           {defect.foundInRun && (
             <>
-              {found.length ? " · " : ""}
+              {" · "}
               <Link
                 to={projectPath(project.key, `runs/${defect.foundInRun.key}`)}
                 className="text-primary underline-offset-4 hover:underline"

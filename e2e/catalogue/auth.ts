@@ -41,7 +41,7 @@ const suites: CatalogueSuite[] = [
         steps: [
           [
             "Select Sign in with both fields empty",
-            "Usernames are at least 3 characters; Enter your password",
+            "Enter your username; Enter your password",
           ],
         ],
       },

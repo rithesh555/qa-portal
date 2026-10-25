@@ -263,7 +263,66 @@ describe("DefectPage links", () => {
   })
 })
 
+describe("DefectPage comments (F19)", () => {
+  const comment = (body: string) => ({
+    id: "c1",
+    kind: "comment" as const,
+    actor: tom,
+    action: "commented",
+    changes: null,
+    body,
+    createdAt: "2026-10-14T11:00:00.000Z",
+  })
+
+  it("posts a comment with Ctrl+Enter", async () => {
+    routes["GET /api/projects/PAY/defects/PAY-D-14"] = () => json(200, defect())
+    routes["POST /api/projects/PAY/defects/PAY-D-14/comments"] = () =>
+      json(200, comment("Seen on staging too"))
+    renderAt("/projects/PAY/defects/PAY-D-14", "tester")
+    const box = await screen.findByLabelText("Add a comment")
+    await userEvent.type(box, "Seen on staging too")
+    await userEvent.keyboard("{Control>}{Enter}{/Control}")
+    await waitFor(() =>
+      expect(
+        calls.find((c) => c.method === "POST" && c.path.endsWith("/comments"))
+          ?.body
+      ).toEqual({ body: "Seen on staging too" })
+    )
+  })
+
+  it("turns web addresses in comments into links, and nothing else", async () => {
+    routes["GET /api/projects/PAY/defects/PAY-D-14"] = () => json(200, defect())
+    routes["GET /api/projects/PAY/defects/PAY-D-14/activity"] = () =>
+      json(200, {
+        items: [
+          comment(
+            "Log: https://logs.example.com/run/42?x=1. Not javascript:alert(1)"
+          ),
+        ],
+      })
+    renderAt("/projects/PAY/defects/PAY-D-14", "tester")
+    const link = await screen.findByRole("link", {
+      name: "https://logs.example.com/run/42?x=1",
+    })
+    expect(link).toHaveAttribute("href", "https://logs.example.com/run/42?x=1")
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText(/Not javascript:alert\(1\)/)).toBeInTheDocument()
+    expect(
+      screen.queryByRole("link", { name: /javascript/ })
+    ).not.toBeInTheDocument()
+  })
+})
+
 describe("DefectPage workflow", () => {
+  it("separates No release from the run it was found in (F17)", async () => {
+    routes["GET /api/projects/PAY/defects/PAY-D-14"] = () =>
+      json(200, defect({ foundInRelease: null }))
+    renderAt("/projects/PAY/defects/PAY-D-14", "tester")
+    const run = await screen.findByRole("link", { name: "PAY-R-12" })
+    expect(run.parentElement).toHaveTextContent(/^No release · PAY-R-12$/)
+  })
+
   it("leaves triage to a QA Lead", async () => {
     routes["GET /api/projects/PAY/defects/PAY-D-14"] = () => json(200, defect())
     renderAt("/projects/PAY/defects/PAY-D-14", "tester")

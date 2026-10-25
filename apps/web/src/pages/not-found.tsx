@@ -9,8 +9,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { usePageTitle } from "@/hooks/use-page-title"
 
 export function NotFound() {
+  usePageTitle("Page not found")
   return (
     // Fills the space it's given: the whole screen outside the app, the page
     // area inside it, without scrolling.

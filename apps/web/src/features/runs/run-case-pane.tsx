@@ -756,6 +756,14 @@ export function RunCasePane({
               })}
             </div>
           )}
+          {/* Rendered empty so the live region exists before it speaks. */}
+          <p
+            role="status"
+            className="w-full text-sm text-muted-foreground empty:hidden sm:text-right"
+          >
+            {record.isPaused &&
+              "You're offline. This result will save when you're back online."}
+          </p>
         </div>
 
         {pending && detail && (

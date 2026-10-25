@@ -38,9 +38,7 @@ test("E2E-AUTH-002 a wrong password is refused and the password field is cleared
 test("E2E-AUTH-003 empty fields show what to fill in", async ({ page }) => {
   await page.goto("/login")
   await page.getByRole("button", { name: "Sign in" }).click()
-  await expect(
-    page.getByText("Usernames are at least 3 characters")
-  ).toBeVisible()
+  await expect(page.getByText("Enter your username")).toBeVisible()
   await expect(page.getByText("Enter your password")).toBeVisible()
 })
 

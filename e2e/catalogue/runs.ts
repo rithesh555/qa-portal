@@ -255,6 +255,13 @@ const suites: CatalogueSuite[] = [
         ],
       },
       {
+        id: "E2E-RUN-046",
+        title: "A shortcut pressed right after closing the help works",
+        priority: "low",
+        type: "usability",
+        steps: [["Press ?, then Escape, then P at once", "The case is Passed"]],
+      },
+      {
         id: "E2E-RUN-020",
         title: "U undoes the last result",
         priority: "high",

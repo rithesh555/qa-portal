@@ -17,6 +17,11 @@ describe("loginSchema", () => {
     ).toBe(false)
   })
 
+  it("asks for a username when it's empty, before its length (F24)", () => {
+    const result = loginSchema.safeParse({ username: "  ", password: "x" })
+    expect(result.error?.issues[0]?.message).toBe("Enter your username")
+  })
+
   it("requires a password", () => {
     const result = loginSchema.safeParse({ username: "alice", password: "" })
     expect(result.success).toBe(false)

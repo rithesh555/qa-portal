@@ -1,6 +1,6 @@
 import { PORTAL_ROLE_LABELS, type ProjectSummary } from "@qa/shared"
 import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router"
 import { BrandMark } from "@/components/brand-mark"
 import { useTheme } from "@/components/theme-provider"
@@ -301,16 +301,18 @@ export function AppShell() {
   const items = user ? navFor(user.role, user.projectsLed) : []
   const project = useSidebarProject()
 
-  useEffect(() => {
+  // A layout effect, so a page's own title (usePageTitle) comes after it.
+  useLayoutEffect(() => {
     document.title = pageTitle(pathname, project)
   }, [pathname, project])
 
   return (
     <SidebarProvider>
-      {/* First thing a keyboard reaches: past the sidebar to the page. */}
+      {/* First thing a keyboard reaches: past the sidebar to the page. Padding
+          is set on focus: not-sr-only resets it (F18). */}
       <a
         href="#content"
-        className="sr-only z-50 rounded-md bg-background px-3 py-2 text-sm font-medium shadow ring-2 ring-ring focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 rounded-md bg-background text-sm font-medium shadow ring-2 ring-ring focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:px-3 focus:py-2"
       >
         Skip to content
       </a>

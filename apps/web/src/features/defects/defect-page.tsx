@@ -49,6 +49,7 @@ import { DefectFields } from "./defect-fields"
 import { DefectWorkflow } from "./defect-workflow"
 import { PageLoading } from "@/components/page-loading"
 import { InlineError } from "@/components/inline-error"
+import { LinkifiedText } from "@/components/linkified-text"
 
 function Section({
   label,
@@ -467,7 +468,7 @@ function Activity({ defect }: { defect: Defect }) {
                 </p>
                 {(e.body || typeof e.changes?.note === "string") && (
                   <p className="mt-1 text-sm break-words whitespace-pre-wrap">
-                    {e.body || String(e.changes?.note)}
+                    <LinkifiedText text={e.body || String(e.changes?.note)} />
                   </p>
                 )}
               </div>
@@ -500,6 +501,13 @@ function Activity({ defect }: { defect: Defect }) {
             placeholder="Add a comment. Plain text; paste links to logs or screenshots."
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault()
+                void post()
+              }
+            }}
+            aria-keyshortcuts="Control+Enter"
           />
           <div className="flex justify-end">
             <Button type="submit" disabled={!body.trim() || comment.isPending}>
