@@ -72,6 +72,13 @@ const RESULT_KEYS: Record<ResultStatus, string> = {
   skipped: "S",
 }
 
+/** A Failed/Blocked result being written but not saved yet. */
+export interface NoteDraft {
+  status: "failed" | "blocked"
+  note: string
+  failedStep: number | null
+}
+
 export interface Recorded {
   item: RunCase
   status: RunCaseStatus
@@ -250,6 +257,8 @@ export function RunCasePane({
   onHelp,
   advance,
   autoFocus,
+  draft,
+  onDraftChange,
 }: {
   run: TestRun
   item: RunCase
@@ -266,14 +275,21 @@ export function RunCasePane({
   advance: boolean
   /** Move focus to the case heading on arrival (after navigating or saving). */
   autoFocus: boolean
+  /** An unsaved note from an earlier visit to this case. */
+  draft: NoteDraft | undefined
+  onDraftChange: (draft: NoteDraft | null) => void
 }) {
   const { project, allowed } = useProjectContext()
   const detailQuery = useRunCase(project.key, run.key, item.id)
   const record = useRecordResult(project.key, run.key)
   const refresh = useRefreshCase(project.key, run.key)
-  const [pending, setPending] = useState<"failed" | "blocked" | null>(null)
-  const [note, setNote] = useState("")
-  const [failedStep, setFailedStep] = useState<number | null>(null)
+  const [pending, setPending] = useState<"failed" | "blocked" | null>(
+    draft?.status ?? null
+  )
+  const [note, setNote] = useState(draft?.note ?? "")
+  const [failedStep, setFailedStep] = useState<number | null>(
+    draft?.failedStep ?? null
+  )
   const [noteError, setNoteError] = useState(false)
   const [conflict, setConflict] = useState<{
     message: string
@@ -296,6 +312,11 @@ export function RunCasePane({
   useEffect(() => {
     if (pending) noteRef.current?.focus()
   }, [pending])
+
+  // The pane is remounted per case, so the page keeps the unsaved note.
+  useEffect(() => {
+    onDraftChange(pending ? { status: pending, note, failedStep } : null)
+  }, [pending, note, failedStep, onDraftChange])
 
   // The pane is remounted per case; keep keyboard and screen reader users on it.
   useEffect(() => {
@@ -324,6 +345,8 @@ export function RunCasePane({
       setPending(null)
       setNote("")
       setFailedStep(null)
+      // Saving may move to the next case, unmounting this pane first.
+      onDraftChange(null)
       onRecorded({
         item,
         status,

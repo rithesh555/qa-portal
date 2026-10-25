@@ -321,6 +321,72 @@ describe("RunPage", () => {
     })
   })
 
+  it("keeps an unsaved Failed note when moving to another case and back", async () => {
+    serveRun(run(), [rc(1), rc(2)])
+    renderAt("/projects/PAY/runs/PAY-R-12", "tester")
+    await screen.findByRole("heading", { name: "Case number 1" })
+    await waitFor(() => expect(resultButton("Failed")).toBeEnabled())
+    await userEvent.keyboard("f")
+    const note = await screen.findByRole("textbox", {
+      name: /What went wrong/,
+    })
+    await userEvent.type(note, "Spinner never stops")
+    await userEvent.click(screen.getByRole("button", { name: /^Next/ }))
+    await screen.findByRole("heading", { name: "Case number 2" })
+    expect(
+      screen.queryByRole("textbox", { name: /What went wrong/ })
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: /^Previous/ }))
+    await screen.findByRole("heading", { name: "Case number 1" })
+    expect(
+      await screen.findByRole("textbox", { name: /What went wrong/ })
+    ).toHaveValue("Spinner never stops")
+    expect(resultCalls()).toHaveLength(0)
+  })
+
+  it("asks before leaving the run with an unsaved note", async () => {
+    serveRun(run(), [rc(1)])
+    routes["GET /api/projects/PAY/runs"] = () =>
+      json(200, { items: [], total: 0 })
+    const router = renderAt("/projects/PAY/runs/PAY-R-12", "tester")
+    await screen.findByRole("heading", { name: "Case number 1" })
+    await waitFor(() => expect(resultButton("Blocked")).toBeEnabled())
+    await userEvent.keyboard("b")
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: /What went wrong/ }),
+      "Login is down"
+    )
+    void router.navigate("/projects/PAY/runs")
+    const dialog = await screen.findByRole("alertdialog")
+    expect(dialog).toHaveTextContent(/will be lost/)
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Keep editing" })
+    )
+    expect(router.state.location.pathname).toBe("/projects/PAY/runs/PAY-R-12")
+    expect(
+      screen.getByRole("textbox", { name: /What went wrong/ })
+    ).toHaveValue("Login is down")
+  })
+
+  it("forgets the note once it's saved: leaving doesn't ask", async () => {
+    serveRun(run(), [rc(1), rc(2)])
+    routes["GET /api/projects/PAY/runs"] = () =>
+      json(200, { items: [], total: 0 })
+    const router = renderAt("/projects/PAY/runs/PAY-R-12", "tester")
+    await screen.findByRole("heading", { name: "Case number 1" })
+    await waitFor(() => expect(resultButton("Failed")).toBeEnabled())
+    await userEvent.keyboard("f")
+    await userEvent.type(
+      await screen.findByRole("textbox", { name: /What went wrong/ }),
+      "Spinner never stops{Control>}{Enter}{/Control}"
+    )
+    await screen.findByRole("heading", { name: "Case number 2" })
+    await router.navigate("/projects/PAY/runs")
+    expect(router.state.location.pathname).toBe("/projects/PAY/runs")
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
+  })
+
   it("undoes the last result by recording the one before it", async () => {
     const cases = [rc(1), rc(2)]
     serveRun(run(), cases)

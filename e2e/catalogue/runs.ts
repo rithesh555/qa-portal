@@ -236,6 +236,25 @@ const suites: CatalogueSuite[] = [
         steps: [["Press J, N, then K", "1 of 3 → 2 of 3 → 3 of 3 → 2 of 3"]],
       },
       {
+        id: "E2E-RUN-045",
+        title:
+          "An unsaved fail note survives moving between cases; leaving the run asks first",
+        priority: "high",
+        type: "functional",
+        steps: [
+          ["Press F, type a note, then select Next", "Case 2 opens"],
+          [
+            "Select Previous",
+            "Case 1 shows the Failed form with the typed note",
+          ],
+          [
+            "Select Test runs in the breadcrumb",
+            '"Leave without saving?" asks first',
+          ],
+          ["Keep editing", "Still on the run with the note"],
+        ],
+      },
+      {
         id: "E2E-RUN-020",
         title: "U undoes the last result",
         priority: "high",

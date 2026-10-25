@@ -16,8 +16,14 @@ import {
   LockIcon,
   PartyPopperIcon,
 } from "lucide-react"
-import { useCallback, useState } from "react"
-import { Link, Navigate, useParams, useSearchParams } from "react-router"
+import { useCallback, useEffect, useState } from "react"
+import {
+  Link,
+  Navigate,
+  useBlocker,
+  useParams,
+  useSearchParams,
+} from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -68,7 +74,7 @@ import {
   useRun,
   useRunCases,
 } from "./api"
-import { type Recorded, RunCasePane } from "./run-case-pane"
+import { type NoteDraft, type Recorded, RunCasePane } from "./run-case-pane"
 import {
   CASE_FILTERS,
   type CaseFilter,
@@ -284,6 +290,29 @@ export function RunPage() {
   const close = useCloseRun(project.key, ref)
   const reopen = useReopenRun(project.key, ref)
   const remove = useRemoveCases(project.key, ref)
+  // Failed/Blocked notes typed but not saved, by run case. They survive moving
+  // between cases, and leaving the run with one asks first.
+  const [drafts, setDrafts] = useState<Record<string, NoteDraft>>({})
+  const setDraft = useCallback(
+    (id: string, draft: NoteDraft | null) =>
+      setDrafts((d) => {
+        if (draft) return { ...d, [id]: draft }
+        if (!(id in d)) return d
+        return Object.fromEntries(Object.entries(d).filter(([k]) => k !== id))
+      }),
+    []
+  )
+  const unsaved = Object.values(drafts).filter((d) => d.note.trim()).length
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      unsaved > 0 && currentLocation.pathname !== nextLocation.pathname
+  )
+  useEffect(() => {
+    if (unsaved === 0) return
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault()
+    window.addEventListener("beforeunload", warn)
+    return () => window.removeEventListener("beforeunload", warn)
+  }, [unsaved])
 
   const showParam = params.get("show")
   const filter: CaseFilter = (CASE_FILTERS as readonly string[]).includes(
@@ -302,6 +331,11 @@ export function RunPage() {
     shown[0] ??
     all[0]
   const index = current ? shown.findIndex((c) => c.id === current.id) : -1
+  const currentId = current?.id
+  const onDraftChange = useCallback(
+    (draft: NoteDraft | null) => currentId && setDraft(currentId, draft),
+    [currentId, setDraft]
+  )
 
   // Focus follows the case only once someone moves; not on first load.
   const [focusCase, setFocusCase] = useState(false)
@@ -725,6 +759,8 @@ export function RunPage() {
                 onHelp={() => openDialog("help")}
                 advance={advance}
                 autoFocus={focusCase}
+                draft={drafts[current.id]}
+                onDraftChange={onDraftChange}
               />
             )}
             {canRecord && (
@@ -818,6 +854,30 @@ export function RunPage() {
           endSelecting()
         }}
       />
+      <AlertDialog
+        open={blocker.state === "blocked"}
+        onOpenChange={(open) => !open && blocker.reset?.()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave without saving?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {unsaved === 1
+                ? "A result note you typed hasn't been saved and will be lost."
+                : `${unsaved} result notes you typed haven't been saved and will be lost.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => blocker.proceed?.()}
+            >
+              Leave
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AlertDialog
         open={dialog === "remove"}
         onOpenChange={(o) => setDialog(o ? "remove" : null)}

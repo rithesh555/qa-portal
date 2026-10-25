@@ -121,6 +121,32 @@ test("E2E-RUN-019 j, n and k move between cases", async ({ page, project }) => {
   await expect(currentCase(page)).toHaveText("Run case 2")
 })
 
+test("E2E-RUN-045 an unsaved fail note survives moving between cases; leaving the run asks first", async ({
+  page,
+  project,
+}) => {
+  await openRun(page, project)
+  await page.keyboard.press("f")
+  const note = page.getByLabel("What went wrong? (required)")
+  await note.fill("Spinner never stops")
+  await page.getByRole("button", { name: /^Next/ }).click()
+  await expect(currentCase(page)).toHaveText("Run case 2")
+  await expect(note).toBeHidden()
+  await page.getByRole("button", { name: /^Previous/ }).click()
+  await expect(currentCase(page)).toHaveText("Run case 1")
+  await expect(note).toHaveValue("Spinner never stops")
+
+  await page
+    .getByRole("navigation", { name: /breadcrumb/i })
+    .getByRole("link", { name: "Test runs" })
+    .click()
+  const leave = page.getByRole("alertdialog", { name: "Leave without saving?" })
+  await expect(leave).toBeVisible()
+  await leave.getByRole("button", { name: "Keep editing" }).click()
+  await expect(note).toHaveValue("Spinner never stops")
+  await expect(page.getByText("0% complete (0 of 3)")).toBeVisible()
+})
+
 test("E2E-RUN-020 u undoes the last result", async ({ page, project }) => {
   await openRun(page, project)
   await page.keyboard.press("p")
