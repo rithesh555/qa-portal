@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "e2e"
 
 # Only listed packages may run install scripts (pnpm supply-chain default).
 allowBuilds:

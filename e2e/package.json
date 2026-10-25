@@ -1,0 +1,28 @@
+{
+  "name": "@qa/e2e",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "e2e:list": "playwright test --list",
+    "e2e:report": "playwright show-report results/html",
+    "e2e:catalogue:check": "node scripts/catalogue-check.ts",
+    "e2e:catalogue:csv": "node scripts/catalogue-csv.ts",
+    "e2e:catalogue:push": "node scripts/catalogue-push.ts",
+    "e2e:portal:setup": "node scripts/portal-setup.ts",
+    "e2e:publish": "node scripts/publish-results.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "@qa/shared": "workspace:*",
+    "@types/node": "22.20.5",
+    "@types/papaparse": "5.5.2",
+    "@types/pg": "8.23.1",
+    "papaparse": "5.7.0",
+    "pg": "8.23.1",
+    "read-excel-file": "9.3.10"
+  }
+}

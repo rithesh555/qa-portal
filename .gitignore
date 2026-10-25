@@ -28,8 +28,12 @@ Thumbs.db
 __pycache__/
 .venv/
 
-# playwright (Phase 2)
+# playwright
 test-results/
 playwright-report/
 .playwright-mcp/
+# e2e: sign-in states hold live session cookies
+e2e/.auth/
+e2e/results/
+e2e/.web-dist/
 apps/api/src/generated/

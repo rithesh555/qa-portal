@@ -13,6 +13,9 @@ export default defineConfig([
     "**/generated",
     ".agents",
     ".claude",
+    "e2e/.web-dist",
+    "e2e/results",
+    "e2e/.auth",
   ]),
   {
     files: ["**/*.{js,ts,tsx}"],
@@ -38,6 +41,7 @@ export default defineConfig([
       "packages/**/*.ts",
       "*.js",
       "apps/web/vite.config.ts",
+      "e2e/**/*.ts",
     ],
     languageOptions: { globals: globals.node },
   },
