@@ -47,8 +47,6 @@ describe("RouteError", () => {
       await screen.findByRole("heading", { name: "Something went wrong" })
     ).toBeInTheDocument()
     expect(screen.queryByText(/secret internal detail/)).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("button", { name: "Go to home" })
-    ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Go to home" })).toBeInTheDocument()
   })
 })

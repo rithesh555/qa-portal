@@ -406,7 +406,7 @@ describe("ReportsPage", () => {
         name: "No runs for this choice yet",
       })
     ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Start a run" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Start a run" })).toHaveAttribute(
       "href",
       "/projects/PAY/runs/new"
     )
@@ -482,7 +482,7 @@ describe("HomePage", () => {
       await screen.findByText(/14 cases and 1 defect are waiting for you\./)
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Continue PAY-R-12" })
+      screen.getByRole("link", { name: "Continue PAY-R-12" })
     ).toHaveAttribute("href", "/projects/PAY/runs/PAY-R-12?show=mine")
     expect(screen.getByText("14 of your 38 cases left")).toBeInTheDocument()
     expect(

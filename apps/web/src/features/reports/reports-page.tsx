@@ -22,6 +22,7 @@ import {
 import { type ReactNode, useState } from "react"
 import { Link } from "react-router"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -78,7 +79,7 @@ import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
 const NONE = "none"
 
-const linkCls = "text-primary underline-offset-4 hover:underline"
+const linkCls = "text-primary underline underline-offset-4"
 
 /** "Oct 19" for a week's Monday (YYYY-MM-DD, UTC). */
 const weekLabel = (day: string) =>
@@ -200,19 +201,14 @@ export function ReportsPage() {
               </SelectContent>
             </Select>
           )}
-          <Button
+          <ButtonLink
             variant="outline"
-            nativeButton={false}
             disabled={!r}
-            render={
-              <Link
-                to={`print?release=${release ?? NONE}${live ? "&live=true" : ""}`}
-              />
-            }
+            to={`print?release=${release ?? NONE}${live ? "&live=true" : ""}`}
           >
             <PrinterIcon data-icon="inline-start" />
             Print report
-          </Button>
+          </ButtonLink>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -371,12 +367,9 @@ function NoRuns({ hasRelease }: { hasRelease: boolean }) {
       </EmptyHeader>
       {allowed("runs:execute") && (
         <EmptyContent>
-          <Button
-            nativeButton={false}
-            render={<Link to="../runs/new" relative="path" />}
-          >
+          <ButtonLink to="../runs/new" relative="path">
             Start a run
-          </Button>
+          </ButtonLink>
         </EmptyContent>
       )}
     </Empty>

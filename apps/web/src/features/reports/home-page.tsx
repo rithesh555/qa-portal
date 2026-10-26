@@ -2,6 +2,7 @@ import type { Home } from "@qa/shared"
 import { FolderKanbanIcon } from "lucide-react"
 import { Link } from "react-router"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -302,18 +303,13 @@ function MyRuns({ home: h }: { home: Home }) {
                     {r.mineLeft} of your {r.mine} cases left
                   </span>
                 </span>
-                <Button
+                <ButtonLink
                   variant="outline"
                   size="sm"
-                  nativeButton={false}
-                  render={
-                    <Link
-                      to={`/projects/${r.projectKey}/runs/${r.key}?show=mine`}
-                    />
-                  }
+                  to={`/projects/${r.projectKey}/runs/${r.key}?show=mine`}
                 >
                   Continue <span className="sr-only">{r.key}</span>
-                </Button>
+                </ButtonLink>
               </li>
             ))}
           </ul>

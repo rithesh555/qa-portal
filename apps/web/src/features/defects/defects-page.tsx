@@ -14,6 +14,7 @@ import { Link } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -252,10 +253,10 @@ export function DefectsPage() {
         </p>
       </div>
       {canEdit && !nothingYet && (
-        <Button nativeButton={false} render={<Link to="new" />}>
+        <ButtonLink to="new">
           <PlusIcon data-icon="inline-start" />
           New defect
-        </Button>
+        </ButtonLink>
       )}
     </div>
   )
@@ -280,20 +281,15 @@ export function DefectsPage() {
           </EmptyHeader>
           {canEdit && (
             <EmptyContent className="flex-row flex-wrap justify-center">
-              <Button
+              <ButtonLink
                 variant="outline"
-                nativeButton={false}
-                render={<Link to={projectPath(project.key, "runs")} />}
+                to={projectPath(project.key, "runs")}
               >
                 Go to test runs
-              </Button>
-              <Button
-                variant="outline"
-                nativeButton={false}
-                render={<Link to="new" />}
-              >
+              </ButtonLink>
+              <ButtonLink variant="outline" to="new">
                 Log one by hand
-              </Button>
+              </ButtonLink>
             </EmptyContent>
           )}
         </Empty>

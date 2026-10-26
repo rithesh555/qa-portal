@@ -262,6 +262,18 @@ const suites: CatalogueSuite[] = [
         steps: [["Press ?, then Escape, then P at once", "The case is Passed"]],
       },
       {
+        id: "E2E-RUN-047",
+        title: "A shortcut pressed before the next case loads is kept",
+        priority: "low",
+        type: "usability",
+        steps: [
+          [
+            "Press P, then S before the next case's steps load",
+            "The first case is Passed, the second Skipped",
+          ],
+        ],
+      },
+      {
         id: "E2E-RUN-020",
         title: "U undoes the last result",
         priority: "high",

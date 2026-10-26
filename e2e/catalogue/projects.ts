@@ -298,7 +298,7 @@ const suites: CatalogueSuite[] = [
         title: "Change someone's project role",
         priority: "high",
         steps: [
-          ["Set Role for <tester> to QA Lead", '"<name> is now QA Lead"'],
+          ["Set Role for a new tester to QA Lead", '"<name> is now QA Lead"'],
         ],
       },
       {

@@ -1,5 +1,6 @@
 import { CircleAlertIcon, RefreshCwIcon } from "lucide-react"
-import { Link, useRouteError } from "react-router"
+import { useRouteError } from "react-router"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -48,9 +49,9 @@ export function RouteError() {
           <RefreshCwIcon data-icon="inline-start" />
           Reload
         </Button>
-        <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
+        <ButtonLink variant="outline" to="/">
           Go to home
-        </Button>
+        </ButtonLink>
       </EmptyContent>
     </Empty>
   )

@@ -177,9 +177,7 @@ describe("DefectsPage", () => {
     expect(
       within(row).getByRole("link", { name: "PAY-R-12" })
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole("button", { name: /New defect/ })
-    ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /New defect/ })).toBeInTheDocument()
   })
 
   it("shows a QA Lead how many defects wait for triage, and filters to them", async () => {
@@ -206,7 +204,7 @@ describe("DefectsPage", () => {
     expect(
       await screen.findByRole("heading", { name: "No defects yet" })
     ).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: /New defect/ })).toBeNull()
+    expect(screen.queryByRole("link", { name: /New defect/ })).toBeNull()
     expect(
       screen.getByText(/once QA Leads and Testers log them/)
     ).toBeInTheDocument()

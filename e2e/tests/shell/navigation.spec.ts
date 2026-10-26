@@ -112,8 +112,8 @@ test("E2E-SHELL-007 unknown pages and projects show not found", async ({
   ).toBeVisible()
   // F23: the tab says so too.
   await expect(page).toHaveTitle("Page not found · QA Portal")
-  // Finding: a link to Home, exposed as a button (Button rendered as <Link>).
-  await page.getByRole("button", { name: "Go to home" }).click()
+  // F1: navigation styled as a button is still a link.
+  await page.getByRole("link", { name: "Go to home" }).click()
   await expect(page).toHaveURL("/")
   await page.goto("/projects/NOPE9")
   await expect(

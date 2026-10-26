@@ -20,30 +20,31 @@ function CloseVerified({
 }) {
   const { project } = useProjectContext()
   const transition = useTransition(project.key, defect.key)
+  // mutateAsync, not mutate's callbacks: the refetch after closing removes
+  // this button, and an unmounted mutate() never calls its onSuccess.
+  async function close() {
+    try {
+      await transition.mutateAsync({
+        to: "closed",
+        note: "",
+        evidenceResultId: resultId,
+        version: defect.version,
+      })
+    } catch (err) {
+      toast.add({
+        type: "error",
+        title: `Couldn't close ${defect.key}`,
+        description: errorMessage(err),
+      })
+      return
+    }
+    toast.add({ title: `${defect.key} closed as verified` })
+  }
   return (
     <Button
       size="sm"
       disabled={transition.isPending}
-      onClick={() =>
-        transition.mutate(
-          {
-            to: "closed",
-            note: "",
-            evidenceResultId: resultId,
-            version: defect.version,
-          },
-          {
-            onSuccess: () =>
-              toast.add({ title: `${defect.key} closed as verified` }),
-            onError: (err) =>
-              toast.add({
-                type: "error",
-                title: `Couldn't close ${defect.key}`,
-                description: errorMessage(err),
-              }),
-          }
-        )
-      }
+      onClick={() => void close()}
     >
       {transition.isPending && <Spinner data-icon="inline-start" />}
       Close {defect.key} as verified

@@ -1,6 +1,5 @@
 import { LockIcon } from "lucide-react"
-import { Link } from "react-router"
-import { Button } from "@/components/ui/button"
+import { ButtonLink } from "@/components/button-link"
 import {
   Empty,
   EmptyContent,
@@ -25,9 +24,9 @@ export function NoAccess() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button variant="outline" nativeButton={false} render={<Link to="/" />}>
+        <ButtonLink variant="outline" to="/">
           Go to home
-        </Button>
+        </ButtonLink>
       </EmptyContent>
     </Empty>
   )

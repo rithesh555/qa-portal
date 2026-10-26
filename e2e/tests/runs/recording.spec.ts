@@ -201,6 +201,24 @@ test("E2E-RUN-046 a shortcut pressed right after closing the help works", async 
   await expect(stat(page, "1 passed")).toBeVisible()
 })
 
+test("E2E-RUN-047 a shortcut pressed before the next case loads is kept", async ({
+  page,
+  project,
+}) => {
+  const { cases } = await openRun(page, project)
+  // F4: hold the second case's steps back, so S lands before they load.
+  await page.route(`**/cases/${cases[1]!.id}`, async (route) => {
+    await new Promise((r) => setTimeout(r, 800))
+    await route.continue()
+  })
+  await page.keyboard.press("p")
+  await expect(currentCase(page)).toHaveText("Run case 2")
+  await page.keyboard.press("s")
+  await expect(stat(page, "1 passed")).toBeVisible()
+  await expect(stat(page, "1 skipped")).toBeVisible()
+  await expect(currentCase(page)).toHaveText("Run case 3")
+})
+
 test("E2E-RUN-022 with auto-advance off, saving stays on the case", async ({
   page,
   project,

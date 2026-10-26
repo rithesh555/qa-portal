@@ -20,6 +20,7 @@ import { Link } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -234,24 +235,20 @@ export function CasesPage() {
       {!projectEmpty && (
         <div className="flex flex-wrap gap-2">
           {canEdit && (
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link to="import" />}
-            >
+            <ButtonLink variant="outline" to="import">
               <UploadIcon data-icon="inline-start" />
               Import
-            </Button>
+            </ButtonLink>
           )}
           <Button variant="outline" onClick={() => setExporting(true)}>
             <DownloadIcon data-icon="inline-start" />
             Export
           </Button>
           {canEdit && (
-            <Button nativeButton={false} render={<Link to={newCaseLink} />}>
+            <ButtonLink to={newCaseLink}>
               <PlusIcon data-icon="inline-start" />
               New test case
-            </Button>
+            </ButtonLink>
           )}
         </div>
       )}
@@ -278,16 +275,10 @@ export function CasesPage() {
           </EmptyHeader>
           {canEdit && (
             <EmptyContent className="flex-row flex-wrap justify-center">
-              <Button nativeButton={false} render={<Link to="new" />}>
-                New test case
-              </Button>
-              <Button
-                variant="outline"
-                nativeButton={false}
-                render={<Link to="import" />}
-              >
+              <ButtonLink to="new">New test case</ButtonLink>
+              <ButtonLink variant="outline" to="import">
                 Import from CSV or Excel
-              </Button>
+              </ButtonLink>
               <Button
                 variant="ghost"
                 onClick={() =>
@@ -500,13 +491,9 @@ export function CasesPage() {
                   ) : (
                     canEdit &&
                     selectedSuite && (
-                      <Button
-                        size="sm"
-                        nativeButton={false}
-                        render={<Link to={newCaseLink} />}
-                      >
+                      <ButtonLink size="sm" to={newCaseLink}>
                         New case in this suite
-                      </Button>
+                      </ButtonLink>
                     )
                   )}
                 </EmptyContent>

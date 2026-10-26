@@ -72,10 +72,13 @@ test.describe("as the lead", () => {
   test("E2E-MEMB-004 change someone's project role", async ({
     page,
     project,
-    slot,
   }) => {
+    // A throwaway person: a slot user made lead here would change what their
+    // Home shows in later tests.
+    const other = await freshUser(project.admin)
+    await project.admin.addMembers(project.key, [other.id], "tester")
     await page.goto(membersUrl(project.key))
-    const tester = displayName("tester", slot)
+    const tester = other.name
     await choose(
       page,
       page.getByRole("combobox", { name: `Role for ${tester}` }),

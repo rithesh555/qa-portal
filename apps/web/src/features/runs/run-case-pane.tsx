@@ -15,7 +15,13 @@ import {
   CircleAlertIcon,
   HistoryIcon,
 } from "lucide-react"
-import { type KeyboardEvent, useEffect, useRef, useState } from "react"
+import {
+  type KeyboardEvent,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
@@ -304,6 +310,11 @@ export function RunCasePane({
   const [comparing, setComparing] = useState(false)
   const [confirmLatest, setConfirmLatest] = useState(false)
   const noteRef = useRef<HTMLTextAreaElement>(null)
+  const queued = useRef<{
+    status: ResultStatus
+    note: string
+    step: number | null
+  } | null>(null)
   const stickyFooter = useStickyFooter<HTMLDivElement>()
   const headingRef = useRef<HTMLHeadingElement>(null)
   const detail = detailQuery.data
@@ -331,7 +342,12 @@ export function RunCasePane({
     step: number | null = null,
     overwrite = false
   ) {
-    if (!detail || record.isPending) return
+    if (record.isPending) return
+    if (!detail) {
+      // A shortcut pressed right after auto-advance: save once the case loads.
+      queued.current = { status, note: withNote, step }
+      return
+    }
     const last = detail.results[0]
     setConflict(null)
     setSaveError(null)
@@ -384,6 +400,16 @@ export function RunCasePane({
       }
     }
   }
+
+  const saveQueued = useEffectEvent(() => {
+    const q = queued.current
+    if (!detail || !q) return
+    queued.current = null
+    void save(q.status, q.note, q.step)
+  })
+  useEffect(() => {
+    if (detail) saveQueued()
+  }, [detail])
 
   function choose(status: ResultStatus) {
     if (!canRecord || record.isPending) return

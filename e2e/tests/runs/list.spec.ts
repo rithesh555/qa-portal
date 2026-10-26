@@ -12,7 +12,7 @@ test.describe("as a tester", () => {
     await expect(
       page.getByRole("heading", { name: "No test runs yet" })
     ).toBeVisible()
-    await page.getByRole("button", { name: "Start the first run" }).click()
+    await page.getByRole("link", { name: "Start the first run" }).click()
     await expect(page).toHaveURL(`/projects/${project.key}/runs/new`)
     await expect(
       page.getByRole("heading", { level: 1, name: "New test run" })
@@ -109,9 +109,9 @@ test.describe("as a viewer", () => {
       page.getByRole("heading", { name: "No test runs yet" })
     ).toBeVisible()
     await expect(
-      page.getByRole("button", { name: "Start the first run" })
+      page.getByRole("link", { name: "Start the first run" })
     ).toHaveCount(0)
-    await expect(page.getByRole("button", { name: "New run" })).toHaveCount(0)
+    await expect(page.getByRole("link", { name: "New run" })).toHaveCount(0)
 
     await page.goto(`/projects/${project.key}/runs/new`)
     await expect(

@@ -42,6 +42,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -704,21 +705,16 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
               </span>
             )
           )}
-          <Button
+          <ButtonLink
             variant="outline"
-            nativeButton={false}
-            render={
-              <Link
-                to={
-                  initial
-                    ? casePagePath(project.key, initial.key)
-                    : `/projects/${project.key}/cases`
-                }
-              />
+            to={
+              initial
+                ? casePagePath(project.key, initial.key)
+                : `/projects/${project.key}/cases`
             }
           >
             Cancel
-          </Button>
+          </ButtonLink>
           {!initial && (
             <Button
               type="button"

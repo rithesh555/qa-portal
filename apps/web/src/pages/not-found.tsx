@@ -1,6 +1,5 @@
 import { CompassIcon } from "lucide-react"
-import { Link } from "react-router"
-import { Button } from "@/components/ui/button"
+import { ButtonLink } from "@/components/button-link"
 import {
   Empty,
   EmptyContent,
@@ -29,9 +28,7 @@ export function NotFound() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button nativeButton={false} render={<Link to="/" />}>
-          Go to home
-        </Button>
+        <ButtonLink to="/">Go to home</ButtonLink>
       </EmptyContent>
     </Empty>
   )

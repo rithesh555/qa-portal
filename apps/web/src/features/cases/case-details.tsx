@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -334,15 +335,14 @@ export function CaseDetails({
         </Button>
         {onClose && (
           <>
-            <Button
+            <ButtonLink
               variant="ghost"
               size="icon-sm"
               aria-label={`Open ${testCase.key} as a full page`}
-              nativeButton={false}
-              render={<Link to={fullPage} />}
+              to={fullPage}
             >
               <ExternalLinkIcon />
-            </Button>
+            </ButtonLink>
             <Button
               variant="ghost"
               size="icon-sm"
@@ -411,14 +411,10 @@ export function CaseDetails({
         <div className="flex flex-wrap gap-2">
           {canEdit && (
             <>
-              <Button
-                size="sm"
-                nativeButton={false}
-                render={<Link to={`${fullPage}/edit`} />}
-              >
+              <ButtonLink size="sm" to={`${fullPage}/edit`}>
                 <PencilIcon data-icon="inline-start" />
                 Edit
-              </Button>
+              </ButtonLink>
               <Button
                 size="sm"
                 variant="outline"

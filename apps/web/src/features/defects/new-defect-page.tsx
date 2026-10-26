@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -221,13 +222,12 @@ export function NewDefectPage() {
           </Field>
         </div>
         <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
-          <Button
+          <ButtonLink
             variant="outline"
-            nativeButton={false}
-            render={<Link to={projectPath(project.key, "defects")} />}
+            to={projectPath(project.key, "defects")}
           >
             Cancel
-          </Button>
+          </ButtonLink>
           <Button type="submit" disabled={create.isPending}>
             {create.isPending && <Spinner data-icon="inline-start" />}
             {create.isPending ? "Logging…" : "Log defect"}

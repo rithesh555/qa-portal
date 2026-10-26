@@ -51,21 +51,11 @@ const cases: [
   ["E2E-A11Y-021", "not found", "viewer", "/no-such-page"],
 ]
 
-/** Known app findings (findings/app-findings.md): expected to fail until fixed. */
-const KNOWN: Record<string, { finding: string; lightOnly?: boolean }> = {
-  "E2E-A11Y-002": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-003": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-006": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-009": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-012": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-013": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-016": { finding: "F3 colour-only links in report text" },
-  "E2E-A11Y-018": { finding: "F2 tab label contrast", lightOnly: true },
-  "E2E-A11Y-019": { finding: "F2 tab label contrast", lightOnly: true },
-}
-
 async function settled(page: Page) {
-  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible()
+  // The first page on a fresh worker loads its route chunks cold.
+  await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({
+    timeout: 20_000,
+  })
   await expect(page.getByRole("status", { name: /loading/i })).toHaveCount(0)
   await page.waitForLoadState("networkidle")
 }
@@ -78,12 +68,6 @@ for (const [id, name, role, path] of cases) {
       slot,
     }, testInfo) => {
       test.setTimeout(60_000)
-      const known = KNOWN[id]
-      if (known)
-        test.fail(
-          !known.lightOnly || testInfo.project.name !== "dark",
-          `App bug: ${known.finding} (findings/app-findings.md)`
-        )
       const url =
         typeof path === "string"
           ? path

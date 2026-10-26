@@ -12,6 +12,7 @@ import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -186,10 +187,10 @@ export function RunsPage() {
         </p>
       </div>
       {canRun && !noRunsAtAll && (
-        <Button nativeButton={false} render={<Link to="new" />}>
+        <ButtonLink to="new">
           <PlusIcon data-icon="inline-start" />
           New run
-        </Button>
+        </ButtonLink>
       )}
     </div>
   )
@@ -213,9 +214,7 @@ export function RunsPage() {
           </EmptyHeader>
           {canRun && (
             <EmptyContent>
-              <Button nativeButton={false} render={<Link to="new" />}>
-                Start the first run
-              </Button>
+              <ButtonLink to="new">Start the first run</ButtonLink>
             </EmptyContent>
           )}
         </Empty>

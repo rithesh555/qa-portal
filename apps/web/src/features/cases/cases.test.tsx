@@ -194,9 +194,9 @@ describe("CasesPage", () => {
     expect(within(row).getAllByText("Ready")).toHaveLength(2)
     expect(within(row).getAllByText("Critical")).toHaveLength(2)
     expect(
-      screen.getByRole("button", { name: /New test case/ })
+      screen.getByRole("link", { name: /New test case/ })
     ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /Import/ })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /Import/ })).toBeInTheDocument()
     expect(
       screen.getByRole("checkbox", { name: "Select PAY-TC-1" })
     ).toBeInTheDocument()
@@ -219,7 +219,7 @@ describe("CasesPage", () => {
     expect(screen.getByTestId("where")).toHaveTextContent("/projects/PAY/cases")
     // Testers edit but don't archive.
     expect(
-      within(preview).getByRole("button", { name: /Edit/ })
+      within(preview).getByRole("link", { name: /Edit/ })
     ).toBeInTheDocument()
     expect(
       within(preview).queryByRole("button", { name: /Archive/ })
@@ -234,7 +234,7 @@ describe("CasesPage", () => {
     })
     expect(screen.getByText(/You're a Viewer/)).toBeInTheDocument()
     expect(
-      screen.queryByRole("button", { name: /New test case/ })
+      screen.queryByRole("link", { name: /New test case/ })
     ).not.toBeInTheDocument()
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: /Export/ })).toBeInTheDocument()
@@ -302,7 +302,7 @@ describe("CasesPage", () => {
       await screen.findByRole("heading", { name: "No test cases yet" })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Import from CSV or Excel" })
+      screen.getByRole("link", { name: "Import from CSV or Excel" })
     ).toBeInTheDocument()
   })
 })

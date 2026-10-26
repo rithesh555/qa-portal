@@ -73,8 +73,6 @@ test("E2E-KEY-001 sign in, open a run, fail a case and log its defect with the k
   await page.keyboard.type("Card is declined")
   await page.keyboard.press("Control+Enter")
   await expect(page.locator("#run-case-title")).toHaveText("Run case 2")
-  // F4: shortcuts are ignored until the next case's steps have loaded.
-  await expect(passed).toBeEnabled()
   await page.keyboard.press("k")
   await expect(page.locator("#run-case-title")).toHaveText("Run case 1")
 

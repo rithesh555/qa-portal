@@ -1,7 +1,6 @@
 import { type Action, can, type Project } from "@qa/shared"
 import { ArchiveIcon, CircleAlertIcon, FolderXIcon } from "lucide-react"
 import {
-  Link,
   Navigate,
   Outlet,
   useLocation,
@@ -9,6 +8,7 @@ import {
   useParams,
 } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -54,13 +54,9 @@ function ProjectNotFound({ isAdmin }: { isAdmin: boolean }) {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={<Link to="/projects" />}
-        >
+        <ButtonLink variant="outline" to="/projects">
           Go to your projects
-        </Button>
+        </ButtonLink>
       </EmptyContent>
     </Empty>
   )

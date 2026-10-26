@@ -45,6 +45,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/field"
@@ -996,13 +997,9 @@ export function ImportPage() {
             </Alert>
           )}
           <div className="mt-4 flex flex-wrap justify-end gap-2 border-t px-5 py-4">
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link to={listPath} />}
-            >
+            <ButtonLink variant="outline" to={listPath}>
               Cancel
-            </Button>
+            </ButtonLink>
             <Button
               disabled={noTitle || dupes.size > 0 || checking}
               onClick={() => void runCheck()}
@@ -1187,13 +1184,9 @@ export function ImportPage() {
             >
               Back to matching
             </Button>
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link to={listPath} />}
-            >
+            <ButtonLink variant="outline" to={listPath}>
               Cancel
-            </Button>
+            </ButtonLink>
             <Button
               disabled={check.errorRows > 0 || run.isPending}
               aria-describedby={
@@ -1250,13 +1243,9 @@ export function ImportPage() {
                   )}
                   Restore import
                 </Button>
-                <Button
-                  variant="outline"
-                  nativeButton={false}
-                  render={<Link to={listPath} />}
-                >
+                <ButtonLink variant="outline" to={listPath}>
                   Back to test cases
-                </Button>
+                </ButtonLink>
                 <Button onClick={restart}>Import another file</Button>
               </div>
             </>
@@ -1292,9 +1281,7 @@ export function ImportPage() {
                 activity.
               </p>
               <div className="flex flex-wrap justify-center gap-2 pt-1">
-                <Button nativeButton={false} render={<Link to={listPath} />}>
-                  View imported cases
-                </Button>
+                <ButtonLink to={listPath}>View imported cases</ButtonLink>
                 <Button variant="outline" onClick={restart}>
                   Import another file
                 </Button>

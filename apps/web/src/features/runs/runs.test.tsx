@@ -214,7 +214,7 @@ describe("RunsPage", () => {
     expect(
       within(row).getAllByRole("img", { name: /80% complete/ })
     ).toHaveLength(2)
-    expect(screen.getByRole("button", { name: /New run/ })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /New run/ })).toBeInTheDocument()
   })
 
   it("doesn't offer a new run to a Viewer", async () => {
@@ -222,7 +222,7 @@ describe("RunsPage", () => {
       json(200, { items: [summary()], total: 1, page: 1, pageSize: 25 })
     renderAt("/projects/PAY/runs", "viewer")
     await screen.findByRole("link", { name: "Release 4.2 regression" })
-    expect(screen.queryByRole("button", { name: /New run/ })).toBeNull()
+    expect(screen.queryByRole("link", { name: /New run/ })).toBeNull()
   })
 })
 

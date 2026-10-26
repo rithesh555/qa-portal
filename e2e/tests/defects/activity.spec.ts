@@ -89,16 +89,8 @@ test("E2E-DEF-034 a passed retest closes a fixed defect from the run", async ({
   }>(`/projects/${project.key}/defects/${d.key}`)
   expect(after.status).toBe("closed")
   expect(after.links.map((l) => l.kind)).toContain("passed")
-  // F6 (findings/app-findings.md): the "closed as verified" confirmation is
-  // passed to mutate() on a button that can unmount first, so it only shows
-  // sometimes. Recorded, not asserted, until it's fixed.
-  const confirmed = await page
-    .getByText(`${d.key} closed as verified`)
-    .isVisible()
-  test.info().annotations.push({
-    type: "finding",
-    description: `F6: confirmation ${confirmed ? "shown" : "missing"} this run`,
-  })
+  // F6: the confirmation shows even though the button unmounts on refetch.
+  await expect(page.getByText(`${d.key} closed as verified`)).toBeVisible()
 })
 
 test("E2E-DEF-035 a failed retest offers to reopen the fixed defect", async ({

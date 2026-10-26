@@ -15,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -319,13 +320,9 @@ function CopyRunFields({
             {saving && <Spinner data-icon="inline-start" />}
             {saving ? "Starting run…" : "Start run"}
           </Button>
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={<Link to={projectPath(project.key, "runs")} />}
-          >
+          <ButtonLink variant="outline" to={projectPath(project.key, "runs")}>
             Cancel
-          </Button>
+          </ButtonLink>
         </div>
       </form>
     </div>
@@ -604,13 +601,9 @@ function NewRunForm() {
                 ? "Creating run…"
                 : `Create run with ${total} ${total === 1 ? "case" : "cases"}`}
             </Button>
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<Link to={projectPath(project.key, "runs")} />}
-            >
+            <ButtonLink variant="outline" to={projectPath(project.key, "runs")}>
               Cancel
-            </Button>
+            </ButtonLink>
           </div>
         </aside>
       </form>

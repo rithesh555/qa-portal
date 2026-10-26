@@ -7,7 +7,8 @@ import {
 } from "@qa/shared"
 import { ArrowLeftIcon, PrinterIcon } from "lucide-react"
 import { useEffect } from "react"
-import { Link, useParams, useSearchParams } from "react-router"
+import { useParams, useSearchParams } from "react-router"
+import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { useSession } from "@/features/auth/session"
@@ -83,13 +84,9 @@ export function PrintReportPage() {
           >
             Try again
           </Button>
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={<Link to={back} />}
-          >
+          <ButtonLink variant="outline" to={back}>
             Back to reports
-          </Button>
+          </ButtonLink>
         </div>
       </main>
     )
@@ -116,14 +113,10 @@ export function PrintReportPage() {
   return (
     <div className="min-h-svh bg-muted/40 py-6 print:bg-white print:py-0">
       <div className="mx-auto mb-4 flex max-w-[210mm] flex-wrap items-center justify-between gap-2 px-4 print:hidden">
-        <Button
-          variant="ghost"
-          nativeButton={false}
-          render={<Link to={back} />}
-        >
+        <ButtonLink variant="ghost" to={back}>
           <ArrowLeftIcon data-icon="inline-start" />
           Back to reports
-        </Button>
+        </ButtonLink>
         <Button onClick={() => window.print()}>
           <PrinterIcon data-icon="inline-start" />
           Print or save as PDF
