@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Cellar: natural wine, Thursday to Sunday from 5pm</title>
+<meta name="description" content="Night Cellar is a natural wine shop and bar, open Thursday to Sunday from 5pm, with 140 bottles on the list and a tasting every month at £25.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · shape: Conversational FAQ, opened by a Poster · genre: atmospheric · theme: Spore (by request, exemplar)
+ * hero: Poster · nav: floating pill (N5, always a pill, solid paper, top centre) · footer: statement (Ft5) · enrichment: E5 drawn glass cluster on a brick ledge, tier B SVG, still · signature: three glasses drawn in the theme's cap grammar on a brick shelf, the tasting's name in cream serif and its £25 in pink
+ * axes: dark/roman-serif/warm · posture: committed · spore: cellar · contrast: pass · fold: pass
+ * hero-review: ship after 1 fix · finish-review: 1 finding (11: pill hover recoloured and lifted; now colour only, the theme moves nothing but state) · resolved · gap: none · v2.3.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V5 · weakest: H, the shelf and the headline compete; the shelf takes the right column only and the head keeps the left */
+:root {
+  --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5625rem; --text-3xl: 2.441rem;
+  --text-figure: clamp(2.125rem, 1.6vw + 1.25rem, 3.25rem); --text-hero: clamp(3rem, 4.4vw + 1rem, 6rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --dur-short: 220ms;
+  --gutter: 64px; --container: calc(1312px + 2 * var(--gutter));
+  --z-sticky: 200; --z-sticky-nav: 300; --z-toast: 500;
+  --color-paper: oklch(15% 0.01 60); --color-paper-2: oklch(19% 0.012 60); --color-paper-3: oklch(24% 0.02 50);
+  --color-ink: oklch(93% 0.02 85); --color-ink-2: oklch(88% 0.02 120); --color-muted: oklch(64% 0.02 70);
+  --color-rule: oklch(30% 0.015 60); --color-error-ink: oklch(72% 0.14 27);
+  --color-accent: oklch(77% 0.09 30); --color-accent-2: oklch(86% 0.06 30); --color-accent-ink: oklch(15% 0.01 60); --color-focus: oklch(86% 0.06 30);
+  --color-wine-red: oklch(52% 0.16 18); --color-wine-amber: oklch(72% 0.13 62); --color-wine-pale: oklch(87% 0.08 98); --color-mortar: oklch(12% 0.01 50); --color-lip: oklch(34% 0.024 50);
+  --font-display: "Young Serif", "Young Serif Fallback", Georgia, serif; --font-body: "Instrument Sans", "Instrument Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 12px; --radius-pill: 999px; --rule-hair: 1px;
+  --shadow-card: 0 12px 32px oklch(8% 0.01 60 / 0.35);
+  --tracking-display: -0.01em; --grain: 0.22;
+}
+@font-face { font-family: "Young Serif Fallback"; src: local("Georgia"); size-adjust: 108%; ascent-override: 88%; descent-override: 24%; line-gap-override: 0%; }
+@font-face { font-family: "Instrument Sans Fallback"; src: local("Arial"), local("Helvetica"); size-adjust: 97%; ascent-override: 96%; descent-override: 25%; line-gap-override: 0%; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.55; -webkit-font-smoothing: antialiased; caret-color: var(--color-accent); }
+::selection { background: color-mix(in oklab, var(--color-accent) 30%, transparent); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 400; letter-spacing: var(--tracking-display); line-height: 1.05; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+h1 { max-width: 20ch; } h2 { max-width: 30ch; } h3 { max-width: 40ch; }
+p { margin: 0; text-wrap: pretty; max-width: 65ch; }
+img, svg, video { max-width: 100%; height: auto; display: block; }
+button, input, select, textarea { font: inherit; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); box-sizing: border-box; }
+.num, .figure, td.num { font-variant-numeric: tabular-nums; }
+[data-slot] { position: relative; overflow: hidden; }
+[data-slot] > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+[data-slot]:has(> img) > :not(img) { display: none !important; }
+@media (max-width: 60rem) { :root { --gutter: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; } }
+@media (prefers-reduced-motion: reduce) { *:not(.keep-motion), *:not(.keep-motion)::before, *:not(.keep-motion)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+body::after { content: ""; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: var(--z-sticky); pointer-events: none; opacity: var(--grain); mix-blend-mode: screen; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.62 0 0 0 0 0.56 0 0 0 0 0.46 1.1 0 0 0 -0.32'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.skip { position: absolute; left: var(--space-md); top: var(--space-md); z-index: var(--z-toast); padding: var(--space-xs) var(--space-md); border-radius: var(--radius-pill); background: var(--color-ink); color: var(--color-paper); transform: translateY(-200%); }
+.skip:focus-visible { transform: none; }
+.pill-nav { position: fixed; top: var(--space-md); left: 50%; transform: translateX(-50%); z-index: var(--z-sticky-nav); display: flex; align-items: center; gap: var(--space-lg); padding: var(--space-xs) var(--space-lg); background: var(--color-paper-2); border-radius: var(--radius-pill); box-shadow: inset 0 0 0 1px var(--color-rule); white-space: nowrap; }
+.pill-nav__wordmark { font: 400 var(--text-lg)/1 var(--font-display); color: var(--color-ink); text-decoration: none; }
+.pill-nav__wordmark:hover { color: var(--color-accent-2); }
+.pill-nav__wordmark:active { color: var(--color-accent); }
+.pill-nav__links { display: flex; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
+.pill-nav__links a { display: block; padding: var(--space-xs) var(--space-sm); border-radius: var(--radius-pill); font-size: var(--text-sm); font-weight: 500; color: var(--color-ink-2); text-decoration: none; transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+.pill-nav__links a:hover { background: var(--color-paper-3); color: var(--color-ink); }
+.pill-nav__links a:active { background: var(--color-rule); }
+.pill-nav__links a[aria-current="true"] { color: var(--color-ink); }
+.pill-nav__menu { display: none; min-height: 44px; padding: var(--space-xs) var(--space-md); border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--color-ink); font-size: var(--text-sm); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--color-ink-2); cursor: pointer; }
+.pill-nav__menu:hover { background: var(--color-paper-3); }
+.pill-nav__menu:active { background: var(--color-rule); }
+.pill-nav__menu:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: var(--space-sm) var(--space-lg); box-sizing: border-box; border: 0; border-radius: var(--radius-pill); font-weight: 600; font-size: var(--text-md); line-height: 1; text-decoration: none; white-space: nowrap; cursor: pointer; background: var(--color-accent); color: var(--color-accent-ink); transition: background-color var(--dur-short) var(--ease-out); }
+.btn:hover { background: var(--color-accent-2); }
+.btn:active { background: var(--color-accent); }
+.btn:disabled, .btn[aria-busy="true"] { opacity: 0.55; cursor: not-allowed; }
+.hero { min-height: 100dvh; display: grid; align-items: center; padding-block: var(--space-4xl) var(--space-3xl); box-sizing: border-box; }
+.hero__in { display: grid; grid-template-columns: fit-content(38rem) minmax(0, 1fr); gap: var(--space-2xl); align-items: center; }
+.hero__title { font-size: var(--text-hero); line-height: 1.06; max-width: 12ch; }
+.hero__lede { margin-top: var(--space-lg); font-size: var(--text-lg); line-height: 1.5; color: var(--color-ink-2); max-width: 45ch; text-wrap: balance; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xl); }
+.shelf { margin: 0; display: grid; width: 100%; }
+.cluster { width: 82%; margin-inline-start: auto; margin-inline-end: var(--space-lg); }
+.glass .stem { fill: var(--color-ink-2); }
+.glass .top { fill: var(--c); }
+.glass .hi { fill: var(--color-ink); opacity: 0.35; }
+.glass--pale { --c: var(--color-wine-pale); }
+.glass--red { --c: var(--color-wine-red); }
+.glass--amber { --c: var(--color-wine-amber); }
+.ledge { display: grid; grid-template-rows: 1fr 1fr; height: 48px; border-top: 2px solid var(--color-lip); background-color: var(--color-paper-3); background-image: linear-gradient(transparent calc(50% - 1px), var(--color-mortar) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)), repeating-linear-gradient(90deg, transparent 0 74px, var(--color-mortar) 74px 76px); background-size: 100% 100%, 100% 50%; background-repeat: no-repeat, no-repeat; background-position: 0 0, 0 0; }
+.ledge span { grid-row: 2; background-image: repeating-linear-gradient(90deg, transparent 0 74px, var(--color-mortar) 74px 76px); background-position: 38px 0; }
+.ledge__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-lg); padding: var(--space-md) var(--space-2xs) 0; }
+.ledge__name { font: 400 var(--text-xl)/1.1 var(--font-display); color: var(--color-ink); }
+.ledge__price { font: 400 var(--text-figure)/1 var(--font-display); color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.faq--hours { padding-block: var(--space-3xl) var(--space-4xl); }
+.faq--list { padding-block: var(--space-4xl) var(--space-3xl); }
+.faq--tasting { padding-block: var(--space-4xl); }
+.faq__qa { display: grid; gap: var(--space-md); max-width: 40rem; }
+.faq__qa h2 { font-size: var(--text-3xl); line-height: 1.05; }
+.faq__qa p { font-size: var(--text-lg); line-height: 1.5; color: var(--color-ink-2); max-width: 45ch; }
+.week-wrap { display: grid; gap: var(--space-lg); margin-top: var(--space-xl); }
+.now { justify-self: start; padding: var(--space-xs) var(--space-md); border-radius: var(--radius-pill); box-shadow: inset 0 0 0 1.5px var(--color-ink-2); font-size: var(--text-sm); font-weight: 500; color: var(--color-ink); }
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border-bottom: 2px solid var(--color-paper-3); }
+.week li { display: grid; gap: var(--space-xs); padding-block: var(--space-lg); padding-inline-end: var(--space-md); }
+.week__day { font: 400 var(--text-figure)/1 var(--font-display); color: var(--color-muted); }
+.week__when { font-size: var(--text-sm); font-weight: 500; color: var(--color-muted); }
+.week .is-open .week__day { color: var(--color-ink); }
+.week .is-open .week__when { color: var(--color-ink-2); }
+.week [aria-current="date"] { box-shadow: inset 0 -2px 0 var(--color-ink); }
+.racks { margin: var(--space-xl) 0 0; display: grid; gap: var(--space-md); }
+.racks__shelves { display: grid; grid-template-columns: repeat(35, 14px); justify-content: space-between; row-gap: var(--space-lg); background-image: repeating-linear-gradient(180deg, transparent 0 54px, var(--color-lip) 54px 56px, transparent 56px 78px); }
+.racks__shelves i { position: relative; display: block; width: 14px; height: 54px; }
+.racks__shelves i::before { content: ""; position: absolute; left: 5px; top: 2px; width: 4px; height: 18px; border-radius: 2px; background: var(--color-ink-2); }
+.racks__shelves i::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 38px; border-radius: 7px 7px 3px 3px / 9px 9px 3px 3px; background: var(--color-ink-2); }
+.racks figcaption { font-size: var(--text-sm); font-weight: 500; color: var(--color-muted); }
+.tasting { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: end; }
+.price { font-family: var(--font-display); font-size: 1.25em; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.signup { display: grid; gap: var(--space-xs); padding: var(--space-xl); box-shadow: inset 0 0 0 1.5px var(--color-ink); }
+.signup label { font-size: var(--text-sm); font-weight: 500; color: var(--color-ink-2); }
+.signup__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-sm); }
+.signup input { min-height: 48px; box-sizing: border-box; padding: var(--space-sm) var(--space-md); border: 1.5px solid var(--color-ink-2); border-radius: 0; background: var(--color-paper-2); color: var(--color-ink); font-size: var(--text-md); transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out); }
+.signup input:hover { background: var(--color-paper-3); }
+.signup input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -5px; }
+.signup input:active { background: var(--color-paper-2); }
+.signup input[aria-invalid] { border-color: var(--color-error-ink); }
+.signup input:disabled { opacity: 0.55; cursor: not-allowed; }
+.signup__help { min-height: 1lh; font-size: var(--text-sm); color: var(--color-error-ink); }
+.signup__help.is-done { color: var(--color-ink-2); }
+.foot { padding-block: var(--space-4xl) var(--space-xl); }
+.foot__line { font: 400 var(--text-3xl)/1.05 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); max-width: 28ch; overflow-wrap: break-word; min-width: 0; }
+.foot__meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-sm) var(--space-xl); margin-top: var(--space-xl); padding-top: var(--space-md); border-top: var(--rule-hair) solid var(--color-rule); font-size: var(--text-sm); color: var(--color-muted); }
+.foot__wordmark { margin-inline-end: auto; font: 400 var(--text-lg)/1 var(--font-display); color: var(--color-ink); }
+.foot__links { display: flex; gap: var(--space-lg); margin: 0; padding: 0; list-style: none; }
+.foot__links a { color: var(--color-ink-2); text-decoration: none; }
+.foot__links a:hover { color: var(--color-ink); text-decoration: underline; }
+.foot__links a:active { color: var(--color-accent-2); }
+@media (max-width: 60rem) {
+  .hero { min-height: 0; padding-block: var(--space-4xl) var(--space-3xl); }
+  .hero__in { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xl); }
+  .js .pill-nav__menu { display: inline-flex; align-items: center; }
+  .js .pill-nav__links { display: none; position: absolute; top: calc(100% + var(--space-xs)); right: 0; flex-direction: column; min-width: 12rem; padding: var(--space-xs); border-radius: var(--radius-card); background: var(--color-paper-2); box-shadow: inset 0 0 0 1px var(--color-rule), var(--shadow-card); }
+  .js .pill-nav[data-open] .pill-nav__links { display: flex; }
+  .js .pill-nav__links a { padding: var(--space-sm) var(--space-md); font-size: var(--text-md); }
+  .faq--hours, .faq--list, .faq--tasting { padding-block: var(--space-2xl); }
+  .foot { padding-block: var(--space-3xl) var(--space-xl); }
+  .week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .racks__shelves { grid-template-columns: repeat(20, 12px); }
+  .tasting { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 40rem) {
+  .week { grid-template-columns: minmax(0, 1fr); border-bottom: 0; }
+  .week li { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; padding-block: var(--space-sm); padding-inline-end: 0; border-bottom: 2px solid var(--color-paper-3); }
+  .week [aria-current="date"] { box-shadow: none; border-bottom-color: var(--color-ink); }
+  .racks__shelves { grid-template-columns: repeat(14, 10px); row-gap: var(--space-md); background-image: repeating-linear-gradient(180deg, transparent 0 40px, var(--color-lip) 40px 42px, transparent 42px 56px); }
+  .racks__shelves i { width: 10px; height: 40px; }
+  .racks__shelves i::before { left: 3.5px; width: 3px; height: 13px; }
+  .racks__shelves i::after { height: 28px; border-radius: 5px 5px 2px 2px / 7px 7px 2px 2px; }
+  .signup { padding: var(--space-lg); }
+  .signup__row { grid-template-columns: minmax(0, 1fr); }
+  .hero { padding-block: var(--space-3xl) var(--space-2xl); }
+  .hero__in { gap: var(--space-xl); }
+  .pill-nav { left: var(--space-md); right: var(--space-md); transform: none; justify-content: space-between; }
+  .cluster { width: 88%; margin-inline-end: 0; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="pill-nav" aria-label="Primary">
+<a class="pill-nav__wordmark" href="#top" aria-label="Night Cellar, home">Night Cellar</a>
+<button class="pill-nav__menu" type="button" aria-expanded="false" aria-controls="pill-links">Menu</button>
+<ul class="pill-nav__links" id="pill-links">
+<li><a href="#hours">Hours</a></li>
+<li><a href="#list">The list</a></li>
+<li><a href="#tasting">Tastings</a></li>
+</ul>
+</nav>
+<main id="main">
+<section class="hero" id="top" aria-labelledby="hero-title">
+<div class="container hero__in">
+<div class="hero__copy">
+<h1 class="hero__title" id="hero-title">140 bottles after five</h1>
+<p class="hero__lede">Natural wine to drink here or take home, Thursday to Sunday.</p>
+<div class="hero__actions">
+<a class="btn" href="#tasting">Get the tasting date</a>
+</div>
+</div>
+<figure class="shelf hero__fig">
+<svg class="cluster" viewBox="0 0 400 300" role="img" aria-labelledby="cluster-title">
+<title id="cluster-title">Three glasses standing together on a brick shelf: white, red and orange wine.</title>
+<g class="glass glass--red">
+<rect class="stem" x="160" y="292" width="80" height="8" rx="4"/>
+<rect class="stem" x="195" y="150" width="10" height="146" rx="5"/>
+<path class="top" d="M128 96A72 58 0 0 0 272 96Z"/>
+<ellipse class="hi" cx="152" cy="110" rx="14" ry="6"/>
+</g>
+<g class="glass glass--amber">
+<rect class="stem" x="286" y="292" width="64" height="8" rx="4"/>
+<rect class="stem" x="313.5" y="196" width="9" height="100" rx="4.5"/>
+<path class="top" d="M262 150A56 46 0 0 0 374 150Z"/>
+<ellipse class="hi" cx="282" cy="162" rx="11" ry="5"/>
+</g>
+<g class="glass glass--pale">
+<rect class="stem" x="58" y="292" width="56" height="8" rx="4"/>
+<rect class="stem" x="82" y="226" width="8" height="70" rx="4"/>
+<path class="top" d="M40 188A46 38 0 0 0 132 188Z"/>
+<ellipse class="hi" cx="58" cy="198" rx="9" ry="4"/>
+</g>
+</svg>
+<div class="ledge" aria-hidden="true"><span></span></div>
+<figcaption class="ledge__label"><span class="ledge__name">Monthly tasting</span><span class="ledge__price">£25</span></figcaption>
+</figure>
+</div>
+</section>
+<section class="faq faq--hours" id="hours" aria-labelledby="hours-title">
+<div class="container">
+<div class="faq__qa">
+<h2 id="hours-title">When are you open?</h2>
+<p>Thursday to Sunday, from 5pm. Monday to Wednesday the cellar is closed.</p>
+</div>
+<div class="week-wrap">
+<p class="now" role="status" data-now>Open Thursday to Sunday</p>
+<ol class="week">
+<li data-day="1"><span class="week__day">Mon</span><span class="week__when">Closed</span></li>
+<li data-day="2"><span class="week__day">Tue</span><span class="week__when">Closed</span></li>
+<li data-day="3"><span class="week__day">Wed</span><span class="week__when">Closed</span></li>
+<li data-day="4" class="is-open"><span class="week__day">Thu</span><span class="week__when">Open</span></li>
+<li data-day="5" class="is-open"><span class="week__day">Fri</span><span class="week__when">Open</span></li>
+<li data-day="6" class="is-open"><span class="week__day">Sat</span><span class="week__when">Open</span></li>
+<li data-day="0" class="is-open"><span class="week__day">Sun</span><span class="week__when">Open</span></li>
+</ol>
+</div>
+</div>
+</section>
+<section class="faq faq--list" id="list" aria-labelledby="list-title">
+<div class="container">
+<div class="faq__qa">
+<h2 id="list-title">What’s on the list?</h2>
+<p>140 bottles of natural wine, for drinking at the bar or carrying home.</p>
+</div>
+<figure class="racks">
+<div class="racks__shelves" role="img" aria-label="140 bottles drawn on four shelves, one mark for each bottle on the list">
+<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+</div>
+<figcaption>Every mark is one bottle on the list.</figcaption>
+</figure>
+</div>
+</section>
+<section class="faq faq--tasting" id="tasting" aria-labelledby="tasting-title">
+<div class="container tasting">
+<div class="faq__qa">
+<h2 id="tasting-title">When’s the next tasting?</h2>
+<p>A few bottles opened side by side, once a month, at <span class="price">£25</span>. Leave your email and we’ll send the date.</p>
+</div>
+<form class="signup" action="#" method="post" data-endpoint="" novalidate>
+<label for="t-email">Email address</label>
+<div class="signup__row">
+<input id="t-email" name="email" type="email" autocomplete="email" required>
+<button class="btn" type="submit">Send me the date</button>
+</div>
+<p class="signup__help" id="t-email-help" aria-live="polite"></p>
+</form>
+</div>
+</section>
+</main>
+<footer class="foot">
+<div class="container">
+<p class="foot__line">See you Thursday, from five.</p>
+<div class="foot__meta">
+<span class="foot__wordmark">Night Cellar</span>
+<ul class="foot__links">
+<li><a href="#hours">Hours</a></li>
+<li><a href="#list">The list</a></li>
+<li><a href="#tasting">Tastings</a></li>
+</ul>
+<span>Natural wine shop and bar</span>
+<span>© 2026 Night Cellar</span>
+</div>
+</div>
+</footer>
+<script>
+document.documentElement.classList.add('js');
+(() => {
+const nav = document.querySelector('.pill-nav');
+const btn = nav && nav.querySelector('.pill-nav__menu');
+if (btn) btn.addEventListener('click', () => {
+const open = nav.toggleAttribute('data-open');
+btn.setAttribute('aria-expanded', String(open));
+});
+const day = new Date().getDay();
+const today = document.querySelector(`.week li[data-day="${day}"]`);
+if (today) today.setAttribute('aria-current', 'date');
+const now = document.querySelector('[data-now]');
+if (now) now.textContent = [4, 5, 6, 0].includes(day) ? 'Open tonight' : 'Closed tonight, back Thursday';
+const form = document.querySelector('.signup');
+const input = form.querySelector('input');
+const help = form.querySelector('.signup__help');
+form.addEventListener('submit', (e) => {
+e.preventDefault();
+const ok = /^\S+@\S+\.\S+$/.test(input.value.trim());
+input.toggleAttribute('aria-invalid', !ok);
+help.classList.toggle('is-done', ok);
+if (!ok) { input.setAttribute('aria-describedby', help.id); help.textContent = 'That address looks incomplete. Add it as name@example.com.'; input.focus(); return; }
+const endpoint = form.dataset.endpoint;
+if (!endpoint) { help.textContent = 'The list opens soon. Nothing was sent.'; return; }
+fetch(endpoint, { method: 'POST', body: new FormData(form) }).then((r) => {
+help.textContent = r.ok ? 'Thanks. The next date goes to ' + input.value.trim() + '.' : 'That did not go through. Try again in a minute.';
+if (r.ok) form.reset();
+}).catch(() => { help.textContent = 'That did not go through. Try again in a minute.'; });
+});
+})();
+window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === 'string' ? v : v.src; im.alt = (typeof v === 'object' && v.alt) || s.dataset.alt || ''; s.prepend(im); } };
+</script>
+</body>
+</html>

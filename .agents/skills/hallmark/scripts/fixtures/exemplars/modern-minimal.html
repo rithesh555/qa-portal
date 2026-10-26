@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tilly, invoicing that chases late payments for you</title>
+<meta name="description" content="Tilly sends the reminders, logs the replies and marks invoices paid. Invoicing for freelancers, 8 pounds a month.">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · shape: Map / Diagram · genre: modern-minimal · theme: Coral (by request, exemplar)
+ * hero: Settled · nav: floating chip, top right, solid paper · footer: inline single line · enrichment: none · signature: the chase drawn as two lanes, Tilly's work in ink pills and yours in outlined pills, and the only coloured thing on the page is the price
+ * axes: light/grotesk-sans/warm · posture: restrained · contrast: pass · fold: pass · hero-review: ship · finish-review: 3 findings · 3 resolved · gap: none · v2.3.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R5 V5 · weakest: H, two pill styles on one diagram could blur with the buttons; the lanes are labelled and the diagram's pills are not links */
+/* Hallmark · waive 23 · posture: restrained declared; the price figure is the only coral on the page, well under one percent of its screen · Coral spends its one signal on a figure on paper, and the price is the figure a freelancer came for */
+:root {
+  --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5625rem; --text-3xl: 2.441rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --dur-short: 220ms;
+  --container: 1440px; --gutter: 64px; --z-sticky-nav: 300;
+  --color-paper: oklch(96.5% 0.005 50); --color-paper-2: oklch(94% 0.006 50); --color-paper-3: oklch(91% 0.007 50);
+  --color-ink: oklch(20% 0.010 35); --color-ink-2: oklch(26% 0.012 40); --color-muted: oklch(46% 0.010 40);
+  --color-rule: oklch(86% 0.008 50); --color-rule-2: oklch(80% 0.010 50);
+  --color-accent: oklch(52% 0.165 28); --color-accent-ink: oklch(98% 0.005 50); --color-focus: oklch(52% 0.19 28);
+  --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif; --font-body: var(--font-display);
+  --radius-card: 8px; --radius-pill: 999px; --rule-hair: 1px;
+  --shadow-card: 0 1px 2px oklch(20% 0.01 35 / 0.05);
+  --tracking-display: -0.025em; --display-weight: 600; --control-h: 48px;
+}
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.55; -webkit-font-smoothing: antialiased; caret-color: var(--color-accent); }
+::selection { background: color-mix(in oklab, var(--color-accent) 22%, transparent); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); letter-spacing: var(--tracking-display); line-height: 1.05; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+h1 { max-width: 20ch; } h2 { max-width: 30ch; } h3 { max-width: 40ch; }
+p { margin: 0; text-wrap: pretty; max-width: 65ch; }
+img, svg, video { max-width: 100%; height: auto; display: block; }
+button, input, select, textarea { font: inherit; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); box-sizing: border-box; }
+.num, .figure, td.num { font-variant-numeric: tabular-nums; }
+[data-slot] { position: relative; overflow: hidden; }
+[data-slot] > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+[data-slot]:has(> img) > :not(img) { display: none !important; }
+@media (max-width: 60rem) { :root { --gutter: 24px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; } }
+@media (prefers-reduced-motion: reduce) { *:not(.keep-motion), *:not(.keep-motion)::before, *:not(.keep-motion)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+.chip { position: fixed; top: var(--space-md); right: max(var(--space-md), calc(50% - var(--container) / 2 + var(--gutter))); z-index: var(--z-sticky-nav); display: flex; align-items: center; gap: var(--space-md); padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) var(--space-md); background: var(--color-paper); border: var(--rule-hair) solid var(--color-rule); border-radius: var(--radius-pill); box-shadow: var(--shadow-card); }
+.chip__mark { font-weight: 600; font-size: var(--text-lg); letter-spacing: var(--tracking-display); text-decoration: none; }
+.chip__mark:hover { text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 0.2em; }
+.chip .btn { height: 44px; padding: 0 var(--space-md); font-size: var(--text-sm); }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: var(--control-h); padding: 0 var(--space-lg); box-sizing: border-box; border-radius: var(--radius-pill); border: var(--rule-hair) solid var(--color-ink); background: var(--color-ink); color: var(--color-paper); font-family: var(--font-body); font-weight: 500; font-size: var(--text-md); text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+.btn:hover { background: var(--color-ink-2); }
+.btn:active { background: var(--color-ink); transition-duration: 0ms; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.btn--line { background: transparent; color: var(--color-ink); border-color: var(--color-rule-2); }
+.btn--line:hover { background: var(--color-paper-2); border-color: var(--color-ink); }
+.btn--line:active { background: var(--color-paper-3); }
+.hero { min-height: 86dvh; box-sizing: border-box; display: grid; align-items: center; padding-block: var(--space-3xl) var(--space-4xl); }
+.hero__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: center; }
+.hero__text { display: grid; gap: var(--space-lg); }
+.hero__text h1 { font-weight: var(--display-weight); font-size: clamp(2.5rem, 3.4vw + 1rem, 4.25rem); line-height: 1.04; max-width: 15ch; }
+.hero__line { font-size: var(--text-lg); line-height: 1.5; color: var(--color-ink-2); max-width: 32ch; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xs); }
+.shot { margin: 0; border-radius: var(--radius-card); border: var(--rule-hair) solid var(--color-rule); background: var(--color-paper); }
+.shot__ph { position: absolute; inset: 0; display: grid; grid-template-rows: 40px minmax(0, 1fr); background: linear-gradient(170deg, var(--color-paper-2), var(--color-paper-3)); }
+.shot__head { display: flex; align-items: center; padding-inline: var(--space-md); border-bottom: var(--rule-hair) solid var(--color-rule); background: var(--color-paper-3); font-weight: 500; font-size: var(--text-sm); color: var(--color-muted); }
+.shot__body { display: grid; place-items: center; padding: var(--space-xl); }
+.shot__art { width: min(82%, 30rem); height: auto; }
+.hero__shot { aspect-ratio: 5 / 4; }
+.chase { padding-top: calc(var(--space-4xl) + var(--space-xl)); }
+.jobs { padding-top: calc(var(--space-4xl) + var(--space-2xl)); }
+h2 { font-weight: var(--display-weight); font-size: var(--text-3xl); line-height: 1.08; }
+.chase__head, .jobs__head { border-top: var(--rule-hair) solid var(--color-rule); padding-top: var(--space-lg); }
+.chase__head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: end; }
+.chase__head p { font-size: var(--text-lg); color: var(--color-ink-2); max-width: 46ch; }
+.lanes { --lane-h: 9.5rem; margin-top: var(--space-2xl); display: grid; grid-template-columns: 9rem minmax(0, 1fr); border-block: var(--rule-hair) solid var(--color-rule); }
+.lanes__names { display: grid; grid-template-rows: var(--lane-h) var(--lane-h); }
+.lanes__names p { padding-top: var(--space-lg); font-weight: 500; font-size: var(--text-sm); color: var(--color-muted); }
+.lanes__names p + p { border-top: var(--rule-hair) solid var(--color-rule); }
+.lanes__map { position: relative; background: linear-gradient(to bottom, transparent calc(var(--lane-h) - 1px), var(--color-rule) calc(var(--lane-h) - 1px), var(--color-rule) var(--lane-h), transparent var(--lane-h)); }
+.lanes__lines { position: absolute; left: 0; top: 0; width: 100%; height: calc(var(--lane-h) * 2); }
+.lanes__steps { list-style: none; margin: 0; padding: 0; position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: var(--lane-h) var(--lane-h); }
+.step { grid-column: var(--col); grid-row: 1; display: grid; justify-items: center; align-content: start; gap: var(--space-xs); padding: var(--space-md) var(--space-xs) 0; text-align: center; }
+.step--tilly { grid-row: 2; }
+.step__pill { display: inline-flex; align-items: center; white-space: nowrap; min-height: 36px; padding: 0 var(--space-md); border-radius: var(--radius-pill); border: var(--rule-hair) solid var(--color-rule-2); background: var(--color-paper); font-weight: 500; font-size: var(--text-sm); line-height: 1.2; }
+.step--tilly .step__pill { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+.step__note { max-width: 18ch; font-size: var(--text-sm); color: var(--color-muted); line-height: 1.4; }
+.jobs__head { margin-bottom: var(--space-xl); }
+.jobs__close { margin-top: var(--space-2xl); font-size: var(--text-lg); color: var(--color-ink-2); }
+.jobs__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-rows: auto auto; gap: var(--space-xl) var(--space-3xl); }
+.job { margin: 0; display: grid; gap: var(--space-sm); align-content: start; }
+.job--big { grid-row: span 2; }
+.job__shot { aspect-ratio: 4 / 3; }
+.job--big .job__shot { aspect-ratio: 5 / 4; }
+.job figcaption { font-size: var(--text-md); color: var(--color-ink-2); }
+.price { padding-block: calc(var(--space-4xl) + var(--space-xl)) var(--space-3xl); }
+.price__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-3xl); align-items: end; border-top: var(--rule-hair) solid var(--color-rule); padding-top: var(--space-xl); }
+.price__num { margin-top: var(--space-lg); font-weight: var(--display-weight); font-size: var(--text-xl); letter-spacing: var(--tracking-display); color: var(--color-ink-2); font-variant-numeric: tabular-nums; }
+.price__num span { font-size: clamp(4.5rem, 7vw, 7rem); line-height: 1; color: var(--color-accent); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.price__text { display: grid; gap: var(--space-lg); padding-bottom: var(--space-sm); }
+.price__text p { font-size: var(--text-lg); color: var(--color-ink-2); max-width: 45ch; }
+.foot { padding-block: var(--space-3xl) var(--space-xl); }
+.foot__row { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-sm) var(--space-xl); border-top: var(--rule-hair) solid var(--color-rule); padding-top: var(--space-lg); font-size: var(--text-sm); color: var(--color-muted); }
+.foot__mark { font-weight: 600; font-size: var(--text-md); color: var(--color-ink); }
+.foot__row a { margin-left: auto; color: var(--color-ink-2); text-decoration: underline; text-decoration-color: var(--color-rule-2); text-underline-offset: 0.2em; }
+.foot__row a:hover { text-decoration-color: var(--color-accent); }
+.foot__row a:active { color: var(--color-ink); }
+@media (max-width: 60rem) {
+  .chase__head, .price__grid, .jobs__grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); }
+  .job--big { grid-row: auto; }
+  .chase, .jobs { padding-top: var(--space-3xl); }
+  .price { padding-block: var(--space-3xl) var(--space-2xl); }
+  .foot { padding-top: var(--space-2xl); }
+  .lanes { grid-template-columns: minmax(0, 1fr); border-block: 0; }
+  .lanes__names, .lanes__lines { display: none; }
+  .lanes__map { background: none; }
+  .lanes__steps { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; gap: var(--space-md); border-left: var(--rule-hair) solid var(--color-rule-2); padding-left: var(--space-lg); }
+  .step, .step--tilly { grid-column: 1; grid-row: auto; justify-items: start; text-align: left; padding: 0; }
+  .step__note { max-width: none; }
+  .hero { min-height: 0; padding-block: calc(var(--space-3xl) + var(--space-md)) var(--space-2xl); }
+  .hero__grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xl); }
+}
+@media (max-width: 40rem) {
+  .chip { left: var(--space-md); justify-content: space-between; }
+  .hero__actions .btn { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body id="top">
+<nav class="chip" aria-label="Tilly">
+<a class="chip__mark" href="#top" aria-label="Tilly, back to the top">Tilly</a>
+<a class="btn btn--line" href="#price">Start</a>
+</nav>
+<main>
+<section class="hero" aria-labelledby="hero-title">
+<div class="container hero__grid">
+<div class="hero__text">
+<h1 id="hero-title">Late invoices, chased for you.</h1>
+<p class="hero__line">Tilly sends the reminders, logs the replies and marks invoices paid.</p>
+<div class="hero__actions">
+<a class="btn" href="#price">Start for £8 a month</a>
+<a class="btn btn--line" href="#chase">See the chase</a>
+</div>
+</div>
+<figure class="shot hero__shot" data-slot="hero" data-alt="The invoices screen in Tilly">
+<div class="shot__ph">
+<div class="shot__head">Your invoices screen</div>
+<div class="shot__body" aria-hidden="true">
+<svg class="shot__art" viewBox="0 0 320 220" focusable="false">
+<rect x="96" y="22" width="128" height="168" rx="6" fill="var(--color-paper)" stroke="var(--color-rule-2)"/>
+<path d="M116 52H176M116 66H200M116 80H164M116 150H204" stroke="var(--color-rule-2)" stroke-width="3" stroke-linecap="round"/>
+<rect x="196" y="164" width="64" height="24" rx="12" fill="var(--color-ink)"/>
+<rect x="266" y="164" width="44" height="24" rx="12" fill="none" stroke="var(--color-rule-2)"/>
+</svg>
+</div>
+</div>
+</figure>
+</div>
+</section>
+<section class="chase" id="chase" aria-labelledby="chase-title">
+<div class="container">
+<div class="chase__head">
+<h2 id="chase-title">From sent to paid</h2>
+<p>The bottom lane is the work Tilly takes off your desk.</p>
+</div>
+<div class="lanes">
+<div class="lanes__names" aria-hidden="true">
+<p>You and your client</p>
+<p>Tilly</p>
+</div>
+<div class="lanes__map">
+<svg class="lanes__lines" viewBox="0 0 600 200" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+<path d="M50 22.4H100V122.4H150M150 122.4H200V22.4H250M250 22.4H300V122.4H350M350 122.4H400V22.4H450M450 22.4H500V122.4H550" fill="none" stroke="var(--color-rule-2)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>
+<ol class="lanes__steps">
+<li class="step step--you" style="--col: 1"><span class="step__pill">You send the invoice</span><span class="step__note">Written and sent from Tilly.</span></li>
+<li class="step step--tilly" style="--col: 2"><span class="step__pill">Tilly sends the reminders</span><span class="step__note">Once the invoice runs late.</span></li>
+<li class="step step--you" style="--col: 3"><span class="step__pill">Your client replies</span><span class="step__note">They answer the reminder.</span></li>
+<li class="step step--tilly" style="--col: 4"><span class="step__pill">Tilly logs the reply</span><span class="step__note">Kept with the invoice it answers.</span></li>
+<li class="step step--you" style="--col: 5"><span class="step__pill">Your client pays</span><span class="step__note">The money lands.</span></li>
+<li class="step step--tilly" style="--col: 6"><span class="step__pill">Tilly marks it paid</span><span class="step__note">And the chasing stops.</span></li>
+</ol>
+</div>
+</div>
+</div>
+</section>
+<section class="jobs" aria-labelledby="jobs-title">
+<div class="container">
+<div class="jobs__head"><h2 id="jobs-title">Three jobs off your desk</h2></div>
+<div class="jobs__grid">
+<figure class="job job--big">
+<div class="shot job__shot" data-slot="demo-2" data-alt="The reminder Tilly sends once an invoice runs late">
+<div class="shot__ph">
+<div class="shot__head">The reminder</div>
+<div class="shot__body" aria-hidden="true">
+<svg class="shot__art" viewBox="0 0 320 220" focusable="false"><rect x="70" y="40" width="180" height="128" rx="8" fill="var(--color-paper)" stroke="var(--color-rule-2)"/><path d="M70 48 160 112 250 48" fill="none" stroke="var(--color-rule-2)"/><rect x="190" y="150" width="76" height="26" rx="13" fill="var(--color-ink)"/></svg>
+</div>
+</div>
+</div>
+<figcaption>The reminder Tilly sends for you, once an invoice runs late.</figcaption>
+</figure>
+<figure class="job">
+<div class="shot job__shot" data-slot="demo-3" data-alt="A client's reply, logged against the invoice it answers">
+<div class="shot__ph">
+<div class="shot__head">The reply log</div>
+<div class="shot__body" aria-hidden="true">
+<svg class="shot__art" viewBox="0 0 320 220" focusable="false"><rect x="60" y="50" width="150" height="40" rx="20" fill="none" stroke="var(--color-rule-2)"/><rect x="110" y="110" width="150" height="40" rx="20" fill="var(--color-paper)" stroke="var(--color-rule-2)"/><path d="M80 70H180M130 130H230" stroke="var(--color-rule-2)" stroke-width="3" stroke-linecap="round"/></svg>
+</div>
+</div>
+</div>
+<figcaption>Every reply from your client, kept with the invoice it answers.</figcaption>
+</figure>
+<figure class="job">
+<div class="shot job__shot" data-slot="demo-4" data-alt="An invoice marked paid in Tilly">
+<div class="shot__ph">
+<div class="shot__head">Marked paid</div>
+<div class="shot__body" aria-hidden="true">
+<svg class="shot__art" viewBox="0 0 320 220" focusable="false"><rect x="110" y="30" width="100" height="134" rx="6" fill="var(--color-paper)" stroke="var(--color-rule-2)"/><path d="M126 56H180M126 70H196" stroke="var(--color-rule-2)" stroke-width="3" stroke-linecap="round"/><rect x="150" y="146" width="80" height="26" rx="13" fill="var(--color-ink)"/></svg>
+</div>
+</div>
+</div>
+<figcaption>Paid and marked, so the reminders stop.</figcaption>
+</figure>
+</div>
+<p class="jobs__close">Three screens to check, not three emails to write.</p>
+</div>
+</section>
+<section class="price" id="price" aria-labelledby="price-title">
+<div class="container"><div class="price__grid">
+<div class="price__fig">
+<h2 id="price-title">What it costs</h2>
+<p class="price__num"><span>£8</span> a month</p>
+</div>
+<div class="price__text">
+<p>Invoicing that does its own chasing.</p>
+<div class="hero__actions">
+<a class="btn" href="/start">Start chasing invoices</a>
+</div>
+</div>
+</div></div>
+</section>
+</main>
+<footer class="foot">
+<div class="container"><div class="foot__row">
+<p class="foot__mark">Tilly</p>
+<p>Invoicing that chases for you</p>
+<a href="#top">Back to the top</a>
+</div></div>
+</footer>
+<script>window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === 'string' ? v : v.src; im.alt = (typeof v === 'object' && v.alt) || s.dataset.alt || ''; s.prepend(im); } };</script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wren Weaving: linen and wool, woven by the metre</title>
+<meta name="description" content="A two-loom studio in the Scottish Borders weaving linen and wool to order, from £64 a metre, six to eight weeks from order.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400&family=Hanken+Grotesk:wght@400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · shape: Narrative Workflow · genre: editorial · theme: Loom (by request, exemplar) · loom: ecru
+ * hero: Stage · nav: N9 edge-aligned, two text links · footer: Ft1 mast-headed · enrichment: none · signature: the six to eight week lead time drawn as a length of cloth on the indigo comb band, carrying stage two's head
+ * axes: light/roman-serif/cool · posture: committed · contrast: pass · fold: pass
+ * hero-review: ship after 1 fix round (5 findings, 5 resolved) · finish-review: 3 findings · 2 resolved, 1 answered · gap: none · v2.3.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S5 R4 V5 · weakest: P, a studio page argues little; the stages argue for slow: nothing is cut until you order it */
+/* Hallmark · answered F15 · six type sizes, not five: the Loom theme names a 28px wordmark, 19px subheads and 14px controls beside display, display-s and body */
+:root {
+  --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px;
+  --text-sm: 0.875rem; --text-md: 1rem; --text-lede: 1.1875rem; --text-mark: 1.75rem;
+  --text-display-s: clamp(2.25rem, 4vw + 0.5rem, 3.75rem); --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --dur-micro: 120ms; --dur-short: 220ms;
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap: 144px; --nav-h: 80px; --numeral-col: 4.5rem; --bar-h: 32px;
+  --z-raised: 10; --z-toast: 500;
+  --color-paper: oklch(95% 0.015 85); --color-paper-2: oklch(92% 0.02 85); --color-paper-3: oklch(84% 0.03 80);
+  --color-ink: oklch(20% 0.01 60); --color-ink-2: oklch(30% 0.012 60); --color-muted: oklch(45% 0.012 60);
+  --color-rule: oklch(84% 0.02 85); --color-thread: oklch(87% 0.02 85); --color-oat: oklch(76% 0.04 80); --color-oat-2: oklch(69% 0.045 78);
+  --color-accent: oklch(38% 0.15 275); --color-accent-2: oklch(46% 0.16 275); --color-accent-ink: oklch(95% 0.015 85); --color-focus: oklch(46% 0.16 275);
+  --color-error: oklch(52% 0.19 27); --color-field: var(--color-accent); --rail: var(--color-ink-2);
+  --on-band-soft: color-mix(in oklab, var(--color-accent-ink) 78%, var(--color-accent)); --on-band-rule: color-mix(in oklab, var(--color-accent-ink) 45%, transparent);
+  --font-display: "Libre Caslon Text", "Caslon fallback", "Times New Roman", serif; --font-body: "Hanken Grotesk", "Hanken fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: "DM Mono", ui-monospace, monospace;
+  --radius-pill: 0; --shadow-card: 0 18px 30px oklch(20% 0.01 60 / 0.12); --tracking-display: -0.015em;
+  --comb-paper: repeating-linear-gradient(90deg, var(--color-thread) 0 1px, transparent 1px 12px);
+  --comb-oat: repeating-linear-gradient(90deg, var(--color-oat) 0 1px, transparent 1px 12px);
+  --comb-ink: color-mix(in oklab, var(--color-accent-ink) 16%, transparent);
+  --weft-wool: repeating-linear-gradient(180deg, var(--color-oat-2) 0 3px, var(--color-oat) 3px 5px);
+  --weft-linen: repeating-linear-gradient(180deg, var(--color-paper-3) 0 3px, var(--color-paper) 3px 5px);
+  --weft-oat: repeating-linear-gradient(180deg, var(--color-oat) 0 3px, var(--color-paper) 3px 5px);
+  --fold-shade: color-mix(in oklab, var(--color-ink) 7%, transparent); --fold-light: color-mix(in oklab, var(--color-paper) 30%, transparent);
+}
+@font-face { font-family: "Caslon fallback"; src: local("Times New Roman"), local("TimesNewRomanPSMT"); size-adjust: 112%; ascent-override: 88%; descent-override: 27%; line-gap-override: 0%; }
+@font-face { font-family: "Hanken fallback"; src: local("Arial"), local("ArialMT"); size-adjust: 97%; ascent-override: 100%; descent-override: 26%; line-gap-override: 0%; }
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); scroll-behavior: smooth; }
+body { margin: 0; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); font-size: var(--text-md); line-height: 1.55; -webkit-font-smoothing: antialiased; caret-color: var(--color-accent); }
+::selection { background: color-mix(in oklab, var(--color-accent) 22%, transparent); color: var(--color-ink); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 400; letter-spacing: var(--tracking-display); line-height: 1.05; overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+h1 { max-width: 20ch; } h2 { max-width: 30ch; } h3 { max-width: 40ch; }
+p { margin: 0; text-wrap: pretty; max-width: 65ch; }
+img, svg, video { max-width: 100%; height: auto; display: block; }
+button, input, select, textarea { font: inherit; }
+.container { width: 100%; max-width: var(--container); margin-inline: auto; padding-inline: var(--gutter); box-sizing: border-box; }
+.num, .figure, td.num { font-variant-numeric: tabular-nums; }
+[data-slot] { position: relative; overflow: hidden; }
+[data-slot] > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+[data-slot]:has(> img) > :not(img) { display: none !important; }
+@media (max-width: 60rem) { :root { --gutter: 24px; --section-gap: 96px; } }
+@media (max-width: 40rem) { :root { --gutter: 16px; --section-gap: 72px; --gap-columns: 16px; } }
+@media (prefers-reduced-motion: reduce) { *:not(.keep-motion), *:not(.keep-motion)::before, *:not(.keep-motion)::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
+.display { font-size: var(--text-display); line-height: 1.04; color: var(--color-ink); }
+.lede { font-size: var(--text-lede); line-height: 1.5; color: var(--color-muted); max-width: 46ch; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; box-sizing: border-box; padding: var(--space-md) var(--space-lg); border: 0; border-radius: var(--radius-pill); font: 500 var(--text-sm)/1 var(--font-body); white-space: nowrap; text-decoration: none; cursor: pointer; background: var(--color-accent); color: var(--color-accent-ink); transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.link { position: relative; display: inline-flex; align-items: center; padding-block: var(--space-xs); font: 500 var(--text-sm)/1 var(--font-body); white-space: nowrap; text-decoration: none; color: var(--color-ink); border-bottom: 2px solid currentColor; transition: border-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out); }
+.link::before { content: ""; position: absolute; inset: calc(-1 * var(--space-sm)) calc(-1 * var(--space-xs)); }
+.link:active { color: var(--color-accent); }
+.link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.link-quiet { position: relative; display: inline-flex; align-items: center; min-height: 44px; font: 500 var(--text-sm)/1 var(--font-body); white-space: nowrap; color: var(--color-ink-2); text-decoration: underline 2px transparent; text-underline-offset: 2px; transition: color var(--dur-micro) var(--ease-out), text-decoration-color var(--dur-micro) var(--ease-out); }
+.link-quiet:active { color: var(--color-accent); }
+@media (hover: hover) {
+  .btn:hover { background: var(--color-accent-2); }
+  .link:hover { border-bottom-color: var(--color-accent); }
+  .link-quiet:hover { color: var(--color-accent); text-decoration-color: var(--color-accent); }
+}
+.skip { position: absolute; left: var(--space-md); top: calc(-1 * var(--space-3xl)); z-index: var(--z-toast); padding: var(--space-xs) var(--space-sm); background: var(--color-ink); color: var(--color-paper); font-size: var(--text-sm); text-decoration: none; }
+.skip:focus-visible { top: var(--space-md); }
+.nav { position: relative; z-index: var(--z-raised); }
+.nav__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-lg); min-height: var(--nav-h); }
+.wordmark { font: 400 var(--text-mark)/1 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); text-decoration: none; white-space: nowrap; }
+.wordmark:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.nav__links { display: flex; align-items: center; gap: var(--space-xl); list-style: none; margin: 0; padding: 0; }
+.hero__grid { min-height: 88dvh; box-sizing: border-box; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap-columns); align-items: center; padding-block: var(--space-xl) var(--space-2xl); }
+.hero__copy { grid-column: 1 / 7; display: grid; justify-items: start; gap: var(--space-lg); }
+.hero__copy .display { max-width: 19ch; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-lg) var(--space-xl); margin-top: var(--space-md); }
+.drop { grid-column: 7 / -1; margin: 0 0 0 var(--space-2xl); display: grid; justify-items: center; position: relative; }
+.drop__rail { width: 100%; height: var(--space-xs); background: var(--rail); position: relative; z-index: var(--z-raised); }
+.drop__length { display: grid; margin-top: calc(-1 * var(--space-2xs)); }
+.drop__cloth { height: min(calc(88dvh - 168px), 40rem); aspect-ratio: 4 / 5; max-width: 100%; background: var(--comb-paper), var(--weft-wool); box-shadow: var(--shadow-card); }
+.drop__folds { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0 6%, var(--fold-shade) 17%, transparent 29%, var(--fold-light) 43%, transparent 55%, var(--fold-shade) 71%, transparent 85%, var(--fold-light) 95%); }
+.drop__fringe { height: var(--space-xl); background: repeating-linear-gradient(90deg, var(--color-oat-2) 0 1px, transparent 1px 12px); -webkit-mask-image: linear-gradient(180deg, var(--color-ink) 40%, transparent); mask-image: linear-gradient(180deg, var(--color-ink) 40%, transparent); }
+.slot-label { position: absolute; left: var(--space-md); top: var(--space-md); z-index: var(--z-raised); padding: var(--space-2xs) var(--space-xs); background: var(--color-paper); color: var(--color-muted); font: 500 var(--text-sm)/1.3 var(--font-body); }
+main { counter-reset: stage; }
+.stage { counter-increment: stage; }
+.stage--cloth { padding-top: var(--section-gap); }
+.stage--loom { margin-top: calc(var(--section-gap) + var(--space-md)); }
+[id] { scroll-margin-top: var(--space-xl); }
+.stage__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap-columns); row-gap: var(--space-2xl); align-items: start; }
+.stage__head { grid-column: 1 / span 8; display: grid; gap: var(--space-md); }
+.stage__head h2 { display: grid; grid-template-columns: var(--numeral-col) minmax(0, 1fr); column-gap: var(--gap-columns); align-items: start; font-size: var(--text-display-s); line-height: 1.06; color: var(--color-ink); max-width: none; }
+.stage__head h2::before { content: counter(stage); font: 400 var(--text-display-s)/1 var(--font-display); color: var(--color-ink); padding-bottom: calc(var(--bar-h) + var(--space-sm)); background: linear-gradient(var(--color-accent), var(--color-accent)) left bottom / 100% var(--bar-h) no-repeat; }
+.stage__head p { margin-left: calc(var(--numeral-col) + var(--gap-columns)); max-width: 46ch; font-size: var(--text-lede); line-height: 1.5; color: var(--color-muted); }
+.swatches { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--gap-columns); align-items: start; margin-left: calc(var(--numeral-col) + var(--gap-columns)); }
+.sample { position: relative; margin: 0; display: grid; gap: var(--space-xs); padding: var(--space-lg); border: 1px dashed var(--color-oat); color: var(--color-ink); }
+.sample figcaption { display: grid; gap: var(--space-xs); }
+.sample--wool { margin-top: var(--space-3xl); }
+.sample__cloth { display: block; position: relative; overflow: hidden; aspect-ratio: 16 / 10; margin-bottom: var(--space-sm); outline: 1px solid var(--color-rule); outline-offset: -1px; }
+.sample--wool .sample__cloth { aspect-ratio: 4 / 3; }
+.sample__weft { position: absolute; inset: -5px 0 0; transition: transform var(--dur-short) var(--ease-out); }
+.sample__cloth::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 0 10%, var(--fold-shade) 30%, transparent 48%, var(--fold-light) 66%, transparent 82%); }
+.sample--linen .sample__weft { background: var(--comb-oat), var(--weft-linen); }
+.sample--wool .sample__weft { background: var(--comb-paper), var(--weft-oat); }
+.sample__name { justify-self: start; font: 400 var(--text-mark)/1.1 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); white-space: nowrap; text-decoration: underline 2px transparent; text-underline-offset: 2px; transition: text-decoration-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out); }
+.sample__name::after { content: ""; position: absolute; inset: 0; z-index: var(--z-raised); }
+.sample__line { color: var(--color-muted); }
+.sample__name:focus-visible { outline: none; }
+.sample:has(.sample__name:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.sample__name:active { color: var(--color-accent); }
+@media (hover: hover) {
+  .sample__name:hover { text-decoration-color: var(--color-accent); }
+  .sample:has(.sample__name:hover) .sample__weft { transform: translateY(5px); }
+}
+.band { background: var(--color-field) repeating-linear-gradient(90deg, var(--comb-ink) 0 1px, transparent 1px 12px); color: var(--color-accent-ink); padding-block: var(--section-gap); }
+.band .stage__head h2, .band .stage__head h2::before { color: var(--color-accent-ink); }
+.band .stage__head h2::before { background-image: linear-gradient(var(--color-accent-ink), var(--color-accent-ink)); }
+.band .stage__head p { color: var(--on-band-soft); }
+.band ::selection { background: var(--color-accent-ink); color: var(--color-accent); }
+.weeks { grid-column: 1 / -1; margin: 0 0 0 calc(var(--numeral-col) + var(--space-lg)); display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); row-gap: var(--space-sm); }
+.weeks__tag { font: 500 var(--text-sm)/1.3 var(--font-body); color: var(--color-accent-ink); grid-row: 1; }
+.weeks__tag--made { grid-column: 1 / 7; }
+.weeks__tag--ready { grid-column: 7 / 9; padding-left: var(--space-sm); }
+.weeks__made { grid-row: 2; grid-column: 1 / 7; height: var(--space-3xl); background: repeating-linear-gradient(90deg, var(--comb-ink) 0 1px, transparent 1px 12px), repeating-linear-gradient(180deg, var(--color-accent-ink) 0 3px, var(--color-paper-3) 3px 5px); }
+.weeks__ready { grid-row: 2; grid-column: 7 / 9; height: var(--space-3xl); box-sizing: border-box; border: 1px dashed var(--color-accent-ink); border-left: 0; }
+.weeks__scale { grid-row: 3; grid-column: 1 / -1; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); font: 400 var(--text-sm)/1 var(--font-outlier); font-variant-numeric: tabular-nums; color: var(--color-accent-ink); }
+.weeks__scale li { position: relative; text-align: right; padding-top: var(--space-md); border-right: 1px solid var(--on-band-rule); padding-right: var(--space-xs); }
+.weeks__scale li:first-child { border-left: 1px solid var(--on-band-rule); }
+.weeks__order { position: absolute; left: var(--space-xs); top: var(--space-md); font-family: var(--font-body); font-weight: 500; }
+.weeks figcaption { grid-row: 4; grid-column: 1 / -1; margin-top: var(--space-sm); font: 400 var(--text-sm)/1.4 var(--font-body); color: var(--on-band-soft); }
+.order { background: var(--color-paper-2); margin-top: calc(var(--section-gap) + var(--space-md)); padding-block: var(--section-gap); }
+.order__grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap-columns); row-gap: var(--space-xl); align-items: start; }
+.order__head { grid-column: 1 / span 4; display: grid; gap: var(--space-md); }
+.order__head h2 { font-size: var(--text-display-s); line-height: 1.06; }
+.order__head p { font-size: var(--text-lede); line-height: 1.5; color: var(--color-muted); max-width: 45ch; }
+.order__form { grid-column: 6 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--gap-columns); row-gap: var(--space-md); }
+.field { display: grid; gap: var(--space-xs); align-content: start; min-width: 0; margin: 0; padding: 0; border: 0; }
+.field--wide { grid-column: 1 / -1; }
+.field label, .field legend { font: 500 var(--text-sm)/1.3 var(--font-body); color: var(--color-ink-2); padding: 0; }
+.field input[type="text"], .field input[type="email"], .field input[type="number"], .field textarea { width: 100%; box-sizing: border-box; height: 48px; padding: 0 var(--space-sm); font: 400 var(--text-md)/1.4 var(--font-body); color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-ink-2); border-radius: 0; outline: 2px solid transparent; outline-offset: 1px; transition: background-color var(--dur-micro) var(--ease-out); }
+.field textarea { height: auto; min-height: 6rem; padding-block: var(--space-sm); resize: vertical; }
+.field input:focus-visible, .field textarea:focus-visible { outline-color: var(--color-focus); }
+.field input:disabled, .field textarea:disabled { opacity: 0.55; cursor: not-allowed; }
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: var(--color-error); }
+.help { min-height: 1lh; font: 400 var(--text-sm)/1.4 var(--font-body); color: var(--color-muted); }
+.choice { display: flex; gap: var(--space-lg); align-items: center; min-height: 48px; }
+.choice__item { display: inline-flex; align-items: center; gap: var(--space-xs); font: 400 var(--text-md)/1 var(--font-body) !important; color: var(--color-ink) !important; cursor: pointer; }
+.choice__item input { width: 18px; height: 18px; margin: 0; accent-color: var(--color-accent); }
+.field--send { padding-top: var(--space-xs); justify-items: start; }
+@media (hover: hover) { .field input:hover, .field textarea:hover { background: var(--color-paper-3); } }
+.foot { padding-block: var(--space-3xl) var(--space-xl); }
+.foot__mast { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--gap-columns); align-items: baseline; padding-top: var(--space-lg); border-top: 1px solid var(--color-ink); }
+.foot__mark { font: 400 var(--text-display-s)/1 var(--font-display); letter-spacing: var(--tracking-display); color: var(--color-ink); }
+.foot__tag { color: var(--color-muted); max-width: 40ch; }
+.foot__links { display: flex; gap: var(--space-xl); list-style: none; margin: 0; padding: 0; }
+.foot__base { margin-top: var(--space-2xl); font-size: var(--text-sm); color: var(--color-muted); }
+@media (max-width: 60rem) {
+  .hero__grid { min-height: 0; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xl); padding-block: var(--space-xl) var(--space-3xl); }
+  .hero__copy, .drop { grid-column: 1 / -1; }
+  .drop { max-width: 28rem; justify-self: start; width: 100%; margin-left: 0; }
+  .drop__length { width: 88%; }
+  .drop__cloth { height: auto; width: 100%; }
+  .stage__head, .order__head, .order__form { grid-column: 1 / -1; }
+  .swatches, .weeks { margin-left: 0; }
+  .swatches { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
+  .sample--wool { margin-top: 0; }
+  .foot__mast { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
+  .foot__links { flex-wrap: wrap; gap: var(--space-xs) var(--space-lg); }
+}
+@media (max-width: 40rem) {
+  :root { --numeral-col: 2.75rem; }
+  .nav__links { gap: var(--space-lg); }
+  .nav__links li:first-child { display: none; }
+  .stage__head p { margin-left: 0; }
+  .stage__head h2 { column-gap: var(--space-md); }
+  .order__form { grid-template-columns: minmax(0, 1fr); }
+  .weeks__tag--ready { padding-left: 0; grid-row: 1; justify-self: end; grid-column: 5 / 9; text-align: right; }
+  .weeks__tag--made { grid-column: 1 / 5; }
+  .weeks__scale li { padding-right: var(--space-2xs); }
+  .weeks__order { display: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="nav">
+<div class="container nav__inner">
+<a class="wordmark" href="#top" aria-label="Wren Weaving, home">Wren Weaving</a>
+<nav aria-label="Primary">
+<ul class="nav__links" role="list">
+<li><a class="link-quiet" href="#metres">Prices</a></li>
+<li><a class="link-quiet" href="#weeks">Lead times</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main id="main">
+<section class="hero" id="top" aria-labelledby="hero-title">
+<div class="container hero__grid">
+<div class="hero__copy">
+<h1 id="hero-title" class="display">Woven in the&nbsp;Borders, by&nbsp;the&nbsp;metre.</h1>
+<p class="lede">Linen and wool, made to order on our two looms.</p>
+<div class="actions">
+<a class="btn" href="#order">Start an order</a>
+<a class="link" href="#cloth">How an order runs</a>
+</div>
+</div>
+<figure class="drop">
+<span class="drop__rail" aria-hidden="true"></span>
+<div class="drop__length">
+<div class="drop__cloth" data-slot="hero" data-alt="A close crop of the cloth">
+<span class="drop__folds" aria-hidden="true"></span>
+<span class="slot-label">Photo: a close crop of your cloth</span>
+</div>
+<span class="drop__fringe" aria-hidden="true"></span>
+</div>
+</figure>
+</div>
+</section>
+<section class="stage stage--cloth" id="cloth" aria-labelledby="s1-title">
+<div class="container stage__grid">
+<div class="stage__head">
+<h2 id="s1-title">Choose linen or wool</h2>
+<p>Neither waits on a shelf. Each is woven after you order it, for the room you are making.</p>
+</div>
+<div class="swatches">
+<figure class="sample sample--linen">
+<span class="sample__cloth" aria-hidden="true"><span class="sample__weft"></span></span>
+<figcaption>
+<a class="sample__name" href="#order" data-cloth="linen">Linen</a>
+<span class="sample__line">Cool and crisp, softening with every wash.</span>
+</figcaption>
+</figure>
+<figure class="sample sample--wool">
+<span class="sample__cloth" aria-hidden="true"><span class="sample__weft"></span></span>
+<figcaption>
+<a class="sample__name" href="#order" data-cloth="wool">Wool</a>
+<span class="sample__line">Warm and springy, with a full, soft hand.</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</section>
+<section class="stage stage--loom band" id="weeks" aria-labelledby="s2-title">
+<div class="container stage__grid">
+<div class="stage__head">
+<h2 id="s2-title">Six to eight weeks on the loom</h2>
+<p>We dress a loom for your length and weave it here, pick by pick.</p>
+</div>
+<figure class="weeks">
+<p class="weeks__tag weeks__tag--made">In the studio</p>
+<p class="weeks__tag weeks__tag--ready">Ready to send</p>
+<div class="weeks__made" aria-hidden="true"></div>
+<div class="weeks__ready" aria-hidden="true"></div>
+<ol class="weeks__scale" role="list">
+<li><span class="weeks__order">Order</span>1</li><li>2</li><li>3</li><li>4</li><li>5</li><li>6</li><li>7</li><li>8</li>
+</ol>
+<figcaption>Weeks from the day you order.</figcaption>
+</figure>
+</div>
+</section>
+<section class="order" id="order" aria-labelledby="order-title">
+<div class="container order__grid">
+<div class="order__head">
+<h2 id="order-title">Start an order</h2>
+<p>Tell us the cloth, the metres and the room. We write back with a start date.</p>
+</div>
+<form class="order__form" action="#order" method="post" data-endpoint="">
+<div class="field">
+<label for="o-name">Your name</label>
+<input id="o-name" name="name" type="text" autocomplete="name" required aria-describedby="o-name-help">
+<p class="help" id="o-name-help"></p>
+</div>
+<div class="field">
+<label for="o-email">Email</label>
+<input id="o-email" name="email" type="email" autocomplete="email" required aria-describedby="o-email-help">
+<p class="help" id="o-email-help"></p>
+</div>
+<fieldset class="field field--cloth">
+<legend>Cloth</legend>
+<div class="choice">
+<label class="choice__item"><input type="radio" name="cloth" value="linen" checked> Linen</label>
+<label class="choice__item"><input type="radio" name="cloth" value="wool"> Wool</label>
+</div>
+</fieldset>
+<div class="field" id="metres">
+<label for="o-metres">Metres</label>
+<input id="o-metres" name="metres" type="number" min="1" step="1" inputmode="numeric" aria-describedby="o-metres-help">
+<p class="help" id="o-metres-help">From £64 a metre.</p>
+</div>
+<div class="field field--wide">
+<label for="o-room">The room it is for</label>
+<textarea id="o-room" name="room" rows="3" aria-describedby="o-room-help"></textarea>
+<p class="help" id="o-room-help">Optional: the use, the colour, the date you need it by.</p>
+</div>
+<div class="field field--wide field--send">
+<button class="btn" type="submit">Send the order</button>
+</div>
+</form>
+</div>
+</section>
+</main>
+<footer class="foot">
+<div class="container">
+<div class="foot__mast">
+<p class="foot__mark">Wren Weaving</p>
+<p class="foot__tag">Linen and wool, woven to order in the Scottish Borders.</p>
+<ul class="foot__links" role="list">
+<li><a class="link-quiet" href="#order">Start an order</a></li>
+<li><a class="link-quiet" href="#cloth">The cloth</a></li>
+<li><a class="link-quiet" href="#top">Back to the top</a></li>
+</ul>
+</div>
+<p class="foot__base">© 2026 Wren Weaving</p>
+</div>
+</footer>
+<script>
+for (const a of document.querySelectorAll('.sample__name[data-cloth]')) {
+a.addEventListener('click', () => {
+const r = document.querySelector(`input[name="cloth"][value="${a.dataset.cloth}"]`);
+if (r) r.checked = true;
+});
+}
+window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === 'string' ? v : v.src; im.alt = (typeof v === 'object' && v.alt) || s.dataset.alt || ''; s.prepend(im); } };
+</script>
+</body>
+</html>

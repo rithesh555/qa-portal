@@ -1,0 +1,950 @@
+[
+  { "name": "Basel grid", "tier": "graphic-system",
+    "lineage": "Swiss International Style, Basel and Zurich schools, 1950s-70s",
+    "spark": "The grid is not scaffolding you hide; it is the design, and one red mark does all the emotional work.",
+    "system": [
+      "Palette/material: white surface with the column grid exposed as hairlines; ink near-black; exactly one signal red per viewport",
+      "Type/composition: one neo-grotesque family at two weights; flush-left rag-right; size jumps of 3x, never 1.2x",
+      "Topology/navigation: content locks to twelve columns with asymmetric spans; nav is a single ruled line of text links",
+      "Controls/state: buttons are ruled boxes that invert to ink on press; active state is the red mark migrating",
+      "Responsive/motion: columns collapse by halving; motion is none or a single hard-cut reveal"
+    ],
+    "webLeverage": "CSS subgrid keeps nested content on the exposed master grid",
+    "fits": ["institutions", "agencies", "engineering tools"] },
+
+  { "name": "Bauhaus catalog", "tier": "graphic-system",
+    "lineage": "Bauhaus Dessau exhibition catalogs and prospectuses, 1920s",
+    "spark": "A page that believes geometry is moral: circle, triangle, bar, and a diagonal that earns its angle.",
+    "system": [
+      "Palette/material: warm off-white with primary red, blue, yellow as flat geometry, never as tints",
+      "Type/composition: geometric sans, heavy lowercase; rotated type only along a load-bearing diagonal",
+      "Topology/navigation: sections keyed by a numbered geometric marker; nav is a horizontal band of numbers",
+      "Controls/state: hover fills the shape behind the label; pressed swaps figure and ground",
+      "Responsive/motion: the diagonal flattens to horizontal bands on small screens; one rotation animates once"
+    ],
+    "webLeverage": "CSS transform with transform-origin makes the rotated headline settle once on load",
+    "fits": ["design tools", "education", "manifestos"] },
+
+  { "name": "Constructivist poster", "tier": "graphic-system",
+    "lineage": "Rodchenko and El Lissitzky poster work, 1920s",
+    "spark": "Red wedge, black bar, a shouted word set on the diagonal: the page as agitation.",
+    "system": [
+      "Palette/material: bone paper, red and black only; no third colour exists",
+      "Type/composition: condensed caps stacked and angled; scale contrast does the shouting",
+      "Topology/navigation: hard wedges and photomontage crops direct the eye along one vector per viewport",
+      "Controls/state: controls are black bars; hover drives the red wedge through them",
+      "Responsive/motion: angles reduce to stacked bars on mobile; one wedge translates in, once"
+    ],
+    "webLeverage": "clip-path polygons build the wedges and crops without images",
+    "fits": ["events", "campaigns", "bold launches"] },
+
+  { "name": "Deco travel poster", "tier": "graphic-system",
+    "lineage": "Art Deco railway and ocean-liner posters, 1920s-30s",
+    "spark": "Dusk laid down in flat bands behind one monumental object that owns the page.",
+    "system": [
+      "Palette/material: gradient dusk rendered as four flat stepped bands, never a smooth mesh; deep navy ground at the base",
+      "Type/composition: tall geometric display caps, tight tracking; a small ruled caption footer",
+      "Topology/navigation: one monumental subject per section, small text yields to it; nav is a slim top rule",
+      "Controls/state: buttons are lozenges with a metallic-adjacent border; hover deepens the band behind them",
+      "Responsive/motion: bands stay full-bleed at every width; parallax banned, one slow band-light shift allowed"
+    ],
+    "webLeverage": "repeating-linear-gradient with hard colour stops builds the stepped dusk in one declaration",
+    "fits": ["travel", "hospitality", "events"] },
+
+  { "name": "NASA standards", "tier": "graphic-system",
+    "lineage": "NASA Graphics Standards Manual, Danne and Blackburn, 1975",
+    "spark": "A specification page so confident it numbers its own figures.",
+    "system": [
+      "Palette/material: cool white; one federal red accent; grey only as hairline rules",
+      "Type/composition: wide grotesque caps for headings, tracked no wider than 0.04em; body flush-left under ruled captions",
+      "Topology/navigation: numbered figures (fig 4.1) anchor every section; nav is a numeric index",
+      "Controls/state: controls carry spec numbers; active state is the red rule thickening under the number",
+      "Responsive/motion: figures reflow but keep their numbers; motion limited to a measured underline draw"
+    ],
+    "webLeverage": "CSS counters auto-number figures and sections so the numbering never drifts",
+    "fits": ["aerospace-adjacent tech", "developer platforms", "hardware"] },
+
+  { "name": "Penguin grid", "tier": "graphic-system",
+    "lineage": "Penguin paperback covers, Tschichold and Marber grid, 1947-62",
+    "spark": "Three fixed bands, colour codes the category, and the band line never moves an inch.",
+    "system": [
+      "Palette/material: one saturated category colour filling the top band; cream centre band; the colour returns at the base",
+      "Type/composition: serif title case in the cream band; publisher-mark discipline, nothing decorative",
+      "Topology/navigation: every section is the same band structure at a fixed ratio; colour changes, structure never does",
+      "Controls/state: controls live in the colour band and reverse out of it; hover swaps band and text colours",
+      "Responsive/motion: the ratio holds at every width; the only motion is a band colour cross-fade between sections"
+    ],
+    "webLeverage": "CSS custom properties swap the category colour per section while the band geometry stays fixed",
+    "fits": ["publishing", "content platforms", "catalogs"] },
+
+  { "name": "Riso zine", "tier": "graphic-system",
+    "lineage": "Risograph small-press printing, 1980s to now",
+    "spark": "Two soy inks slightly out of register, and the mistake is the signature.",
+    "system": [
+      "Palette/material: uncoated stock tinted pink or blue; two spot inks that overprint to a third colour",
+      "Type/composition: chunky bold sans, hand-lettered moments allowed; halftone dots stand in for photography",
+      "Topology/navigation: stapled-spread logic, sections as loose pages; nav hand-drawn as a contents scrawl",
+      "Controls/state: buttons are ink blocks with visible misregistration; press shifts the second ink 2px",
+      "Responsive/motion: misregistration settles once on load (under 400ms) and never loops"
+    ],
+    "webLeverage": "mix-blend-mode multiply makes the two inks genuinely overprint",
+    "fits": ["community", "events", "indie products"] },
+
+  { "name": "Whole Earth spread", "tier": "graphic-system",
+    "lineage": "Whole Earth Catalog, 1968-74",
+    "spark": "Dense, ink-heavy conviction: every item reviewed, priced, and argued for in six-point type.",
+    "system": [
+      "Palette/material: newsprint cream, ink-dense; no accent colour, emphasis is weight",
+      "Type/composition: typewriter body under bold serif headers; captions run right up against images",
+      "Topology/navigation: multi-column item entries with inline prices; an index does the navigating",
+      "Controls/state: links underlined in ink; visited state is a hand-drawn check in the margin",
+      "Responsive/motion: columns drop one at a time; no motion, the density is the energy"
+    ],
+    "webLeverage": "CSS multi-column layout with column-rule gives real newsprint flow",
+    "fits": ["marketplaces", "directories", "tool collections"] },
+
+  { "name": "Isotype board", "tier": "graphic-system",
+    "lineage": "Otto Neurath's Isotype pictogram system, 1920s-40s",
+    "spark": "Quantity is repetition, never scaling: fifty units is fifty marks, and you can count them.",
+    "system": [
+      "Palette/material: flat white; black; one signal red reserved for the exception in the data",
+      "Type/composition: humanist sans captions beneath pictogram rows; a unit legend at the foot",
+      "Topology/navigation: every claim becomes a pictogram row; sections are chart plates with numbered titles",
+      "Controls/state: hovering a row highlights its unit count; the red unit is the interactive one",
+      "Responsive/motion: rows wrap, units never shrink; units populate left to right, once"
+    ],
+    "webLeverage": "inline SVG symbols with use elements repeat the unit pictogram at zero cost",
+    "fits": ["data storytelling", "civic tech", "reports"] },
+
+  { "name": "Specimen broadsheet", "tier": "graphic-system",
+    "lineage": "Type-foundry specimen sheets, 19th century",
+    "spark": "The typeface is the product, shown at every size it owns, waterfall after waterfall.",
+    "system": [
+      "Palette/material: cream broadsheet, ink only; a foundry footer in the body face, a step smaller",
+      "Type/composition: one family at every size as content; waterfall settings, no placeholder text",
+      "Topology/navigation: sized specimens are the sections; a ruled index of point sizes navigates",
+      "Controls/state: hover sets the specimen line in the accent weight; controls are ruled boxes",
+      "Responsive/motion: the waterfall re-breaks by width; one variable-font weight settle on load"
+    ],
+    "webLeverage": "variable font axes animated once with font-variation-settings make the waterfall breathe",
+    "fits": ["type-adjacent tools", "portfolios", "editorial"] },
+
+  { "name": "Letterpress playbill", "tier": "graphic-system",
+    "lineage": "Broadside ballads and theatre playbills, 18th-19th century",
+    "spark": "A different wood type on every line, all centered, and the bill still reads top to bottom like thunder.",
+    "system": [
+      "Palette/material: cream rag paper, black ink, one spot red for the star act",
+      "Type/composition: stacked centered lines, a different display face per line; rule dividers between acts",
+      "Topology/navigation: strict top-to-bottom bill hierarchy; nav is the bill's own running order",
+      "Controls/state: controls are ruled bill lines; hover sets the line in spot red",
+      "Responsive/motion: the stack narrows, never reflows sideways; no motion beyond an ink-in on load"
+    ],
+    "webLeverage": "text-wrap balance keeps every centered wood-type line breaking evenly",
+    "fits": ["events", "restaurants", "launches"] },
+
+  { "name": "Matchbox label", "tier": "graphic-system",
+    "lineage": "Japanese matchbox labels, Meiji through Showa eras",
+    "spark": "One animal in a cartouche is the entire brand, and the border does the rest.",
+    "system": [
+      "Palette/material: kraft ground; two flat inks; the illustration is the only image on the page",
+      "Type/composition: hand-drawn logotype in a cartouche; supporting text tiny and outward-facing like an edge label",
+      "Topology/navigation: every section framed by a printed border; the mark recurs small as a wayfinder",
+      "Controls/state: buttons are bordered chips; hover thickens the border, press fills the cartouche",
+      "Responsive/motion: the border scales with the container; motion is a single stamp-down of the mark"
+    ],
+    "webLeverage": "border-image turns one SVG frame into every container's printed border",
+    "fits": ["consumer goods", "cafes", "playful brands"] },
+
+  { "name": "Pharma sachet", "tier": "graphic-system",
+    "lineage": "Geigy pharmaceutical packaging and literature, 1950s-60s",
+    "spark": "Clinical calm with one enormous abstract shape carrying all the feeling the copy refuses to.",
+    "system": [
+      "Palette/material: clinical white; one large flat geometric figure in a single saturated colour",
+      "Type/composition: akzidenz-class grotesque, lowercase; dosage-table clarity in the data",
+      "Topology/navigation: each section pairs a cool table with one warm abstract figure; nav is a thin rule of lowercase links",
+      "Controls/state: controls are precise 1px-bordered fields; focus is the figure's colour, nothing else is",
+      "Responsive/motion: the figure crops before it shrinks; it drifts a few pixels over 20s, imperceptibly"
+    ],
+    "webLeverage": "SVG shapes with CSS offset-path give the abstract figure its slow drift",
+    "fits": ["health", "science SaaS", "precision tools"] },
+
+  { "name": "Seed packet", "tier": "graphic-system",
+    "lineage": "American seed-packet lithography, 1900s-40s",
+    "spark": "The tomato on the front is redder than any tomato has ever been, and the planting table on the back is dead honest.",
+    "system": [
+      "Palette/material: cream stock; one saturated produce illustration; a banner ribbon in a second colour",
+      "Type/composition: ornamented display caps in the banner; the back-of-pack table set plain and tabular",
+      "Topology/navigation: front-of-pack hierarchy (variety, vignette, promise) then the honest table; sections alternate front and back",
+      "Controls/state: the CTA is the banner ribbon; hover ripples the ribbon ends 2px",
+      "Responsive/motion: illustration stays dominant at all widths; one bloom-in on load, then still"
+    ],
+    "webLeverage": "SVG filters posterize the illustration into genuine lithograph flats",
+    "fits": ["food", "garden", "subscription boxes"] },
+
+  { "name": "Teletext page", "tier": "graphic-system",
+    "lineage": "Ceefax and Minitel broadcast text services, 1970s-80s",
+    "spark": "Page 302 of a broadcast that never stops: block mosaics, double-height caps, colours with no opinions about taste.",
+    "system": [
+      "Palette/material: true black ground; saturated RGB block colours straight from the palette register",
+      "Type/composition: double-height bitmap caps for headers; body in the same monospace grid",
+      "Topology/navigation: three-digit page numbers are the nav; a header row carries page and time",
+      "Controls/state: selection is a colour-block cursor; links are coloured index rows",
+      "Responsive/motion: the character grid scales as a unit; one row-by-row paint-in on load, top to bottom"
+    ],
+    "webLeverage": "ch units and a monospace grid keep every block mosaic cell true to the character cell",
+    "fits": ["news", "data products", "retro consumer"] },
+
+  { "name": "Transit wayfinding", "tier": "graphic-system",
+    "lineage": "Vignelli subway diagram and Calvert-Kinneir motorway signage, 1960s-70s",
+    "spark": "A sign system that gets you off at the right exit without you noticing you read it.",
+    "system": [
+      "Palette/material: high-contrast panel colours (one per line of business) with white reversal; dark charcoal ground",
+      "Type/composition: one transport grotesque, mixed case, huge x-height; arrows are typography",
+      "Topology/navigation: destination hierarchy (line, station, exit); coloured discs badge the categories",
+      "Controls/state: controls are sign panels; active is the white bar under the destination",
+      "Responsive/motion: panels stack like stacked signs; motion is a panel slide with a hard stop"
+    ],
+    "webLeverage": "scroll-driven animations pin the line diagram while stations tick past",
+    "fits": ["navigation-heavy apps", "platforms", "logistics"] },
+
+  { "name": "Racing livery", "tier": "graphic-system",
+    "lineage": "Motorsport liveries and roundel number plates, 1960s-70s",
+    "spark": "One team colour against white, a giant number in a roundel, and sponsor patches held in strict formation.",
+    "system": [
+      "Palette/material: one saturated team colour blocked hard against white; matte black for numerals",
+      "Type/composition: huge condensed numerals, no italics; small sponsor-grid text disciplined to one zone",
+      "Topology/navigation: sections read as body panels, colour breaks at panel lines; nav is the number roundel row",
+      "Controls/state: the roundel is the button; hover rotates the number plate a degree, press stamps it flat",
+      "Responsive/motion: panel lines re-break at width changes; one chequered wipe on section change"
+    ],
+    "webLeverage": "CSS clip-path panel lines let the team colour break exactly where the bodywork would",
+    "fits": ["performance tools", "sports", "speed-led brands"] },
+
+  { "name": "Bus blind", "tier": "graphic-system",
+    "lineage": "London bus destination blinds and roller signs",
+    "spark": "White and yellow letterforms on black, sized like they have somewhere to be.",
+    "system": [
+      "Palette/material: black ground; letterforms in white and one yellow only",
+      "Type/composition: one grotesque in capitals at extreme size; via-points in a smaller line beneath",
+      "Topology/navigation: destination stacking is the page structure; each section is a blind frame",
+      "Controls/state: controls are blind windows; changing state rolls the text vertically like the blind",
+      "Responsive/motion: type scales to fill the frame edge to edge; the roll is the one motion, stepped not smooth"
+    ],
+    "webLeverage": "steps() easing on translateY makes the destination roll land like a real blind",
+    "fits": ["transit", "bold single-message landings", "events"] },
+
+  { "name": "Blue Note sleeve", "tier": "graphic-system",
+    "lineage": "Reid Miles cover design for Blue Note Records, 1955-67",
+    "spark": "A duotone musician mid-phrase, type slicing across the photograph like a horn line.",
+    "system": [
+      "Palette/material: one-colour duotone photography over deep ink ground; a second flat colour for type blocks only",
+      "Type/composition: tight grotesque set in bars and angles that cut across the image; lowercase confidence",
+      "Topology/navigation: every section is a sleeve: image field plus one typographic intervention; track-list rows navigate",
+      "Controls/state: controls are type bars; hover shifts the duotone hue, press knocks the bar out of the photo",
+      "Responsive/motion: the crop tightens before the type shrinks; one slow duotone shift per viewport"
+    ],
+    "webLeverage": "CSS filter plus mix-blend-mode builds real duotones from ordinary photographs",
+    "fits": ["music", "creative platforms", "portfolio"] },
+
+  { "name": "Bass title card", "tier": "graphic-system",
+    "lineage": "Saul Bass film title sequences and posters, 1950s-60s",
+    "spark": "A torn paper shape on a flat colour field tells you the whole story before a word lands.",
+    "system": [
+      "Palette/material: one saturated field colour per act; torn black silhouette shapes; white text only",
+      "Type/composition: irregular hand-cut display letters or a plain grotesque, nothing between; asymmetric placement",
+      "Topology/navigation: sections are acts, each a new field colour and one shape; the cast list is the footer",
+      "Controls/state: controls are cut-out shapes; hover jitters the tear 1px, press inverts shape and field",
+      "Responsive/motion: shapes rescale as silhouettes; one shape assembles from two pieces per section, once"
+    ],
+    "webLeverage": "SVG clip-path with jagged polygon points gives genuine torn edges at any scale",
+    "fits": ["storytelling products", "studios", "campaign pages"] },
+
+  { "name": "Atelier populaire broadside", "tier": "graphic-system",
+    "lineage": "Silkscreened posters of the Paris ateliers, May 1968",
+    "spark": "One colour, pulled through a screen in a hurry, saying exactly one thing.",
+    "system": [
+      "Palette/material: kraft or raw white; a single flat ink (red or black); screen texture where the ink thins",
+      "Type/composition: hand-cut caps drawn fast, slightly irregular; the slogan is the layout",
+      "Topology/navigation: one message per section, full width; nav is a strip of small stencilled words",
+      "Controls/state: buttons are stencil cuts; press pulls a second pass of ink (darker, slightly offset)",
+      "Responsive/motion: the slogan wraps by hand-set breakpoints; no motion, urgency is static"
+    ],
+    "webLeverage": "an SVG feTurbulence filter thins the ink exactly where a squeegee would starve it",
+    "fits": ["manifestos", "community causes", "single-message pages"] },
+
+  { "name": "Ordnance quadrangle", "tier": "graphic-system",
+    "lineage": "USGS and Ordnance Survey topographic sheets, 20th century",
+    "spark": "A landscape flattened to hairline contours, and the margins full of quiet institutional truth.",
+    "system": [
+      "Palette/material: paper white with hairline contour density in brown; water in one blue; a marginalia frame",
+      "Type/composition: place names in the serif a step smaller, italic reserved for water alone; datum notes in a small sans",
+      "Topology/navigation: the sheet grid with edge coordinates is the layout; sections are named quadrangles",
+      "Controls/state: hover raises a contour line's weight; selected areas get the survey's red grid tick",
+      "Responsive/motion: the frame margins hold at every width; contours draw in once, slowly, on first view"
+    ],
+    "webLeverage": "SVG stroke-dashoffset animates the contour draw without a single image asset",
+    "fits": ["mapping", "data platforms", "field tools"] },
+
+  { "name": "Stamp sheet", "tier": "graphic-system",
+    "lineage": "Engraved postage sheets and philatelic presentation packs",
+    "spark": "Forty identical engravings separated by perforations, and every one of them is treasury-grade.",
+    "system": [
+      "Palette/material: pale gum-paper ground; each stamp a one-colour engraving; selvedge margins carry plate numbers",
+      "Type/composition: engraved-style serif for denominations; country and series in the body face, a step smaller",
+      "Topology/navigation: content cells are stamps in a perforated sheet grid; the selvedge is the nav rail",
+      "Controls/state: hover lifts a stamp with a soft paper shadow; selection tears it along the perforation",
+      "Responsive/motion: the sheet re-grids without breaking perforation rhythm; one lift-and-settle per interaction"
+    ],
+    "webLeverage": "a repeating radial-gradient mask cuts true perforated edges on every cell",
+    "fits": ["collections", "membership products", "archival brands"] },
+
+  { "name": "Banknote engraving", "tier": "graphic-system",
+    "lineage": "Intaglio currency engraving and guilloche security lathework",
+    "spark": "A page that spends its whole budget proving it cannot be forged.",
+    "system": [
+      "Palette/material: pale money-green or ochre ground woven with fine guilloche linework; one seal in a second ink",
+      "Type/composition: engraved serif numerals at denomination scale; microtext rules that read up close",
+      "Topology/navigation: sections framed like note faces with corner denominations; the seal badges the key claim",
+      "Controls/state: controls are engraved plaques; hover raises the lattice contrast, press embosses",
+      "Responsive/motion: guilloche density thins at small sizes instead of shrinking; a 30s lattice shimmer, barely there"
+    ],
+    "webLeverage": "layered repeating-conic-gradients generate live guilloche lattices with no artwork",
+    "fits": ["fintech", "security products", "premium brands"] },
+
+  { "name": "Concrete poem", "tier": "graphic-system",
+    "lineage": "Concrete poetry movement, Gomringer and the Noigandres group, 1950s-60s",
+    "spark": "The words are arranged as the thing they describe, and that arrangement is the whole design.",
+    "system": [
+      "Palette/material: bare page, ink only; whitespace is the material being sculpted",
+      "Type/composition: one sans, one size; placement carries all meaning, no bold, no colour",
+      "Topology/navigation: each section is one poem-shaped arrangement; nav is a single line of words",
+      "Controls/state: interactive words are the ones out of place; hover moves a word into its meaning",
+      "Responsive/motion: arrangements recompose per breakpoint by design, not reflow; one word settles per section"
+    ],
+    "webLeverage": "CSS grid template areas hold each hand-placed word exactly where the poem needs it",
+    "fits": ["manifestos", "studios", "single-idea landings"] },
+
+  { "name": "Airline timetable", "tier": "instrument",
+    "lineage": "Mid-century airline timetables and route maps, 1950s-60s",
+    "spark": "The schedule table is the layout, and the route arcs are the only decoration allowed aboard.",
+    "system": [
+      "Palette/material: white with one airline livery colour; buff for the cover panels",
+      "Type/composition: tabular figures everywhere; city codes as their three letters at the body size, untracked; flight numbers as anchors",
+      "Topology/navigation: content is departures rows (time, code, destination, note); tabs like ticket stock navigate",
+      "Controls/state: a row highlights in livery colour on hover; selected flights get the margin arrow",
+      "Responsive/motion: columns shed politely (note first, code last); rows tick in once like a posted schedule"
+    ],
+    "webLeverage": "font-variant-numeric tabular-nums locks every column of times into alignment",
+    "fits": ["logistics", "scheduling tools", "travel"] },
+
+  { "name": "Card catalog", "tier": "instrument",
+    "lineage": "Library card catalogs and drawer indexes",
+    "spark": "Every fact on its own manila card, typed, stamped, and filed where fingers can walk to it.",
+    "system": [
+      "Palette/material: manila and buff cards on a dark oak drawer ground; rubber-stamp red for status",
+      "Type/composition: typewriter mono with underline emphasis; call numbers top-left, always",
+      "Topology/navigation: drawer-and-card structure; tabbed dividers are the nav; one card raised per view",
+      "Controls/state: hover slides a card up 8px from the drawer; selection stamps it in red",
+      "Responsive/motion: drawers become a single column of tabs; the card slide is the only motion"
+    ],
+    "webLeverage": "CSS scroll-snap makes the drawer riffle card by card under the thumb",
+    "fits": ["search products", "archives", "knowledge tools"] },
+
+  { "name": "Double-entry ledger", "tier": "instrument",
+    "lineage": "Bookkeeping ledgers and banker's stationery, 19th-20th century",
+    "spark": "Pale green ruled paper where every claim has to balance against another, in ink, by hand.",
+    "system": [
+      "Palette/material: pale green or buff ruled stock; iron-ink near-black; red reserved for deficit alone",
+      "Type/composition: copperplate-adjacent headers over mono figures; double rule closes every total",
+      "Topology/navigation: debit and credit columns structure every section; the running balance is the thread",
+      "Controls/state: rows confirm with a posted tick; unbalanced states show red in the difference column only",
+      "Responsive/motion: columns fold to stacked entries that keep their rule lines; a total counts up once and closes"
+    ],
+    "webLeverage": "background-image linear-gradient rulings keep the ledger lines pixel-true at any size",
+    "fits": ["fintech", "accounting", "analytics"] },
+
+  { "name": "Line-printer output", "tier": "instrument",
+    "lineage": "Punched-card decks and tractor-feed line-printer reports, 1960s-70s",
+    "spark": "Greenbar stripes, mono throughout, a job number in the header: the machine's own handwriting.",
+    "system": [
+      "Palette/material: greenbar striped paper (alternating pale bands); ink near-black; no accent, emphasis is overstrike",
+      "Type/composition: mono only, report headers in capitals as the display voice and every label in sentence case; fixed-width report blocks; page headers carry job and date",
+      "Topology/navigation: content arrives as numbered report sections; the sprocket margin is the scroll rail",
+      "Controls/state: selection is an overstruck line; errors print as a flagged exception row, never a red banner",
+      "Responsive/motion: the character grid rewraps at column counts, not pixels; output prints in line by line, once"
+    ],
+    "webLeverage": "a steps() typing animation prints the report a full line at a time, never a character",
+    "fits": ["developer tools", "batch and data products", "retro-tech"] },
+
+  { "name": "Blueprint", "tier": "instrument",
+    "lineage": "Cyanotype architectural and engineering blueprints",
+    "spark": "Prussian blue all the way down, white lines doing all the talking, a revision table that never lies.",
+    "system": [
+      "Palette/material: deep prussian-blue ground; pure white linework; one process-yellow highlight for the current revision",
+      "Type/composition: stencil-adjacent lettering in the title block, sentence case; dimension chains in small mono",
+      "Topology/navigation: orthographic views structure sections; the title block anchors every page corner",
+      "Controls/state: hover thickens a dimension chain; approved states get the checker's initials",
+      "Responsive/motion: drawings crop by viewport like a print table; white lines draw in once on first view"
+    ],
+    "webLeverage": "SVG stroke-dashoffset draws the plan's white lines the way a pen plotter would",
+    "fits": ["construction", "architecture tools", "planning software"] },
+
+  { "name": "Nautical chart", "tier": "instrument",
+    "lineage": "Admiralty nautical charts, 19th-20th century",
+    "spark": "Depth soundings scattered like seed, land in buff, and a compass rose that has earned its ornament.",
+    "system": [
+      "Palette/material: pale sea-tint ground with buff landmasses; magenta reserved for lights and warnings",
+      "Type/composition: italic hydrographic labels for water, upright roman for the coast; soundings as scattered small numerals",
+      "Topology/navigation: the chart frame with edge scales is the layout; hazards badge in magenta",
+      "Controls/state: plotted courses are the selected state; hover shows a bearing line from the rose",
+      "Responsive/motion: the frame holds, the chart pans; one course line draws in per section"
+    ],
+    "webLeverage": "SVG textPath curves the coastal labels along the actual coastline",
+    "fits": ["maritime", "exploration products", "route planning"] },
+
+  { "name": "Observatory logbook", "tier": "instrument",
+    "lineage": "Scientific expedition and observatory logbooks",
+    "spark": "Dated entries in iron-gall ink with the sketch pasted in and the coordinates in the margin.",
+    "system": [
+      "Palette/material: ivory ruled pages; iron-gall near-black that browns at the edges; one wax-red seal colour",
+      "Type/composition: serif entries with upright figures for data; marginal coordinates in the serif's figures, a step smaller",
+      "Topology/navigation: strictly chronological entries; the margin rail of dates is the nav",
+      "Controls/state: today's entry is the open page; hover tilts a pasted sketch 1 degree",
+      "Responsive/motion: margins collapse into inline date stamps; a new entry blots in once"
+    ],
+    "webLeverage": "CSS position sticky keeps the date rail fixed while entries scroll like turned pages",
+    "fits": ["research tools", "journals", "long-form products"] },
+
+  { "name": "Herbarium sheet", "tier": "instrument",
+    "lineage": "Botanical herbarium specimen sheets",
+    "spark": "One pressed specimen centered, and a hundred years of annotation slips accumulating around it.",
+    "system": [
+      "Palette/material: aged white sheet; specimen greens gone khaki; accession-stamp violet as the accent",
+      "Type/composition: typed determinavit labels bottom-right; latin binomials in italic, collectors' names in the body face",
+      "Topology/navigation: one specimen per section, annotations orbit it; the accession number indexes everything",
+      "Controls/state: hover lifts an annotation slip; verified state adds the determiner's stamp",
+      "Responsive/motion: slips reflow around the specimen, never over it; one slip settles per section"
+    ],
+    "webLeverage": "CSS shape-outside lets the annotation text wrap the specimen's actual silhouette",
+    "fits": ["botanicals", "archival products", "collections"] },
+
+  { "name": "Vitrine label", "tier": "instrument",
+    "lineage": "Museum object labels and vitrine cards",
+    "spark": "Object number, title, medium, provenance: four quiet lines doing justice to the thing above them.",
+    "system": [
+      "Palette/material: gallery white; ink only; the objects carry all colour",
+      "Type/composition: one quiet serif at two sizes with generous leading; the number line in old-style figures",
+      "Topology/navigation: object-and-label pairs structure the page; a numbered checklist navigates",
+      "Controls/state: hover raises the label's rule; selection adds the loan-collection dot",
+      "Responsive/motion: labels stay under their objects at every width; no motion, gallery stillness"
+    ],
+    "webLeverage": "CSS grid with subgrid keeps every label's four lines aligned across the gallery row",
+    "fits": ["luxury", "portfolios", "archives"] },
+
+  { "name": "Rams instruction card", "tier": "instrument",
+    "lineage": "Braun product literature under Dieter Rams, 1960s-70s",
+    "spark": "Pale grey calm where colour appears only on the control being explained.",
+    "system": [
+      "Palette/material: pale warm grey; ink dark grey; one signal colour appearing only on the referenced control",
+      "Type/composition: small akzidenz-style labels, numbered; generous silence between figures",
+      "Topology/navigation: exploded views with index lines structure sections; numbers cross-reference text to diagram",
+      "Controls/state: hovering text lights its control in the diagram and vice versa; nothing else reacts",
+      "Responsive/motion: diagrams stack above their text; index lines redraw once per layout"
+    ],
+    "webLeverage": "CSS :has() lets the diagram highlight when its matching text row is hovered, no script",
+    "fits": ["hardware", "consumer devices", "productivity tools"] },
+
+  { "name": "Recipe card", "tier": "instrument",
+    "lineage": "Mid-century boxed recipe cards",
+    "spark": "Ingredients on the left rail, method numbered on the right, a gingham band saying someone cooks here.",
+    "system": [
+      "Palette/material: cream card; one gingham or solid tint band; a category tab colour",
+      "Type/composition: friendly serif title, typewriter body; quantities in tabular figures",
+      "Topology/navigation: ingredients rail left, numbered method right; index tabs navigate categories",
+      "Controls/state: steps check off with a pencil tick; the active step's number fills the tab colour",
+      "Responsive/motion: the rail drops above the method on small cards; one card-flip per section change"
+    ],
+    "webLeverage": "CSS counters number the method steps so inserted steps renumber themselves",
+    "fits": ["food", "how-to products", "home brands"] },
+
+  { "name": "Classifieds page", "tier": "instrument",
+    "lineage": "Phone-book yellow pages and newspaper classifieds",
+    "spark": "Six-point type, column rules, and a bold header shouting PIANO, MUST SELL.",
+    "system": [
+      "Palette/material: yellow or newsprint ground, ink-dense; one red stamp for featured entries",
+      "Type/composition: bold condensed headers over tiny body; ad boxes of mixed sizes earn their borders",
+      "Topology/navigation: alphabetical tabs and column rules; the boxed ads are the featured tier",
+      "Controls/state: hover raises an ad box's border weight; placed state adds the red PAID stamp",
+      "Responsive/motion: columns drop but the rules stay; no motion, the density hums by itself"
+    ],
+    "webLeverage": "CSS columns with column-rule reflow the classifieds while keeping the printed rules",
+    "fits": ["directories", "marketplaces", "local services"] },
+
+  { "name": "Matchbook", "tier": "instrument",
+    "lineage": "American matchbook covers, 1930s-60s",
+    "spark": "Front hook, spine message, back offer: a complete pitch on two square inches.",
+    "system": [
+      "Palette/material: one saturated ground colour; foil-adjacent gold accents; the striker strip as a texture band",
+      "Type/composition: script wordmark over a condensed address line in sentence case; tiny type that stays proud",
+      "Topology/navigation: tiny-canvas discipline per section (hook, spine, offer); sections snap like a flipped book",
+      "Controls/state: the CTA is the striker strip; press strikes it with a brief spark of the accent",
+      "Responsive/motion: the canvas stays small and centered by choice; one flip between faces"
+    ],
+    "webLeverage": "CSS 3D transform flips the matchbook face to back on interaction",
+    "fits": ["hospitality", "small brands", "micro-sites"] },
+
+  { "name": "Mixing desk", "tier": "instrument",
+    "lineage": "Inline recording consoles, SSL and Neve channel strips, 1970s-80s",
+    "spark": "Ninety-six faders in ranks, and the one that matters is under your hand.",
+    "system": [
+      "Palette/material: charcoal panel ground; per-function knob colours (red record, green bus, white trim); brushed metal rails",
+      "Type/composition: engraved labels under every control, sentence case, a step smaller; channel numbers in a larger mono",
+      "Topology/navigation: vertical channel strips structure content; the master section anchors the page foot",
+      "Controls/state: faders and knobs are the controls; state reads as physical position plus one LED dot",
+      "Responsive/motion: strips shed to a bussed summary on small screens; meters move, nothing else does"
+    ],
+    "webLeverage": "input type=range restyled with accent-color and a custom track becomes a true fader bank",
+    "fits": ["audio products", "creator tools", "pro workflows"] },
+
+  { "name": "Modular patchbay", "tier": "instrument",
+    "lineage": "Moog and Serge modular synthesizer panels, 1960s-70s",
+    "spark": "A wall of jacks and one patch cable that explains everything by where it goes.",
+    "system": [
+      "Palette/material: matte black or brushed aluminium panels; cable colours as the only saturation; silk-screened white legends",
+      "Type/composition: silk-screen labels in a small sans, sentence case; module names in a wide grotesque, untracked",
+      "Topology/navigation: modules are the sections; drawn patch cables literally connect related content",
+      "Controls/state: jacks are link points; a patched connection is the selected state, cable and all",
+      "Responsive/motion: modules re-rack vertically; cables re-drape with a settle, motion ends there"
+    ],
+    "webLeverage": "SVG cubic bezier paths drape the patch cables with believable slack",
+    "fits": ["developer platforms", "integration products", "audio tools"] },
+
+  { "name": "Split-flap board", "tier": "instrument",
+    "lineage": "Solari di Udine departure boards, 1956 onward",
+    "spark": "The clatter of forty flaps landing on the word you were waiting for.",
+    "system": [
+      "Palette/material: near-black board; off-white flap characters; one amber row for delays and exceptions",
+      "Type/composition: one condensed gothic per flap cell, uppercase as the display voice only; the split line across every character",
+      "Topology/navigation: ranked rows (time, code, destination, remark) are the content; the header row is fixed",
+      "Controls/state: updates flip through intermediate characters; the amber row is the alert state",
+      "Responsive/motion: columns shed right to left; the flap animation is the single signature motion"
+    ],
+    "webLeverage": "CSS 3D rotateX at the character midline reproduces the physical flap fall",
+    "fits": ["status products", "logistics", "live data"] },
+
+  { "name": "Oscilloscope", "tier": "instrument",
+    "lineage": "Tektronix cathode-ray oscilloscopes, 1950s-70s",
+    "spark": "A single green trace on a graticule, telling the truth at the speed of light.",
+    "system": [
+      "Palette/material: deep green-black screen with an etched graticule; phosphor green trace; bone control panel around it",
+      "Type/composition: engraved labels on the panel, sentence case; measurements in mono; the trace is the display type",
+      "Topology/navigation: one screen per section with its control cluster; V/div and T/div framing as section metadata",
+      "Controls/state: rotary knobs and toggle states; the trace responds live to the section's data",
+      "Responsive/motion: the screen stays 4:3 and centered; only the trace moves, everything else is bolted down"
+    ],
+    "webLeverage": "an inline SVG polyline driven by requestAnimationFrame draws a live phosphor trace",
+    "fits": ["monitoring", "engineering tools", "data products"] },
+
+  { "name": "Flight-deck placard", "tier": "instrument",
+    "lineage": "Transport-aircraft cockpit placards and annunciator panels",
+    "spark": "Every switch guarded, every state announced, nothing ambiguous at three in the morning.",
+    "system": [
+      "Palette/material: dark grey panel; annunciator lenses in amber, green, white; guarded red for irreversible actions",
+      "Type/composition: engraved placards in sentence case; checklist items in a stern grotesque with do/verify columns",
+      "Topology/navigation: panel groups by system; the checklist rail runs the page in order",
+      "Controls/state: switches show physical position; irreversible controls sit under a lift-guard interaction",
+      "Responsive/motion: panels stack by system priority; annunciators illuminate, nothing slides"
+    ],
+    "webLeverage": "a details/summary lift-guard makes the destructive action take two deliberate gestures",
+    "fits": ["ops tooling", "safety products", "checklists"] },
+
+  { "name": "Telephone switchboard", "tier": "instrument",
+    "lineage": "Manual cord switchboards and operator rooms, 1900s-50s",
+    "spark": "A wall of brass jacks, cloth cords, and an operator who knows everyone's number by heart.",
+    "system": [
+      "Palette/material: dark bakelite and walnut ground; brass jack rings; cloth-cord colours as the accent set",
+      "Type/composition: engraved number plates; the directory in a compact serif with leader dots",
+      "Topology/navigation: jack fields are the content grid; plugging a cord is following a link",
+      "Controls/state: a live connection is a drawn cord; busy states show the jack's brass ring lit",
+      "Responsive/motion: jack fields wrap; the cord draw is the one animation and it sags correctly"
+    ],
+    "webLeverage": "SVG paths with a catenary curve give every patched cord its real sag",
+    "fits": ["communication products", "concierge services", "directories"] },
+
+  { "name": "Darkroom contact sheet", "tier": "instrument",
+    "lineage": "Photographic contact sheets and grease-pencil edits",
+    "spark": "Thirty-six frames under red light, and the grease pencil circles the only one that matters.",
+    "system": [
+      "Palette/material: photo-black ground; silver-print greys; one grease-pencil red-orange for markup",
+      "Type/composition: frame numbers in film-edge mono; captions typed on slips; the markup is hand-drawn",
+      "Topology/navigation: filmstrip rows with sprocket edges; circled frames are the featured tier",
+      "Controls/state: hover inverts a frame like a loupe check; the pick state is the grease circle",
+      "Responsive/motion: strips rewrap by frame count; the circle draws in once, hand-speed"
+    ],
+    "webLeverage": "SVG stroke-dashoffset animates the grease-pencil circle exactly as a hand would draw it",
+    "fits": ["photography", "review workflows", "portfolios"] },
+
+  { "name": "Chess scoresheet", "tier": "instrument",
+    "lineage": "Tournament scoresheets and dual-face chess clocks",
+    "spark": "Two columns of algebraic moves and a clock that makes time itself take turns.",
+    "system": [
+      "Palette/material: tournament cream sheet; ink black; one arbiter red for flags and illegal states",
+      "Type/composition: algebraic notation in mono pairs; player names in the serif at the head",
+      "Topology/navigation: numbered move pairs structure the content; the clock faces anchor two states",
+      "Controls/state: the active side's clock face is live, the other dimmed; pressing hands turn over",
+      "Responsive/motion: columns stay paired at every width; the only motion is the clock hand and the flag fall"
+    ],
+    "webLeverage": "CSS toggle of two clock faces via :has() keeps the turn state pure markup",
+    "fits": ["competitive products", "turn-based workflows", "strategy tools"] },
+
+  { "name": "Loom draft", "tier": "instrument",
+    "lineage": "Weaving drafts: threading, tie-up, and drawdown grids",
+    "spark": "Four small grids that together are the complete instruction for a bolt of cloth.",
+    "system": [
+      "Palette/material: cream graph ground; thread colours as filled grid cells; the drawdown emerges from them",
+      "Type/composition: numbered shafts and treadles in small mono; the pattern name in a quiet serif",
+      "Topology/navigation: threading across the top, treadling down the side, the drawdown filling the field",
+      "Controls/state: toggling a tie-up cell recomputes the drawdown; hover traces one thread through all grids",
+      "Responsive/motion: grids scale as units; the drawdown fills row by row, once"
+    ],
+    "webLeverage": "CSS grid with cell custom properties recomputes the visible weave without canvas",
+    "fits": ["craft brands", "configuration products", "pattern tools"] },
+
+  { "name": "Reel-to-reel deck", "tier": "instrument",
+    "lineage": "Studer and Revox tape machines, 1960s-70s",
+    "spark": "Two reels, a counter you trust more than your watch, and tape you can touch.",
+    "system": [
+      "Palette/material: brushed aluminium face on charcoal; VU cream dials with red overload wedge; tape brown as the accent",
+      "Type/composition: engraved labels under every switch, sentence case; the counter in a large odometer mono",
+      "Topology/navigation: transport controls order the page (rewind, play, record sections); the counter is the progress indicator",
+      "Controls/state: chunky latching buttons; recording state arms in red and will not be missed",
+      "Responsive/motion: the deck face stacks; reels turn only while something actually plays"
+    ],
+    "webLeverage": "CSS animation-play-state ties reel rotation to the page's real playing state",
+    "fits": ["media products", "recording tools", "archives"] },
+
+  { "name": "Camera top plate", "tier": "instrument",
+    "lineage": "Mechanical rangefinder top plates, 1950s-70s",
+    "spark": "Shutter, ISO, and a film counter, all machined, all legible, all exactly where thumbs expect them.",
+    "system": [
+      "Palette/material: satin chrome and black leatherette; engraved figures ink-filled; one meter-needle orange",
+      "Type/composition: engraved numerals on dials; settings in a small serif, sentence case; the model name in a restrained script",
+      "Topology/navigation: dials cluster by function; sections read left to right like the plate itself",
+      "Controls/state: dials click through detents (real steps, no smooth glide); the needle shows live exposure",
+      "Responsive/motion: dials become stacked steppers; the needle is the only continuous motion"
+    ],
+    "webLeverage": "scroll-snap points on a horizontal dial give real click-stop detents",
+    "fits": ["photography", "precision consumer tools", "settings-heavy products"] },
+
+  { "name": "Planetarium dome", "tier": "atmosphere",
+    "lineage": "Zeiss projection planetariums and star atlases",
+    "spark": "The house lights sink, the dome fills with stars, and a voice starts naming them.",
+    "system": [
+      "Palette/material: deep blue-black dome ground; pinpoint white stars; brass-gold for constellation lines and figures",
+      "Type/composition: classical serif with star names in italic; captions like a narrated program",
+      "Topology/navigation: constellation lines literally connect content nodes; a coordinate ring frames sections",
+      "Controls/state: hover brightens a star and its lines; focus takes the projector's brass ring, instantly",
+      "Responsive/motion: the dome crops, stars keep their positions; the sky turns a few degrees with scroll, nothing loops"
+    ],
+    "webLeverage": "an SVG map of the real sky for the page's date, hairline constellations, no glow",
+    "fits": ["AI and science tools", "night products", "observability"] },
+
+  { "name": "Midnight diner", "tier": "atmosphere",
+    "lineage": "American roadside diners after dark, neon and tungsten",
+    "spark": "Neon in the window, tungsten on the counter, pie under glass, and nowhere else open for miles.",
+    "system": [
+      "Palette/material: night-blue window ground; warm tungsten pools on formica cream; one neon colour, flat, as the only saturation",
+      "Type/composition: a script wordmark in the neon colour; menu-board lettering at display size with hand-set prices; ticket-stub mono only for order numbers and prices",
+      "Topology/navigation: the counter is the content rail; menu boards are the sections; the register closes the page",
+      "Controls/state: specials clip to the board; the neon sign flickers once on hover, steady otherwise",
+      "Responsive/motion: booths stack, the counter persists; light pools stay put; nothing loops"
+    ],
+    "webLeverage": "-webkit-text-stroke over a flat fill draws the neon tube, with no halo",
+    "fits": ["late-night products", "food", "hospitality"] },
+
+  { "name": "Palm house", "tier": "atmosphere",
+    "lineage": "Victorian glasshouses and botanical conservatories",
+    "spark": "White iron ribs, wet green light, and labels for ten thousand leaves.",
+    "system": [
+      "Palette/material: humid green field tones under glass-white structure; terracotta pot accents; condensation softness at edges",
+      "Type/composition: engraved botanical serif with latin italics; zinc-tag labels in sentence case",
+      "Topology/navigation: glasshouse bays are the sections, ribs are the dividers; zinc tags navigate species",
+      "Controls/state: tags tilt on hover like touched labels; selected specimens get a watering ring",
+      "Responsive/motion: bays narrow with the ribs intact; one slow light shift as if a cloud passed"
+    ],
+    "webLeverage": "thin white SVG ribs drawn over the foliage give the glasshouse its structure, with no blur",
+    "fits": ["wellness", "botanical brands", "growth products"] },
+
+  { "name": "Reading room", "tier": "atmosphere",
+    "lineage": "Great library reading rooms, green lamps and oak",
+    "spark": "A hundred green-glass lamps, each one a small island of permitted light.",
+    "system": [
+      "Palette/material: deep oak-brown ground; green-glass lamp pools; brass fittings; paper cream only inside the pools",
+      "Type/composition: bookish serif with old-style figures; catalog numbers in a quiet mono",
+      "Topology/navigation: desks-in-rows structure the content; each lamp pool holds one reading; the stacks are the archive nav",
+      "Controls/state: a lamp switches on to focus its desk; hushed states, nothing blinks",
+      "Responsive/motion: desks stack in single file; light pools fade up one at a time, then hold"
+    ],
+    "webLeverage": "a warm paper tint inside each card is the lamp's pool, with no radial light",
+    "fits": ["knowledge tools", "long-form reading", "research"] },
+
+  { "name": "Night train", "tier": "atmosphere",
+    "lineage": "European sleeper carriages, blue corridor lights",
+    "spark": "A corridor of blue night-lights, brass handles, and a timetable that will be true at dawn.",
+    "system": [
+      "Palette/material: deep railway blue with night-light pools; brass and walnut trims; a linen white for berth cards",
+      "Type/composition: carriage plates with engraved numerals; the timetable in disciplined tabular type",
+      "Topology/navigation: compartments are the sections along a corridor scroll; berth numbers navigate",
+      "Controls/state: a compartment door slides open to its content; the occupied state shows a drawn curtain",
+      "Responsive/motion: the corridor becomes a vertical run; a slow window-light sweep passes every so often"
+    ],
+    "webLeverage": "scroll-driven animations run the passing window lights against the corridor scroll",
+    "fits": ["travel", "night products", "journey-based onboarding"] },
+
+  { "name": "Lighthouse", "tier": "atmosphere",
+    "lineage": "Fresnel-lens lighthouses and keeper's logs",
+    "spark": "One beam sweeping the dark on schedule, and a keeper who writes the weather down.",
+    "system": [
+      "Palette/material: storm blue-black ground; the beam's warm white; signal red banding as the single accent",
+      "Type/composition: a maritime slab for station names; the keeper's log in a handwriting-adjacent serif",
+      "Topology/navigation: the light's characteristic (flash pattern) badges sections; the log rail runs the page",
+      "Controls/state: focus takes the beam's warm white ring, instantly; warnings ring the lamp in red banding",
+      "Responsive/motion: the tower column becomes the page spine; the beam sweeps on its stated period, 8s or slower, with a pause control; nothing else moves"
+    ],
+    "webLeverage": "a conic-gradient rotated by CSS animation is the entire beam, stopped under reduced motion",
+    "fits": ["monitoring", "safety products", "coastal brands"] },
+
+  { "name": "Public pool", "tier": "atmosphere",
+    "lineage": "Municipal pools and lidos, painted lanes and tile",
+    "spark": "Chlorine-blue water over a grid of tiles, lane ropes in primary colours, rules painted on the wall.",
+    "system": [
+      "Palette/material: aqua water field over white tile grid; lane-rope reds and yellows; poolside concrete grey",
+      "Type/composition: sign-writer lettering for the rules, sentence case; depth markers as big honest numerals",
+      "Topology/navigation: lanes are the content columns; depth markers stage the page from shallow to deep",
+      "Controls/state: lane ropes divide interactive zones; hover ripples the water field gently",
+      "Responsive/motion: lanes merge politely on small screens; the water caustic shimmer is slow and subtle"
+    ],
+    "webLeverage": "an SVG feTurbulence displacement map puts real caustic shimmer into the water field",
+    "fits": ["fitness", "community products", "summer brands"] },
+
+  { "name": "Foundry floor", "tier": "atmosphere",
+    "lineage": "Iron foundries and steel pours, soot and molten light",
+    "spark": "Everything is black with soot except the one thing that is dangerously, gorgeously orange.",
+    "system": [
+      "Palette/material: soot-black ground; molten orange-white as the single light source; steel greys between",
+      "Type/composition: stencilled industrial caps; batch numbers in heavy mono; warnings set exactly as painted",
+      "Topology/navigation: the pour sequence orders sections; batch plates are the anchors",
+      "Controls/state: hot states turn molten orange; cooled states go iron-grey and matte",
+      "Responsive/motion: the floor stacks by process order; one heat shimmer, once, above the one hot element"
+    ],
+    "webLeverage": "a stepped fill from white-hot to orange inside an element makes it read as molten, with no outer glow",
+    "fits": ["industrial products", "build tools", "heavy workflows"] },
+
+  { "name": "Jazz basement", "tier": "atmosphere",
+    "lineage": "Basement jazz clubs, one spotlight and a red curtain",
+    "spark": "The room is dark, the curtain is red, the horn is lit, and nobody is checking their phone.",
+    "system": [
+      "Palette/material: near-black room; one warm spotlight pool; deep curtain red as the only saturation",
+      "Type/composition: a set-list serif with hand-numbered sets; names in lowercase, instruments in italic",
+      "Topology/navigation: the set list is the nav; sections are sets; the bar menu is the footer",
+      "Controls/state: the spotlight moves to the active act; applause states are brief and dim back down",
+      "Responsive/motion: tables clear to a single aisle; the spotlight cross-fade is the one transition"
+    ],
+    "webLeverage": "CSS view transitions cross-fade the spotlight between acts like a lighting cue",
+    "fits": ["music", "events", "evening brands"] },
+
+  { "name": "Aquarium tunnel", "tier": "atmosphere",
+    "lineage": "Walk-through aquarium tunnels, deep cyan and silhouettes",
+    "spark": "You walk on the seafloor, the light does not come from the sun, and something enormous drifts overhead.",
+    "system": [
+      "Palette/material: depth as flat bands stepping from teal to navy; silhouette blacks; one bioluminescent accent used sparingly",
+      "Type/composition: a rounded oceanic sans, untracked, for species; depth readouts in mono",
+      "Topology/navigation: the tunnel walk orders sections by depth; species tags float at their level",
+      "Controls/state: tags take the bioluminescent accent on hover; the surface far above is the way back up",
+      "Responsive/motion: the depth bands persist at any height; a silhouette drifts once as its section arrives"
+    ],
+    "webLeverage": "scroll-driven animation steps the depth band and the pressure readout with actual scroll position",
+    "fits": ["depth-of-content products", "science", "immersive brands"] },
+
+  { "name": "Cinema lobby", "tier": "atmosphere",
+    "lineage": "Picture-palace lobbies, marquee bulbs and carpet",
+    "spark": "Bulb-lit letters spelling tonight's picture over a carpet that has opinions.",
+    "system": [
+      "Palette/material: deep red and gold ground; marquee bulb warm-white; a patterned carpet motif kept to bands",
+      "Type/composition: marquee caps with bulb-dot counters; showtimes in ticket mono; lobby cards in a poster serif",
+      "Topology/navigation: the marquee headlines, lobby cards are the sections, the ticket booth is the CTA",
+      "Controls/state: the booth window is the focus; a torn ticket is the confirmed state",
+      "Responsive/motion: the marquee stacks its lines; bulbs chase once on load and then hold steady"
+    ],
+    "webLeverage": "a repeating radial-gradient dot border chases once via background-position animation",
+    "fits": ["entertainment", "launches", "showcase pages"] },
+
+  { "name": "Night market", "tier": "atmosphere",
+    "lineage": "East and Southeast Asian night markets, lantern-lit",
+    "spark": "Paper lanterns, steam, hand-painted prices, and the certainty that everything here is delicious.",
+    "system": [
+      "Palette/material: night ground with lantern reds and ambers as pooled light; hand-painted sign colours per stall",
+      "Type/composition: brushed display lettering per stall, never uniform; prices big, hand-set, proud",
+      "Topology/navigation: stalls are the sections in a walkable row; lantern strings connect them overhead",
+      "Controls/state: a stall brightens as you approach (hover); ordering states stamp a chit",
+      "Responsive/motion: the market narrows to one walkable lane; lanterns sway centimetres, slowly"
+    ],
+    "webLeverage": "CSS transform-origin at the string point lets lanterns sway from where they actually hang",
+    "fits": ["food", "marketplaces", "festival brands"] },
+
+  { "name": "Thermal baths", "tier": "atmosphere",
+    "lineage": "Alpine thermal baths, mineral tile and steam",
+    "spark": "Grey-green stone, warm water, and architecture that tells you to lower your voice.",
+    "system": [
+      "Palette/material: mineral grey-greens; steam-softened whites; brass tap warmth as the accent",
+      "Type/composition: a serene wide sans in lowercase, untracked; temperatures as quiet large numerals",
+      "Topology/navigation: pools order the sections by temperature; the changing-room threshold is the entry",
+      "Controls/state: water states ripple faintly on interaction; occupied pools show a folded towel marker",
+      "Responsive/motion: pools stack down the temperature scale; steam fades in once, nothing else moves"
+    ],
+    "webLeverage": "one SVG wisp fades in once over a flat warm band; nothing drifts",
+    "fits": ["wellness", "premium calm products", "spa brands"] },
+
+  { "name": "Blue hour rooftop", "tier": "atmosphere",
+    "lineage": "City rooftops at dusk, the grid lighting up below",
+    "spark": "The sky has one colour left in it, and the city answers with ten thousand windows.",
+    "system": [
+      "Palette/material: dusk as two flat bands, ember low and deep blue above; window-light amber points; rooftop asphalt greys",
+      "Type/composition: a confident grotesque set sparse and large against the sky; details in the body face, sentence case",
+      "Topology/navigation: the skyline is the section divider; content sits on the parapet line",
+      "Controls/state: window lights flicker on as sections arrive; the lit window is the active state",
+      "Responsive/motion: the skyline simplifies at small widths; lights come on once, in ones and twos"
+    ],
+    "webLeverage": "IntersectionObserver lights the windows section by section exactly once",
+    "fits": ["city products", "evening launches", "ambitious brands"] },
+
+  { "name": "Polar station", "tier": "atmosphere",
+    "lineage": "Antarctic research stations, whiteout and safety orange",
+    "spark": "White to the horizon in every direction, and everything that matters painted arrest-me orange.",
+    "system": [
+      "Palette/material: whiteout field with blue shadow tints; safety orange for everything functional; flag-line reds",
+      "Type/composition: expedition stencil caps; data in a cold precise mono; coordinates everywhere",
+      "Topology/navigation: flag lines connect the sections across the white; the station modules are the content",
+      "Controls/state: orange is interactive by definition; storm states dim the field, never the orange",
+      "Responsive/motion: modules cluster tighter as the viewport narrows; snow static drifts only at the margins"
+    ],
+    "webLeverage": "an SVG feTurbulence grain layer at 3 percent opacity gives the whiteout its texture",
+    "fits": ["research tools", "resilience products", "outdoor brands"] },
+
+  { "name": "Listening booth", "tier": "atmosphere",
+    "lineage": "Record-shop listening booths and crate dividers",
+    "spark": "Headphones on, world off, a handwritten divider that says STAFF PICKS and means it.",
+    "system": [
+      "Palette/material: warm plywood and felt greys; sleeve artwork carries the colour; one marker-pen red for handwritten tags",
+      "Type/composition: a plain grotesque for the racks; genuine handwriting only on divider tags",
+      "Topology/navigation: crates are the sections, dividers the nav; the booth is where detail views open",
+      "Controls/state: flipping to a record tilts it forward; the now-playing state is the booth lamp on",
+      "Responsive/motion: crates become swipeable rows; the record flip is the single interaction motion"
+    ],
+    "webLeverage": "perspective plus rotateX on hover flips records forward like real crate-digging",
+    "fits": ["music", "curation products", "shops"] },
+
+  { "name": "Scriptorium", "tier": "atmosphere",
+    "lineage": "Monastic scriptoria, vellum and gold leaf",
+    "spark": "One candle, one page, one letter so illuminated it took a week.",
+    "system": [
+      "Palette/material: vellum warm-white; iron-gall text ink; one initial in true gold and one in lapis per page",
+      "Type/composition: a calligraphic-adjacent serif for body; versal initials as the only display type",
+      "Topology/navigation: pages are the sections; rubricated red lines mark the entries; marginalia hold the asides",
+      "Controls/state: the illuminated initial is the section's single interactive jewel; hover catches its gilt",
+      "Responsive/motion: the page column stays book-proportioned; the gold catches light once as it enters"
+    ],
+    "webLeverage": "a narrow linear-gradient masked to the initial glints across the gold leaf once, on entry",
+    "fits": ["premium editorial", "craft brands", "slow products"] },
+
+  { "name": "Telescope array", "tier": "atmosphere",
+    "lineage": "Desert radio telescope arrays at dawn",
+    "spark": "A line of white dishes all turning together toward something nobody can see yet.",
+    "system": [
+      "Palette/material: pale dawn-pink sky over desert buff; dish white; one deep-space violet for the data",
+      "Type/composition: a technical grotesque with array IDs in mono; observations in mono",
+      "Topology/navigation: dishes are the sections, aligned along the array baseline; azimuth readouts badge them",
+      "Controls/state: a dish rotates subtly toward the hovered content; locked-on is the tracked state",
+      "Responsive/motion: the array foreshortens to a single dish; rotations are slow and mechanical"
+    ],
+    "webLeverage": "CSS perspective on grouped transforms lets the whole array slew as one rig",
+    "fits": ["data platforms", "search products", "science brands"] },
+
+  { "name": "Submersible viewport", "tier": "atmosphere",
+    "lineage": "Deep-sea research submersibles, one acrylic sphere of light",
+    "spark": "Six thousand metres of black water, one lit instrument, and something pale drifting past the glass.",
+    "system": [
+      "Palette/material: abyssal near-black; instrument amber and green as flat lit segments; the viewport ringed in cold blue",
+      "Type/composition: instrument mono for depth and heading; species callouts in a pale wide serif",
+      "Topology/navigation: the dive profile orders sections by depth; the viewport frames each encounter",
+      "Controls/state: sonar pings mark interactive points; the floodlight reveals detail states",
+      "Responsive/motion: the viewport circle holds center at all sizes; each encounter drifts in once, glacially"
+    ],
+    "webLeverage": "a clip-path circle that widens with scroll is the floodlight, with no glow",
+    "fits": ["deep-data products", "exploration", "research"] },
+
+  { "name": "Orchard stand", "tier": "atmosphere",
+    "lineage": "Roadside fruit stands, painted plywood and sun",
+    "spark": "HONEYCRISP $4 hand-painted on plywood, and the paint faded exactly where the sun hits.",
+    "system": [
+      "Palette/material: sun-bleached plywood buff; hand-paint reds and greens gone chalky; crate-stamp inks",
+      "Type/composition: sign-painter caps with visible brush confidence; prices enormous and honest",
+      "Topology/navigation: crates and a hanging scale structure the stall; painted arrows do the pointing",
+      "Controls/state: the scale needle is the live state; sold-out states get the painted SORRY slat",
+      "Responsive/motion: crates stack simply; the hanging scale settles once when loaded"
+    ],
+    "webLeverage": "an SVG displacement filter roughens the type edges like brush on plywood",
+    "fits": ["food", "local commerce", "seasonal brands"] },
+
+  { "name": "Press floor", "tier": "atmosphere",
+    "lineage": "Working letterpress shops, type cases and proofs",
+    "spark": "Ink under every fingernail, proofs pinned three deep, and a galley that has to be perfect by six.",
+    "system": [
+      "Palette/material: ink-stained wood browns; galley-metal greys; proofing red for corrections only",
+      "Type/composition: honest workshop caps from the case; proof annotations in a marking pencil style",
+      "Topology/navigation: type cases and pinned proofs structure the sections; the composing stick holds the featured line",
+      "Controls/state: proof states show correction marks; approved pulls get the PRINT stamp",
+      "Responsive/motion: cases stack, proofs re-pin; the press cycle is one heavy, decisive motion"
+    ],
+    "webLeverage": "CSS mask-image with a grain texture prints ink coverage unevenly, like a real pull",
+    "fits": ["studios", "publishing tools", "maker brands"] },
+
+  { "name": "Grand hotel desk", "tier": "atmosphere",
+    "lineage": "1930s grand hotel reception, pigeonholes and brass keys",
+    "spark": "A wall of pigeonholes, a bell that means someone will actually come, and a ledger that knows everyone.",
+    "system": [
+      "Palette/material: marble cream and walnut; brass key-plate gold; hotel-livery deep green as the accent",
+      "Type/composition: an elegant engraved serif; room numbers on brass plates",
+      "Topology/navigation: the pigeonhole wall is the content grid; the register book is the nav; the bell is the CTA",
+      "Controls/state: a pigeonhole with mail lights in brass; the checked-in state hangs the key",
+      "Responsive/motion: pigeonholes reflow as a smaller wall; the bell dips once when pressed"
+    ],
+    "webLeverage": "CSS grid dense packing keeps the pigeonhole wall solid at every width",
+    "fits": ["hospitality", "concierge products", "membership"] },
+
+  { "name": "Ferry terminal", "tier": "atmosphere",
+    "lineage": "Working harbour ferry terminals, painted steel and tide boards",
+    "spark": "Painted steel, coiled rope, a chalked tide board, and a horn you feel in your chest.",
+    "system": [
+      "Palette/material: marine-painted steel greens and whites, weathered honestly; safety yellow gangway markings; chalk white",
+      "Type/composition: harbour stencil caps; the tide board hand-chalked; sailing times in tabular figures",
+      "Topology/navigation: berths order the sections; the tide board is the live data panel; gangway arrows direct",
+      "Controls/state: boarding states raise the gangway light; cancelled sailings are chalked through, not deleted",
+      "Responsive/motion: berths stack along the quay; the water line moves, the steel never does"
+    ],
+    "webLeverage": "CSS custom-property-driven chalk strikethroughs keep cancellations legible and honest",
+    "fits": ["transport", "schedule products", "coastal brands"] },
+
+  { "name": "Airship gondola", "tier": "atmosphere",
+    "lineage": "Rigid-airship passenger gondolas, wicker and chart tables",
+    "spark": "Wicker chairs, a chart table, and the Atlantic sliding by underneath at a civilised speed.",
+    "system": [
+      "Palette/material: sky silver-blues through slanted windows; wicker and walnut warms; route-map inks",
+      "Type/composition: a dignified travel serif with engraved numerals; altitude and heading in brass-instrument mono",
+      "Topology/navigation: the promenade windows sequence the content; the chart table holds the overview",
+      "Controls/state: instruments show live readings; the moored state brings the gangway out",
+      "Responsive/motion: windows become a single panoramic band; clouds pass on a very long loop"
+    ],
+    "webLeverage": "background-attachment and layered translateZ give the window view its slow parallax depth",
+    "fits": ["journey products", "premium travel", "roadmap pages"] }
+]
