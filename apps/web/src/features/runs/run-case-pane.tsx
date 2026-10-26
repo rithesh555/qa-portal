@@ -105,7 +105,7 @@ function EarlierResults({ detail }: { detail: RunCaseDetail }) {
     <section aria-labelledby="earlier-results" className="flex flex-col gap-2">
       <h3
         id="earlier-results"
-        className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+        className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
       >
         <HistoryIcon aria-hidden className="size-3.5" />
         Results in this run ({detail.results.length})
@@ -623,7 +623,7 @@ export function RunCasePane({
               <section aria-labelledby="run-case-pre">
                 <h3
                   id="run-case-pre"
-                  className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                  className="mb-1 text-xs font-semibold text-muted-foreground"
                 >
                   Preconditions
                 </h3>
@@ -635,7 +635,7 @@ export function RunCasePane({
             <section aria-labelledby="run-case-steps">
               <h3
                 id="run-case-steps"
-                className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                className="mb-2 text-xs font-semibold text-muted-foreground"
               >
                 Steps
               </h3>
@@ -674,7 +674,7 @@ export function RunCasePane({
       <div
         ref={pending ? undefined : stickyFooter}
         className={cn(
-          "mt-auto flex flex-col gap-3 rounded-b-xl border-t bg-card/95 p-4 backdrop-blur sm:px-6",
+          "mt-auto flex flex-col gap-3 rounded-b-xl border-t bg-card p-4 sm:px-6",
           !pending && "sticky bottom-0"
         )}
       >

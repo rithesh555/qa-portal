@@ -981,7 +981,7 @@ function Tile({
 }) {
   const body = (
     <>
-      <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+      <span className="text-xs font-semibold text-muted-foreground">
         {label}
       </span>
       <span className="text-3xl leading-tight font-semibold tabular-nums">

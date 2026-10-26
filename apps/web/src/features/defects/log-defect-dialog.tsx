@@ -196,7 +196,7 @@ function LogForm({
         )}
         {refs.length > 0 && (
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            <legend className="mb-2 text-xs font-semibold text-muted-foreground">
               Already reported? Defects on this case and similar ones
             </legend>
             {refs.map((d) => (

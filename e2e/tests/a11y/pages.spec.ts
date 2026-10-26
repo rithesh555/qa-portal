@@ -49,6 +49,12 @@ const cases: [
   ["E2E-A11Y-019", "users", "admin", "/users"],
   ["E2E-A11Y-020", "all releases", "admin", "/releases"],
   ["E2E-A11Y-021", "not found", "viewer", "/no-such-page"],
+  [
+    "E2E-A11Y-023",
+    "closed run with every result colour",
+    "viewer",
+    `${P}/runs/${BASE.runs.closed}`,
+  ],
 ]
 
 async function settled(page: Page) {
@@ -78,6 +84,22 @@ for (const [id, name, role, path] of cases) {
     })
   })
 }
+
+test.describe(() => {
+  test.use({ role: "tester" })
+  test("E2E-A11Y-024 no serious accessibility problems: dialog over run execution @a11y", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(60_000)
+    await page.goto(`${P}/runs/${BASE.runs.open}`)
+    await settled(page)
+    await page.keyboard.press("?")
+    await expect(
+      page.getByRole("dialog", { name: "Keyboard shortcuts" })
+    ).toBeVisible()
+    await expectAccessible(page, testInfo, "shortcuts dialog")
+  })
+})
 
 test.describe("signed out", () => {
   test.use({ role: "anonymous" })

@@ -43,14 +43,10 @@ const STATUS_TEXT: Record<RunCaseStatus, string> = {
 
 /** A selected result button: the status fill with text that keeps 4.5:1 in both themes. */
 export const STATUS_PRESSED: Record<RunCaseStatus, string> = {
-  passed:
-    "bg-status-pass hover:bg-status-pass text-[oklch(0.2_0.02_256)] dark:bg-status-pass",
-  failed:
-    "bg-status-fail hover:bg-status-fail hatched text-white dark:bg-status-fail dark:text-[oklch(0.2_0.02_256)]",
-  blocked:
-    "bg-status-blocked hover:bg-status-blocked hatched text-[oklch(0.2_0.02_256)] dark:bg-status-blocked",
-  skipped:
-    "bg-status-skipped hover:bg-status-skipped text-white dark:bg-status-skipped dark:text-[oklch(0.2_0.02_256)]",
+  passed: "bg-status-pass hover:bg-status-pass text-on-status",
+  failed: "bg-status-fail hover:bg-status-fail hatched text-on-status",
+  blocked: "bg-status-blocked hover:bg-status-blocked hatched text-on-status",
+  skipped: "bg-status-skipped hover:bg-status-skipped text-on-status",
   untested: "",
 }
 

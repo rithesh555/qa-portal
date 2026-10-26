@@ -135,7 +135,7 @@ function ProjectTable({ projects }: { projects: ProjectSummary[] }) {
                 {project.leads.length > 0 ? (
                   project.leads.map((lead) => lead.name).join(", ")
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
+                  <span className="inline-flex items-center gap-1.5 text-warning-ink">
                     <TriangleAlertIcon className="size-3.5" />
                     No active lead
                   </span>

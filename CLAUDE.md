@@ -16,6 +16,7 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 ## Scope
 
 - **Phases 1–8: the app only.** Order: 1 Foundation → 2 Access model & User management → 3 Projects, members & releases → 4 Test cases → 5 Test runs → 6 Defects → 7 Dashboard & Reports → 8 Hardening. `compose.yaml` runs PostgreSQL only. No file attachments in v1.
+- **Phase 8.5 (UI refresh, before Phase 9):** the "Warm paper" look and design system, behaviour frozen. Plan: `docs/superpowers/plans/2026-10-26-phase-8-5-ui-refresh.md`.
 - **Phase 9 (last, only once the app is fully developed; do not start without the user):** app Dockerfiles/nginx, CI/CD, Playwright E2E suite, Locust load tests.
 
 ## Rules — no guesswork

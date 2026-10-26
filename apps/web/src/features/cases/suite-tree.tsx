@@ -421,7 +421,7 @@ export function SuiteTree({
       <div className="flex items-center justify-between px-1 pb-1">
         <h2
           id="suites-heading"
-          className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+          className="text-xs font-semibold text-muted-foreground"
         >
           Suites
         </h2>

@@ -163,9 +163,9 @@ function ConflictPanel({
     <section
       role="alert"
       aria-labelledby="conflict-title"
-      className="overflow-hidden rounded-xl border border-amber-500/50"
+      className="overflow-hidden rounded-xl border border-warning/50"
     >
-      <div className="flex flex-col gap-1 bg-amber-50 px-4 py-3 dark:bg-amber-950/40">
+      <div className="flex flex-col gap-1 bg-warning-surface px-4 py-3">
         <h2
           id="conflict-title"
           tabIndex={-1}
@@ -208,7 +208,7 @@ function ConflictPanel({
                   <th scope="row" className="px-3 py-2 text-left font-medium">
                     {row.field}
                     {row.both && (
-                      <span className="mt-0.5 block text-xs font-semibold text-amber-700 dark:text-amber-400">
+                      <span className="mt-0.5 block text-xs font-semibold text-warning-ink">
                         Both changed
                       </span>
                     )}
@@ -694,7 +694,7 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
           className="sticky bottom-0 z-10 -mx-1 flex flex-wrap items-center justify-end gap-2 border-t bg-background px-1 py-3"
         >
           {conflict ? (
-            <span className="mr-auto text-sm font-medium text-amber-700 dark:text-amber-400">
+            <span className="mr-auto text-sm font-medium text-warning-ink">
               <TriangleAlertIcon className="mr-1 inline size-4" />A newer
               version exists — compare above before saving.
             </span>

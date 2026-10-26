@@ -127,7 +127,7 @@ function Team() {
           {project.leads.length > 0 ? (
             project.leads.map((lead) => lead.name).join(", ")
           ) : (
-            <span className="text-amber-700 dark:text-amber-400">
+            <span className="text-warning-ink">
               No active QA Lead. An admin should assign one.
             </span>
           )}

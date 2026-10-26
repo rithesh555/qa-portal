@@ -280,7 +280,7 @@ export function StepsEditor() {
     <div className="flex flex-col gap-3">
       <div
         aria-hidden
-        className="hidden grid-cols-[1.75rem_1.5rem_minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase md:grid"
+        className="hidden grid-cols-[1.75rem_1.5rem_minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 px-3 text-xs font-semibold text-muted-foreground md:grid"
       >
         <span />
         <span />

@@ -146,7 +146,7 @@ export function RunCaseList({
                 key={`${g.suite}:${gi}`}
                 aria-label={g.suite || "No suite"}
               >
-                <div className="sticky top-0 z-[1] flex items-center gap-2 border-b bg-muted/95 px-3 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">
+                <div className="sticky top-0 z-[1] flex items-center gap-2 border-b bg-muted px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                   {selecting && (
                     <Checkbox
                       aria-label={`Select all shown in ${g.suite || "No suite"}`}

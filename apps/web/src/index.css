@@ -1,13 +1,32 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Coral (by request) · redesign: restyle
+ * nav: kept, restyled in the pilot · signature: the case lane (a run as case pills, the current one ringed in coral) · states: loading, empty, error, no-permission
+ * axes: light/grotesk-sans/warm · posture: restrained · contrast: pass · v2.5.0 */
+/* Hallmark · pre-emit critique: P3 H4 E4 S3 R4 V4 · weakest: S, the case lane and the Q check mark carry the identity */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/ibm-plex-sans";
+@import "@fontsource-variable/instrument-sans";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: "IBM Plex Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Instrument Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Warm paper roles beyond shadcn's set. Coral (brand) is never a fill. */
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-rule-strong: var(--rule-strong);
+  --color-on-status: var(--on-status);
+  --color-warning: var(--warning);
+  --color-warning-ink: var(--warning-ink);
+  --color-warning-surface: var(--warning-surface);
+  --color-severity-critical: var(--severity-critical);
+  --color-severity-major: var(--severity-major);
+  --color-severity-minor: var(--severity-minor);
+  --color-severity-trivial: var(--severity-trivial);
   --color-status-pass: var(--status-pass);
   --color-status-fail: var(--status-fail);
   --color-status-blocked: var(--status-blocked);
@@ -78,45 +97,58 @@
 :root {
   /* Native controls (date pickers, scrollbars) follow the theme. */
   color-scheme: light;
-  /* Cool slate surfaces, steel-blue actions. Status hues are reserved for test results. */
-  --background: oklch(0.984 0.004 250);
-  --foreground: oklch(0.23 0.022 256);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.23 0.022 256);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.23 0.022 256);
-  --primary: oklch(0.45 0.095 246);
-  --primary-foreground: oklch(0.985 0.003 250);
-  --secondary: oklch(0.955 0.008 250);
-  --secondary-foreground: oklch(0.3 0.03 256);
-  --muted: oklch(0.955 0.008 250);
-  --muted-foreground: oklch(0.5 0.02 256);
-  --accent: oklch(0.945 0.014 246);
-  --accent-foreground: oklch(0.3 0.05 250);
-  --destructive: oklch(0.55 0.2 27);
-  --border: oklch(0.91 0.01 250);
-  --input: oklch(0.88 0.012 250);
-  --ring: oklch(0.6 0.095 246);
-  --chart-1: oklch(0.45 0.095 246);
-  --chart-2: oklch(0.6 0.13 155);
-  --chart-3: oklch(0.57 0.19 27);
-  --chart-4: oklch(0.75 0.14 75);
-  --chart-5: oklch(0.7 0.015 256);
+  /* Warm paper: grey paper, charcoal ink, one coral accent. Result hues are reserved for test results. */
+  --background: oklch(0.965 0.006 75);
+  --foreground: oklch(0.229 0.013 51);
+  --card: oklch(0.995 0.003 68);
+  --card-foreground: oklch(0.229 0.013 51);
+  --popover: oklch(0.995 0.003 68);
+  --popover-foreground: oklch(0.229 0.013 51);
+  /* Primary actions are ink, so coral never competes with a failed result. */
+  --primary: oklch(0.229 0.013 51);
+  --primary-foreground: oklch(0.965 0.006 75);
+  --secondary: oklch(0.915 0.01 73);
+  --secondary-foreground: oklch(0.229 0.013 51);
+  --muted: oklch(0.915 0.01 73);
+  --muted-foreground: oklch(0.486 0.017 57);
+  --accent: oklch(0.915 0.01 73);
+  --accent-foreground: oklch(0.229 0.013 51);
+  --destructive: oklch(0.5 0.182 30);
+  --border: oklch(0.883 0.013 71);
+  --rule-strong: oklch(0.831 0.017 70);
+  --input: oklch(0.831 0.017 70);
+  --ring: oklch(0.542 0.155 32);
+  --brand: oklch(0.542 0.155 32);
+  --brand-ink: oklch(0.496 0.141 32);
+  --chart-1: oklch(0.325 0.017 56);
+  --chart-2: oklch(0.529 0.106 154);
+  --chart-3: oklch(0.5 0.182 30);
+  --chart-4: oklch(0.531 0.118 64);
+  --chart-5: oklch(0.7 0.018 62);
   --radius: 0.5rem;
-  --sidebar: oklch(0.965 0.007 250);
-  --sidebar-foreground: oklch(0.27 0.025 256);
-  --sidebar-primary: oklch(0.45 0.095 246);
-  --sidebar-primary-foreground: oklch(0.985 0.003 250);
-  --sidebar-accent: oklch(0.925 0.016 246);
-  --sidebar-accent-foreground: oklch(0.25 0.05 250);
-  --sidebar-border: oklch(0.9 0.01 250);
-  --sidebar-ring: oklch(0.6 0.095 246);
-  --status-pass: oklch(0.7 0.14 155);
-  --status-fail: oklch(0.48 0.19 27);
-  --status-blocked: oklch(0.8 0.14 80);
-  --status-skipped: oklch(0.52 0.02 256);
-  --status-pass-ink: oklch(0.5 0.13 155);
-  --status-blocked-ink: oklch(0.55 0.13 70);
+  --sidebar: oklch(0.942 0.008 74);
+  --sidebar-foreground: oklch(0.229 0.013 51);
+  --sidebar-primary: oklch(0.229 0.013 51);
+  --sidebar-primary-foreground: oklch(0.965 0.006 75);
+  --sidebar-accent: oklch(0.915 0.01 73);
+  --sidebar-accent-foreground: oklch(0.229 0.013 51);
+  --sidebar-border: oklch(0.883 0.013 71);
+  --sidebar-ring: oklch(0.542 0.155 32);
+  /* Result fills carry white text (on-status); the -ink shades are for text and icons on paper. */
+  --status-pass: oklch(0.529 0.106 154);
+  --status-fail: oklch(0.5 0.182 30);
+  --status-blocked: oklch(0.531 0.118 64);
+  --status-skipped: oklch(0.486 0.017 57);
+  --status-pass-ink: oklch(0.473 0.095 154);
+  --status-blocked-ink: oklch(0.48 0.103 66);
+  --on-status: oklch(1 0 0);
+  --warning: oklch(0.531 0.118 64);
+  --warning-ink: oklch(0.48 0.103 66);
+  --warning-surface: oklch(0.962 0.024 80);
+  --severity-critical: oklch(0.5 0.182 30);
+  --severity-major: oklch(0.5 0.131 44);
+  --severity-minor: oklch(0.48 0.103 66);
+  --severity-trivial: oklch(0.486 0.017 57);
   /* Defect statuses: own hues, never the result colours. */
   --defect-new: oklch(0.95 0.035 280);
   --defect-new-ink: oklch(0.38 0.12 280);
@@ -128,54 +160,65 @@
   --defect-fixed-ink: oklch(0.38 0.12 300);
   --defect-reopened: oklch(0.95 0.035 340);
   --defect-reopened-ink: oklch(0.38 0.12 340);
-  --chart-line: oklch(0.45 0.095 246);
-  --chart-deemph: oklch(0.6 0.015 256);
-  --chart-grid: oklch(0.93 0.008 250);
-  --chart-axis: oklch(0.88 0.012 250);
-  --chart-bar: oklch(0.45 0.095 246);
-  --tip-bg: oklch(0.23 0.022 256);
-  --tip-fg: oklch(0.98 0.004 250);
+  --chart-line: oklch(0.325 0.017 56);
+  --chart-deemph: oklch(0.7 0.018 62);
+  --chart-grid: oklch(0.915 0.01 73);
+  --chart-axis: oklch(0.831 0.017 70);
+  --chart-bar: oklch(0.325 0.017 56);
+  --tip-bg: oklch(0.229 0.013 51);
+  --tip-fg: oklch(0.965 0.006 75);
 }
 
 .dark {
   color-scheme: dark;
-  --background: oklch(0.185 0.016 256);
-  --foreground: oklch(0.95 0.006 250);
-  --card: oklch(0.225 0.018 256);
-  --card-foreground: oklch(0.95 0.006 250);
-  --popover: oklch(0.225 0.018 256);
-  --popover-foreground: oklch(0.95 0.006 250);
-  --primary: oklch(0.74 0.1 240);
-  --primary-foreground: oklch(0.2 0.03 256);
-  --secondary: oklch(0.28 0.018 256);
-  --secondary-foreground: oklch(0.95 0.006 250);
-  --muted: oklch(0.28 0.018 256);
-  --muted-foreground: oklch(0.72 0.015 256);
-  --accent: oklch(0.3 0.03 248);
-  --accent-foreground: oklch(0.95 0.006 250);
-  --destructive: oklch(0.7 0.17 25);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.6 0.08 240);
-  --chart-1: oklch(0.74 0.1 240);
-  --chart-2: oklch(0.7 0.13 155);
-  --chart-3: oklch(0.68 0.17 27);
-  --chart-4: oklch(0.8 0.13 75);
-  --chart-5: oklch(0.6 0.015 256);
-  --sidebar: oklch(0.205 0.017 256);
-  --sidebar-foreground: oklch(0.92 0.006 250);
-  --sidebar-primary: oklch(0.74 0.1 240);
-  --sidebar-primary-foreground: oklch(0.2 0.03 256);
-  --sidebar-accent: oklch(0.28 0.025 248);
-  --sidebar-accent-foreground: oklch(0.95 0.006 250);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.6 0.08 240);
-  --status-pass: oklch(0.74 0.14 155);
-  --status-fail: oklch(0.6 0.19 27);
-  --status-blocked: oklch(0.83 0.14 80);
-  --status-skipped: oklch(0.62 0.02 256);
+  --background: oklch(0.208 0.009 59);
+  --foreground: oklch(0.949 0.01 68);
+  --card: oklch(0.244 0.011 61);
+  --card-foreground: oklch(0.949 0.01 68);
+  --popover: oklch(0.244 0.011 61);
+  --popover-foreground: oklch(0.949 0.01 68);
+  --primary: oklch(0.949 0.01 68);
+  --primary-foreground: oklch(0.208 0.009 59);
+  --secondary: oklch(0.269 0.013 62);
+  --secondary-foreground: oklch(0.949 0.01 68);
+  --muted: oklch(0.269 0.013 62);
+  --muted-foreground: oklch(0.735 0.021 65);
+  --accent: oklch(0.269 0.013 62);
+  --accent-foreground: oklch(0.949 0.01 68);
+  --destructive: oklch(0.759 0.144 26);
+  --border: oklch(0.324 0.016 59);
+  --rule-strong: oklch(0.379 0.019 61);
+  --input: oklch(0.379 0.019 61);
+  --ring: oklch(0.738 0.13 34);
+  --brand: oklch(0.738 0.13 34);
+  --brand-ink: oklch(0.738 0.13 34);
+  --chart-1: oklch(0.872 0.016 68);
+  --chart-2: oklch(0.781 0.123 156);
+  --chart-3: oklch(0.759 0.144 26);
+  --chart-4: oklch(0.817 0.14 80);
+  --chart-5: oklch(0.561 0.019 56);
+  --sidebar: oklch(0.235 0.011 61);
+  --sidebar-foreground: oklch(0.949 0.01 68);
+  --sidebar-primary: oklch(0.949 0.01 68);
+  --sidebar-primary-foreground: oklch(0.208 0.009 59);
+  --sidebar-accent: oklch(0.269 0.013 62);
+  --sidebar-accent-foreground: oklch(0.949 0.01 68);
+  --sidebar-border: oklch(0.324 0.016 59);
+  --sidebar-ring: oklch(0.738 0.13 34);
+  --status-pass: oklch(0.781 0.123 156);
+  --status-fail: oklch(0.759 0.144 26);
+  --status-blocked: oklch(0.817 0.14 80);
+  --status-skipped: oklch(0.735 0.021 65);
   --status-pass-ink: var(--status-pass);
   --status-blocked-ink: var(--status-blocked);
+  --on-status: oklch(0.208 0.009 59);
+  --warning: oklch(0.817 0.14 80);
+  --warning-ink: oklch(0.817 0.14 80);
+  --warning-surface: oklch(0.285 0.029 73);
+  --severity-critical: oklch(0.759 0.144 26);
+  --severity-major: oklch(0.837 0.117 66);
+  --severity-minor: oklch(0.817 0.14 80);
+  --severity-trivial: oklch(0.735 0.021 65);
   --defect-new: oklch(0.3 0.05 280);
   --defect-new-ink: oklch(0.86 0.08 280);
   --defect-open: oklch(0.3 0.05 200);
@@ -186,20 +229,20 @@
   --defect-fixed-ink: oklch(0.86 0.08 300);
   --defect-reopened: oklch(0.3 0.05 340);
   --defect-reopened-ink: oklch(0.86 0.08 340);
-  --chart-line: oklch(0.74 0.1 240);
-  --chart-deemph: oklch(0.62 0.015 256);
-  --chart-grid: oklch(1 0 0 / 8%);
-  --chart-axis: oklch(1 0 0 / 18%);
-  --chart-bar: oklch(0.74 0.1 240);
-  --tip-bg: oklch(0.95 0.006 250);
-  --tip-fg: oklch(0.2 0.02 256);
+  --chart-line: oklch(0.872 0.016 68);
+  --chart-deemph: oklch(0.561 0.019 56);
+  --chart-grid: oklch(0.269 0.013 62);
+  --chart-axis: oklch(0.379 0.019 61);
+  --chart-bar: oklch(0.872 0.016 68);
+  --tip-bg: oklch(0.949 0.01 68);
+  --tip-fg: oklch(0.208 0.009 59);
 }
 
 /* Fail and blocked carry stripes, so they never depend on colour alone. */
 @utility hatched {
   background-image: repeating-linear-gradient(
     -45deg,
-    oklch(1 0 0 / 28%) 0 2px,
+    color-mix(in oklch, var(--on-status) 28%, transparent) 0 2px,
     transparent 2px 6px
   );
 }
@@ -214,6 +257,15 @@
   html {
     @apply font-sans;
     font-variant-numeric: tabular-nums;
+    scrollbar-color: var(--rule-strong) transparent;
+  }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  ::selection {
+    background-color: color-mix(in oklch, var(--brand) 22%, transparent);
+    color: var(--foreground);
   }
 }
 

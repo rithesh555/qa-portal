@@ -544,7 +544,7 @@ function NewRunForm() {
         >
           <h2
             id="run-summary"
-            className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+            className="text-xs font-semibold text-muted-foreground"
           >
             Summary
           </h2>

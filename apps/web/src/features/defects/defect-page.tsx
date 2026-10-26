@@ -60,7 +60,7 @@ function Section({
 }) {
   return (
     <div>
-      <h3 className="mb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+      <h3 className="mb-1 text-xs font-semibold text-muted-foreground">
         {label}
       </h3>
       <div className="text-sm break-words whitespace-pre-wrap">{children}</div>

@@ -102,7 +102,7 @@ function Steps({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <Subheading className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+        <Subheading className="text-xs font-semibold text-muted-foreground">
           Preconditions
         </Subheading>
         <p className="text-sm whitespace-pre-line">

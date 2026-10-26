@@ -45,6 +45,16 @@ const suites: CatalogueSuite[] = [
         "choose-password dialog",
         "Sign in with an admin-set password"
       ),
+      page(
+        "E2E-A11Y-023",
+        "closed run with every result colour",
+        "As a viewer, open the closed run"
+      ),
+      page(
+        "E2E-A11Y-024",
+        "dialog over run execution",
+        "Open the open run as its tester and press ?"
+      ),
     ],
   },
 ]

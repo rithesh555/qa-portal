@@ -1107,7 +1107,7 @@ export function ImportPage() {
                         worst === "error" &&
                           "shadow-[inset_3px_0_0_var(--color-destructive)]",
                         worst === "warning" &&
-                          "shadow-[inset_3px_0_0_var(--color-amber-500)]"
+                          "shadow-[inset_3px_0_0_var(--color-warning)]"
                       )}
                     >
                       <TableCell className="align-top font-mono text-xs text-muted-foreground">
@@ -1120,8 +1120,7 @@ export function ImportPage() {
                               key={i}
                               className={cn(
                                 p.severity === "error" && "text-destructive",
-                                p.severity === "warning" &&
-                                  "text-amber-700 dark:text-amber-400",
+                                p.severity === "warning" && "text-warning-ink",
                                 p.severity === "note" && "text-muted-foreground"
                               )}
                             >

@@ -205,7 +205,7 @@ function WorkTile({
       href={href}
       className="flex flex-col gap-1 rounded-xl bg-card px-4 py-3.5 ring-1 ring-foreground/10 hover:ring-primary"
     >
-      <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+      <span className="text-xs font-semibold text-muted-foreground">
         {label}
       </span>
       <span className="text-3xl leading-tight font-semibold tabular-nums">
