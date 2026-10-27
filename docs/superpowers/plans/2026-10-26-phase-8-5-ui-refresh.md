@@ -4,7 +4,7 @@
 
 **Goal:** Give `apps/web` a distinctive, consistent visual identity ("Warm paper") and a strict design system, without changing what any screen does.
 
-**Architecture:** Look and feel live in one token layer (`apps/web/src/index.css`, CSS variables mapped through Tailwind v4 `@theme inline` onto shadcn's variable names), so every shadcn primitive restyles at once. Shared composites (PageHeader with FactPills, CaseLane, ProgressTrack, ResultStatus, SeverityMark, DataState) sit between the primitives and the features. Screens then move over one at a time behind the existing E2E and axe gates.
+**Architecture:** Look and feel live in one token layer (`apps/web/src/index.css`, CSS variables mapped through Tailwind v4 `@theme inline` onto shadcn's variable names), so every shadcn primitive restyles at once. Shared composites (PageHeader with FactPills, CaseLane, DataError, and the result-status pieces) sit between the primitives and the features. Screens then move over one at a time behind the existing E2E and axe gates.
 
 **Tech Stack:** React 19, Vite, TypeScript, Tailwind v4, shadcn/ui on Base UI 1.9.0, TanStack Query, React Router 8.4.0, `@fontsource-variable` packages for self-hosted fonts.
 
@@ -94,7 +94,7 @@ Its "Enterprise Gateway" pattern and Fira fonts are for marketing sites and are 
 - **Ink and accent:** charcoal ink (`#221B17`) fills primary buttons and the current nav item. One coral accent (`#B8432F`) is used only for focus, the current case ring, link underlines and the "New" defect status.
 - **Shape:** pills (999) for buttons, nav items, segmented tabs and status; 8px surfaces; 6px inputs.
 - **Fonts:** Instrument Sans for everything you read, Geist Mono for keys and counts, with tabular numerals.
-- **Signature, the case lane:** a run shows as a row of case pills, filled by result, with the current one ringed in coral. It appears on run execution, and a small static lane on sign-in. Progress elsewhere is a rounded ProgressTrack.
+- **Signature, the case lane:** a run shows as a row of case pills, filled by result, with the current one ringed in coral. It appears on run execution, and a small static lane on sign-in. Progress elsewhere is a rounded ProgressBar.
 - **Dark mode:** warm near-black paper (`#1B1714`), lighter status hues, coral lifts to `#F08A72`.
 - **Why it fits:** status hues stay reserved for results, so the identity lives in shape (pills, ink fills) and one accent, which keeps dense tables quiet.
 
@@ -108,16 +108,16 @@ Its "Enterprise Gateway" pattern and Fira fonts are for marketing sites and are 
 - **Gate 26a** reported "no `:focus-visible` anywhere" in single folders. Focus lives in the shadcn primitives (`focus-visible:` utilities), so that was a false positive. Task 1 still unifies the focus colour into one `--focus` token.
 - **Coral theme rules:** pills everywhere. Table rows, inputs and surfaces stay square-ish (6–8px), because pill inputs waste width and pill rows scan badly. Status pills shrink to 12.5px text in tables.
 - **App type scale:** 14px body in tables and forms (Hallmark's page rule says 16px). Its app-screen branch allows the 1.125–1.2 scale, and density is the design here.
-- **Case lane at scale:** a pill per case reads well up to about 60 cases. Above that the lane wraps inside a capped, scrollable box and the ProgressTrack carries the summary (see Review Focus 3).
+- **Case lane at scale:** a pill per case reads well up to about 60 cases. Above that the lane wraps inside a capped, scrollable box and the ProgressBar carries the summary (see Review Focus 3).
 
 ## Target structure (`apps/web/src`)
 
 ```
 index.css                 tokens (single source) → @theme inline → shadcn variables
 components/ui/            shadcn primitives (registry), themed by tokens only
-components/composites/    new: page-header.tsx (PageHeader, FactPills), case-lane.tsx, progress-track.tsx,
+components/composites/    new: page-header.tsx (PageHeader, FactPills), case-lane.tsx,
                           result-status.tsx (ResultStatus, ResultIcon), severity-mark.tsx,
-                          data-state.tsx (DataLoading, DataEmpty, DataError, NoPermission)
+                          data-state.tsx (DataError); result-status.tsx (moved from features/runs)
 components/               existing shared pieces (button-link, search-box, list-pagination, ...)
 hooks/use-can.ts          new: the one permission helper
 features/<module>/        unchanged layout; api.ts keeps the <module>Keys factory + hooks
@@ -136,7 +136,7 @@ TanStack Query convention (documented in `apps/web/README.md`, enforced in revie
 1. **Contrast regressions on secondary text** (muted ink on the sidebar `--paper-2`, captions on `--paper-3` selected rows, white text on the blocked fill) in either mode. Expected: 4.5:1. Task 1 adds axe checks of the table header and caption states; the existing sweep covers 22 pages in both modes.
 2. **Current case vs failed case in the lane:** a failed case that is also the current one. Expected: it stays filled red with its icon and word, and gains the coral ring with a card-coloured gap, so both read. Task 3 adds a unit test; Task 6 a screenshot check in both modes.
 3. **CaseLane with a big run** (300 cases) and at 375px. Expected: the lane wraps inside a box capped at about four rows that scrolls on its own, the current pill is scrolled into view, and the page never scrolls sideways. Task 3 adds unit tests; Task 6 a phone-width E2E assertion.
-4. **ProgressTrack at the extremes:** 0 cases, all untested, a single case, all passed. Expected: no NaN or zero-width artefacts, and the label still reads "0 of 0 cases". Task 3 adds unit tests.
+4. **ProgressBar at the extremes:** 0 cases, all untested, a single case, all passed. Expected: no NaN or zero-width artefacts, and its label reads "— complete: 0 passed, …" (current wording, kept while behaviour is frozen). Task 3 adds unit tests.
 5. **Print report** (`/projects/:key/reports/print`) after its literal colours move to tokens. Expected: still black on white when printed, whichever theme the screen is in. Task 7 adds an E2E check with `emulateMedia({ media: "print" })` in dark mode.
 
 ---
@@ -202,34 +202,18 @@ TanStack Query convention (documented in `apps/web/README.md`, enforced in revie
 
 ### Task 3: Shared composites
 
-**Files:**
+Built 2026-10-27. Existing pieces are moved or reused, not duplicated (DRY):
 
-- Create: in `apps/web/src/components/composites/`, `page-header.tsx`, `case-lane.tsx`, `progress-track.tsx`, `result-status.tsx`, `severity-mark.tsx`, `data-state.tsx`, and `composites.test.tsx`
+- `components/composites/result-status.tsx`: the result pieces moved from `features/runs/run-status.tsx` (which re-exports them): `STATUS_FILL`, `STATUS_ICON`, `STATUS_PRESSED`, `ProgressBar` (the rounded progress track; its aria-label stays "N% complete: …" because E2E and screen-reader users rely on it), `StatusLegend`, `RunCaseStatusBadge`, `RunCaseStatusIcon`.
+- Severity stays `SeverityIndicator` in `features/defects/defect-badges.tsx`; loading stays `PageLoading`; empty states stay shadcn `Empty`. Each is restyled with its screen in Tasks 5 and 6.
 
-**Interfaces:**
+New:
 
-- `PageHeader({ title, description?, facts?, actions? })`:
-  - `facts: { label: string; value: ReactNode }[]` renders `FactPills`: a `role="group"` with `aria-label="{title} details"`, one keyline pill per fact (the label as visually hidden text where the value says it alone, e.g. a key in Geist Mono), wrapping onto more rows.
-  - The title renders as an `h1` (30px, 600, tight tracking).
-- `CaseLane({ cases: { id: string; key: string; status: ResultStatus | "untested" }[], currentId, onPick })`: a list of buttons, each with `aria-label="{key}, {status word}"` and `aria-current="true"` on the current one; the visible text is the key's short number. Wraps inside a box capped at four rows that scrolls on its own, and scrolls the current pill into view.
-- `ProgressTrack({ counts: Record<ResultStatus | "untested", number> })` renders a rounded track with `role="img"`; its `aria-label` reads "4 passed, 1 failed, 0 blocked, 0 skipped, 3 untested", and the visible label reads "{done} of {total} cases".
-- `ResultStatus({ status, size? })`: icon + word, filled for recorded results and a keyline for untested. `ResultIcon({ status })` is the icon alone, `aria-hidden`.
-- `SeverityMark({ severity })`: 1–4 bars + word, in the severity token.
-- `DataLoading({ rows? })`, `DataEmpty({ title, children, action? })`, `DataError({ message, onRetry })`, `NoPermission({ children })`.
+- `PageHeader({ title, description?, facts?, actions?, className? })`: h1 (30px, 600, tight), description, actions; `facts: { label, value }[]` render `FactPills`, a `role="group"` named "{title} details" with one keyline pill per fact, wrapping.
+- `CaseLane({ cases: { id, key, status }[], currentId, onPick, label?, className? })`: buttons named "{key}, {result}", `aria-current="true"` on the current one (coral ring with a card-coloured gap), filled by result with `text-on-status`; wraps inside a `max-h-40` scroll box and scrolls the current pill into view.
+- `DataError({ title, error, onRetry })`: the "Couldn't load …" alert with "Try again" that 19 files build by hand today.
 
-- [ ] **Step 1: Write the failing tests:**
-  - ProgressTrack with all zeros shows "0 of 0 cases" and no `NaN` in any style.
-  - With `{passed:1}` it gives a single full segment.
-  - Its aria-label lists every status in order.
-  - CaseLane marks exactly one button `aria-current="true"`, and a failed current case keeps "Failed" in its label.
-  - CaseLane with 300 cases renders 300 buttons inside one scroll box and calls `scrollIntoView` on the current one.
-  - FactPills with a 60-character value keeps the full text in the DOM.
-  - ResultStatus renders its word for every status.
-  - SeverityMark draws N filled bars for N = 4..1.
-- [ ] **Step 2: Run them.** Expected: FAIL.
-- [ ] **Step 3: Implement** with tokens only, matching the B Design system board.
-- [ ] **Step 4: Run them.** Expected: PASS. Run lint and typecheck.
-- [ ] **Step 5: Commit**, after approval.
+Tests (`components/composites/composites.test.tsx`, 8): PageHeader heading and actions; facts group keeps a 60-character value whole; no group without facts; CaseLane has exactly one current case; a failed current case keeps "Failed" in its name; picking calls `onPick(id)`; 300 cases in one scroll box with `scrollIntoView` on the current one; DataError text and retry.
 
 ### Task 4: Pilot: sign-in, app shell, then the projects list
 
@@ -241,7 +225,7 @@ TanStack Query convention (documented in `apps/web/README.md`, enforced in revie
   - `app/app-shell.tsx`: paper-2 sidebar, `Logo` (Q check) with the wordmark, project switcher as a pill button, ink-filled `aria-current` item, user block
   - `features/projects/project-switcher.tsx`
   - `components/ui/breadcrumb.tsx` (styling via tokens only)
-  - `features/projects/projects-page.tsx`: PageHeader, the Active/Archived segmented tabs and the table from the B Projects board, with ProgressTrack in "Latest run"
+  - `features/projects/projects-page.tsx`: PageHeader, the Active/Archived segmented tabs and the table from the B Projects board, with ProgressBar in "Latest run"
   - `components/project-tile.tsx`: delete if the table replaces it, otherwise tokenise its 8 literals
 - Test: the existing `e2e/tests/{auth,shell,projects}` specs; new phone-width checks below.
 
@@ -266,7 +250,7 @@ Screens: Home, All releases, Project overview, Releases, Members, Users, Test ca
 
 **Files:**
 
-- Modify: the page component of each screen. Each adopts PageHeader (FactPills replace the middle-dot meta strings), ProgressTrack or ResultStatus/SeverityMark where status shows, the DataState components for its loading, empty and error branches, and tokens for every arbitrary `text-[…]`.
+- Modify: the page component of each screen. Each adopts PageHeader (FactPills replace the middle-dot meta strings), ProgressBar or RunCaseStatusBadge/SeverityIndicator where status shows, the DataState components for its loading, empty and error branches, and tokens for every arbitrary `text-[…]`.
 
 **Interfaces:**
 
