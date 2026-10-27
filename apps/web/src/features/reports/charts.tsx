@@ -3,6 +3,7 @@ import { type ReactNode, useId, useState } from "react"
 import { Link } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 
 /**
@@ -16,6 +17,7 @@ export function ChartCard({
   chart,
   table,
   onCsv,
+  actions,
   className,
   children,
 }: {
@@ -25,10 +27,15 @@ export function ChartCard({
   chart?: ReactNode
   table?: ReactNode
   onCsv?: () => void
+  /** Extra header actions, before Table and CSV. */
+  actions?: ReactNode
   className?: string
   children?: ReactNode
 }) {
-  const [asTable, setAsTable] = useState(false)
+  // On a phone the SVG text would shrink to about 6px, so charts open as tables.
+  const phone = useMediaQuery("(max-width: 39.999rem)")
+  const [choice, setChoice] = useState<boolean | null>(null)
+  const asTable = choice ?? phone
   const headingId = `h-${id}`
   return (
     <Card
@@ -37,7 +44,7 @@ export function ChartCard({
       className={cn("min-w-0", className)}
     >
       <CardContent className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex flex-wrap items-start justify-between gap-2 sm:flex-nowrap">
           <div className="flex min-w-0 flex-col gap-0.5">
             <h2 id={headingId} className="font-semibold">
               {title}
@@ -46,12 +53,13 @@ export function ChartCard({
               <p className="text-sm text-muted-foreground">{description}</p>
             )}
           </div>
-          <div className="flex gap-1.5 print:hidden">
+          <div className="flex shrink-0 items-center gap-1.5 print:hidden">
+            {actions}
             {chart && table && (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setAsTable((v) => !v)}
+                onClick={() => setChoice(!asTable)}
               >
                 {asTable ? (
                   <ChartLineIcon data-icon="inline-start" />
@@ -89,42 +97,49 @@ export function DataTable({
   numeric?: number[]
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b">
-            {head.map((h, i) => (
-              <th
-                key={h}
-                scope="col"
-                className={cn(
-                  "px-2 py-2 text-left text-xs font-semibold whitespace-nowrap text-muted-foreground",
-                  numeric.includes(i) && "text-right"
-                )}
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, ri) => (
-            <tr key={ri} className="border-b last:border-0">
-              {r.map((c, i) => (
-                <td
-                  key={i}
+    <div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              {head.map((h, i) => (
+                <th
+                  key={h}
+                  scope="col"
                   className={cn(
-                    "px-2 py-2 tabular-nums",
+                    "px-2 py-2 text-left text-xs font-semibold whitespace-nowrap text-muted-foreground",
                     numeric.includes(i) && "text-right"
                   )}
                 >
-                  {c}
-                </td>
+                  {h}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r, ri) => (
+              <tr key={ri} className="border-b last:border-0">
+                {r.map((c, i) => (
+                  <td
+                    key={i}
+                    className={cn(
+                      "px-2 py-2 tabular-nums",
+                      numeric.includes(i) && "text-right"
+                    )}
+                  >
+                    {c}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {head.length > 3 && (
+        <p className="mt-1 text-xs text-muted-foreground sm:hidden print:hidden">
+          Scroll sideways for more columns.
+        </p>
+      )}
     </div>
   )
 }
@@ -228,8 +243,8 @@ function ticks(floor: number, ceil: number, count = 4) {
 
 /**
  * Pass rate per run, in order. Closed runs are a solid line, the open run a
- * dashed last stretch with a hollow point. The axis starts where the data
- * needs it (labelled), not at an arbitrary 0 or a flattering 90.
+ * dashed last stretch with a hollow point. The axis runs from 0% to 100%,
+ * so a small dip isn't drawn as a cliff.
  */
 export function PassRateChart({
   points,
@@ -246,15 +261,12 @@ export function PassRateChart({
   const BOTTOM = 30
   const [tip, setTip] = useState<Tip | null>(null)
   const titleId = useId()
-  const min = Math.min(...points.map((p) => p.rate))
-  const floor = Math.max(0, Math.floor((min * 100 - 5) / 10) * 10) / 100
-  const ys = ticks(floor, 1)
+  const ys = ticks(0, 1)
   const x = (i: number) =>
     points.length === 1
       ? (LEFT + W - RIGHT) / 2
       : LEFT + (i / (points.length - 1)) * (W - LEFT - RIGHT)
-  const y = (v: number) =>
-    TOP + (1 - (v - floor) / (1 - floor || 1)) * (H - TOP - BOTTOM)
+  const y = (v: number) => TOP + (1 - v) * (H - TOP - BOTTOM)
   const closed = points.filter((p) => !p.open)
   const lastClosed = closed.length - 1
   const solid = closed.map((p, i) => `${x(i)},${y(p.rate)}`).join(" ")
@@ -407,6 +419,12 @@ export function FlowChart({
     const up = (last?.found ?? 0) >= (last?.closed ?? 0)
     foundY = mid + (up ? -7 : 7)
     closedY = mid + (up ? 7 : -7)
+  }
+  // ...and above the week labels, even when both lines sit on 0.
+  const over = Math.max(foundY, closedY) - (H - BOTTOM - 2)
+  if (over > 0) {
+    foundY -= over
+    closedY -= over
   }
 
   return (

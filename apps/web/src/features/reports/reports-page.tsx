@@ -22,6 +22,7 @@ import {
 import { type ReactNode, useState } from "react"
 import { Link } from "react-router"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { PageHeader } from "@/components/composites/page-header"
 import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -173,85 +174,96 @@ export function ReportsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-          <p className="text-sm text-muted-foreground">
-            {r ? asOfLine(r) : "Can this release ship? What's left, and where."}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {loading ? (
-            <Skeleton className="h-8 w-48" />
-          ) : (
-            <Select
-              items={options}
-              value={release ?? NONE}
-              onValueChange={(v) => set({ release: v as string })}
+      <PageHeader
+        title="Reports"
+        description={
+          r ? asOfLine(r) : "Can this release ship? What's left, and where."
+        }
+        actions={
+          <div className="flex flex-wrap items-end gap-2">
+            {loading ? (
+              <Skeleton className="h-8 w-48" />
+            ) : (
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="report-release"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  Release
+                </label>
+                <Select
+                  items={options}
+                  value={release ?? NONE}
+                  onValueChange={(v) => set({ release: v as string })}
+                >
+                  <SelectTrigger
+                    id="report-release"
+                    className="w-auto min-w-44"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {options.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <ButtonLink
+              variant="outline"
+              disabled={!r}
+              to={`print?release=${release ?? NONE}${live ? "&live=true" : ""}`}
             >
-              <SelectTrigger aria-label="Release" className="w-auto min-w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <ButtonLink
-            variant="outline"
-            disabled={!r}
-            to={`print?release=${release ?? NONE}${live ? "&live=true" : ""}`}
-          >
-            <PrinterIcon data-icon="inline-start" />
-            Print report
-          </ButtonLink>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="outline"
-                  disabled={!r || !!busy}
-                  focusableWhenDisabled
-                />
-              }
-            >
-              {busy && <Spinner data-icon="inline-start" />}
-              {busy ? "Preparing CSV…" : "Download data"}
-              <ChevronDownIcon data-icon="inline-end" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              {/* A Base UI menu label must sit inside a group. */}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
-                  CSV files of live numbers, stamped with “{scope}” and the
-                  time.
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() =>
-                    void exportRows("cases", "latest result per case")
-                  }
-                >
-                  Latest result per case
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => void exportRows("defects", "defects")}
-                >
-                  Defects
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => void exportRows("runs", "runs")}
-                >
-                  Runs
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+              <PrinterIcon data-icon="inline-start" />
+              Print report
+            </ButtonLink>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    disabled={!r || !!busy}
+                    focusableWhenDisabled
+                  />
+                }
+              >
+                {busy && <Spinner data-icon="inline-start" />}
+                {busy ? "Preparing CSV…" : "Download data"}
+                <ChevronDownIcon data-icon="inline-end" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {/* A Base UI menu label must sit inside a group. */}
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-xs font-normal whitespace-normal text-muted-foreground">
+                    CSV files of live numbers, stamped with “{scope}” and the
+                    time.
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      void exportRows("cases", "latest result per case")
+                    }
+                  >
+                    Latest result per case
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => void exportRows("defects", "defects")}
+                  >
+                    Defects
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => void exportRows("runs", "runs")}
+                  >
+                    Runs
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        }
+      />
 
       {r?.snapshot && (
         <Alert>
@@ -414,12 +426,12 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
           id="blocking"
           title="Blocking defects"
           description="Open Critical and Major defects found in this release"
-        >
-          <div className="-mt-1 flex justify-end print:hidden">
+          actions={
             <Link to={defectsUrl()} className={cn(linkCls, "text-sm")}>
               Open in Defects
             </Link>
-          </div>
+          }
+        >
           {r.blocking.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No open Critical or Major defects.
@@ -520,6 +532,8 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
         <ChartCard
           id="untested"
           title="Untested Ready cases by priority"
+          // Alone in its row without a release, so it takes the whole row.
+          className={r.release ? undefined : "xl:col-span-2"}
           description={`No result yet in these runs · ${untestedTotal} in all`}
           onCsv={csv("untested cases by priority", {
             columns: ["Priority", "Untested Ready cases"],
@@ -561,7 +575,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
           title="Pass rate by run"
           description={
             trend.length
-              ? "Each run in order, its own results; an open run is dashed. The axis starts where the data does."
+              ? "Each run in order, its own results; an open run is dashed. The axis runs from 0% to 100%."
               : undefined
           }
           chart={trend.length ? <PassRateChart points={trend} /> : undefined}
