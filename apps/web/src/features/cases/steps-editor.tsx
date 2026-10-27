@@ -111,7 +111,10 @@ function StepRow({
         {n}
       </span>
       <div className="flex flex-col gap-1">
-        <label htmlFor={`step-${index}-action`} className="sr-only">
+        <label
+          htmlFor={`step-${index}-action`}
+          className="text-xs font-medium text-muted-foreground md:sr-only"
+        >
           Step {n} action
         </label>
         <Controller
@@ -135,7 +138,10 @@ function StepRow({
         )}
       </div>
       <div className="col-start-3 md:col-start-auto">
-        <label htmlFor={`step-${index}-expected`} className="sr-only">
+        <label
+          htmlFor={`step-${index}-expected`}
+          className="text-xs font-medium text-muted-foreground md:sr-only"
+        >
           Step {n} expected result
         </label>
         <Controller

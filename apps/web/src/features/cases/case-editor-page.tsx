@@ -89,6 +89,8 @@ import { StepsEditor } from "./steps-editor"
 import { suiteOptions } from "./suite-tree"
 import { PageLoading } from "@/components/page-loading"
 import { useStickyFooter } from "@/hooks/use-sticky-footer"
+import { PageHeader } from "@/components/composites/page-header"
+import { timeAgo } from "@/lib/time"
 
 type FormValues = z.input<typeof caseInputSchema>
 
@@ -428,43 +430,141 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
           </Alert>
         )}
 
-        <div className="flex flex-col gap-5 rounded-xl border bg-card p-4 sm:p-5">
-          <FieldGroup>
-            <Controller
-              name="title"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="case-title">Title</FieldLabel>
-                  <Input
-                    {...field}
-                    id="case-title"
-                    autoComplete="off"
-                    maxLength={200}
-                    autoFocus={!initial}
-                    aria-invalid={fieldState.invalid}
-                    aria-describedby="case-title-hint"
-                  />
-                  <div className="flex justify-between gap-2">
-                    {fieldState.invalid ? (
-                      <FieldError
-                        id="case-title-hint"
-                        errors={[fieldState.error]}
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="flex min-w-0 flex-col gap-5">
+            <section
+              aria-labelledby="case-what"
+              className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5"
+            >
+              <h2 id="case-what" className="text-base font-semibold">
+                What it tests
+              </h2>
+              <FieldGroup>
+                <Controller
+                  name="title"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="case-title">Title</FieldLabel>
+                      <Input
+                        {...field}
+                        id="case-title"
+                        autoComplete="off"
+                        maxLength={200}
+                        autoFocus={!initial}
+                        aria-invalid={fieldState.invalid}
+                        aria-describedby="case-title-hint"
                       />
-                    ) : (
-                      <FieldDescription id="case-title-hint">
-                        Say what is checked, e.g. “Declined card shows a retry
-                        message”.
-                      </FieldDescription>
-                    )}
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {title.length}/200
-                    </span>
-                  </div>
-                </Field>
-              )}
-            />
-            <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="flex justify-between gap-2">
+                        {fieldState.invalid ? (
+                          <FieldError
+                            id="case-title-hint"
+                            errors={[fieldState.error]}
+                          />
+                        ) : (
+                          <FieldDescription id="case-title-hint">
+                            Say what is checked, e.g. “Declined card shows a
+                            retry message”.
+                          </FieldDescription>
+                        )}
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {title.length}/200
+                        </span>
+                      </div>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="preconditions"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor="case-preconditions">
+                        Preconditions{" "}
+                        <span className="font-normal text-muted-foreground">
+                          (optional)
+                        </span>
+                      </FieldLabel>
+                      <Textarea
+                        {...field}
+                        id="case-preconditions"
+                        rows={3}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </FieldGroup>
+            </section>
+            <section
+              aria-labelledby="steps-heading"
+              className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:p-5"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h2 id="steps-heading" className="text-base font-semibold">
+                  Steps
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Drag a step by its handle (or focus it, Space, then the arrow
+                  keys), or use its ⋯ menu.
+                </p>
+              </div>
+              {form.formState.errors.steps?.root?.message ||
+              form.formState.errors.steps?.message ? (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.steps?.root?.message ??
+                    form.formState.errors.steps?.message}
+                </p>
+              ) : null}
+              <StepsEditor />
+            </section>
+          </div>
+          <section
+            aria-labelledby="case-details"
+            className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-5"
+          >
+            <h2 id="case-details" className="text-base font-semibold">
+              Details
+            </h2>
+            <FieldGroup>
+              <Controller
+                name="status"
+                control={form.control}
+                render={({ field }) => (
+                  <FieldSet>
+                    <FieldLegend variant="label">Status</FieldLegend>
+                    <ToggleGroup
+                      value={[field.value]}
+                      onValueChange={(value) =>
+                        value[0] && field.onChange(value[0])
+                      }
+                      variant="outline"
+                      aria-label="Status"
+                      aria-describedby="case-status-hint"
+                      className="self-start"
+                    >
+                      {CASE_STATUSES.map((s) => (
+                        <ToggleGroupItem
+                          key={s}
+                          value={s}
+                          className={SELECTED_TOGGLE}
+                        >
+                          {field.value === s && (
+                            <CheckIcon data-icon="inline-start" />
+                          )}
+                          {CASE_STATUS_LABELS[s]}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                    <FieldDescription id="case-status-hint">
+                      {STATUS_HINTS[status]}
+                    </FieldDescription>
+                  </FieldSet>
+                )}
+              />
               <Controller
                 name="suiteId"
                 control={form.control}
@@ -557,137 +657,57 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
                   )
                 }}
               />
-            </div>
-            <Controller
-              name="status"
-              control={form.control}
-              render={({ field }) => (
-                <FieldSet>
-                  <FieldLegend variant="label">Status</FieldLegend>
-                  <ToggleGroup
-                    value={[field.value]}
-                    onValueChange={(value) =>
-                      value[0] && field.onChange(value[0])
-                    }
-                    variant="outline"
-                    aria-label="Status"
-                    aria-describedby="case-status-hint"
-                    className="self-start"
-                  >
-                    {CASE_STATUSES.map((s) => (
-                      <ToggleGroupItem
-                        key={s}
-                        value={s}
-                        className={SELECTED_TOGGLE}
-                      >
-                        {field.value === s && (
-                          <CheckIcon data-icon="inline-start" />
-                        )}
-                        {CASE_STATUS_LABELS[s]}
-                      </ToggleGroupItem>
-                    ))}
-                  </ToggleGroup>
-                  <FieldDescription id="case-status-hint">
-                    {STATUS_HINTS[status]}
-                  </FieldDescription>
-                </FieldSet>
-              )}
-            />
-            <Controller
-              name="labels"
-              control={form.control}
-              render={({ field }) => (
-                <Field>
-                  <FieldLabel htmlFor="case-labels">
-                    Labels{" "}
-                    <span className="font-normal text-muted-foreground">
-                      (optional)
-                    </span>
-                  </FieldLabel>
-                  <LabelsInput
-                    id="case-labels"
-                    value={field.value ?? []}
-                    onChange={field.onChange}
-                    suggestions={labels.data ?? []}
-                    onErrorChange={setLabelError}
-                  />
-                </Field>
-              )}
-            />
-            <Controller
-              name="references"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="case-references">
-                    References{" "}
-                    <span className="font-normal text-muted-foreground">
-                      (optional)
-                    </span>
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id="case-references"
-                    maxLength={200}
-                    aria-describedby="case-references-hint"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  <FieldDescription id="case-references-hint">
-                    Jira issues or requirement IDs, separated by commas.
-                  </FieldDescription>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="preconditions"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="case-preconditions">
-                    Preconditions{" "}
-                    <span className="font-normal text-muted-foreground">
-                      (optional)
-                    </span>
-                  </FieldLabel>
-                  <Textarea
-                    {...field}
-                    id="case-preconditions"
-                    rows={3}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </FieldGroup>
+              <Controller
+                name="labels"
+                control={form.control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel htmlFor="case-labels">
+                      Labels{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (optional)
+                      </span>
+                    </FieldLabel>
+                    <LabelsInput
+                      id="case-labels"
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      suggestions={labels.data ?? []}
+                      onErrorChange={setLabelError}
+                    />
+                  </Field>
+                )}
+              />
+              <Controller
+                name="references"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="case-references">
+                      References{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (optional)
+                      </span>
+                    </FieldLabel>
+                    <Input
+                      {...field}
+                      id="case-references"
+                      maxLength={200}
+                      aria-describedby="case-references-hint"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldDescription id="case-references-hint">
+                      Jira issues or requirement IDs, separated by commas.
+                    </FieldDescription>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </section>
         </div>
-
-        <section
-          aria-labelledby="steps-heading"
-          className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:p-5"
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="steps-heading" className="text-base font-semibold">
-              Steps
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Drag a step by its handle, or use its ⋯ menu.
-            </p>
-          </div>
-          {form.formState.errors.steps?.root?.message ||
-          form.formState.errors.steps?.message ? (
-            <p className="text-sm text-destructive">
-              {form.formState.errors.steps?.root?.message ??
-                form.formState.errors.steps?.message}
-            </p>
-          ) : null}
-          <StepsEditor />
-        </section>
 
         <div
           ref={stickyFooter}
@@ -696,7 +716,7 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
           {conflict ? (
             <span className="mr-auto text-sm font-medium text-warning-ink">
               <TriangleAlertIcon className="mr-1 inline size-4" />A newer
-              version exists — compare above before saving.
+              version exists. Compare above before saving.
             </span>
           ) : (
             isDirty && (
@@ -868,18 +888,24 @@ export function CaseEditorPage() {
   }
 
   return (
-    <div className="flex max-w-5xl flex-col gap-5">
-      {crumbs}
-      <div className="flex flex-col gap-1">
-        {editing && loaded && (
-          <span className="font-mono text-xs text-muted-foreground">
-            Editing {loaded.key} · version {loaded.revision}
-          </span>
-        )}
-        <h1 className="text-2xl leading-tight font-semibold tracking-tight">
-          {editing ? (loaded?.title ?? "Edit test case") : "New test case"}
-        </h1>
-      </div>
+    <div className="flex max-w-6xl flex-col gap-5">
+      <PageHeader
+        before={crumbs}
+        title={editing ? (loaded?.title ?? "Edit test case") : "New test case"}
+        factsLabel="Case details"
+        facts={
+          editing && loaded
+            ? [
+                { label: "Editing", value: loaded.key },
+                { label: "Version", value: loaded.revision },
+                {
+                  label: "Last saved",
+                  value: `${loaded.updatedBy.name}, ${timeAgo(loaded.updatedAt)}`,
+                },
+              ]
+            : undefined
+        }
+      />
       {body}
     </div>
   )
