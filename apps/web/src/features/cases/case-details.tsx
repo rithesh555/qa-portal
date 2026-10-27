@@ -314,7 +314,7 @@ export function CaseDetails({
 
   return (
     <article aria-labelledby="case-title" className="flex flex-col gap-3">
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <span className="font-mono text-xs text-muted-foreground">
           {testCase.key}
         </span>
@@ -322,7 +322,7 @@ export function CaseDetails({
           className="text-xs text-muted-foreground"
           title="The version goes up when the title, preconditions or steps change"
         >
-          · version {testCase.revision}
+          version {testCase.revision}
         </span>
         <span className="ml-auto" />
         <Button
@@ -358,7 +358,7 @@ export function CaseDetails({
         id="case-title"
         className={
           headingLevel === 1
-            ? "text-2xl font-semibold tracking-tight"
+            ? "text-3xl font-semibold tracking-tight break-words"
             : "text-lg leading-snug font-semibold"
         }
       >
@@ -370,7 +370,6 @@ export function CaseDetails({
           archived={testCase.archived}
         />
         <PriorityIndicator priority={testCase.priority} />
-        <span className="text-muted-foreground">·</span>
         <span>{CASE_TYPE_LABELS[testCase.type]}</span>
       </div>
       <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">

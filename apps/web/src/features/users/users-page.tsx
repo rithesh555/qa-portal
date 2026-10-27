@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/composites/page-header"
+import { DataError } from "@/components/composites/data-state"
 import {
   PORTAL_ROLE_LABELS,
   type User,
@@ -5,7 +7,6 @@ import {
   USER_STATUSES,
 } from "@qa/shared"
 import {
-  CircleAlertIcon,
   EllipsisIcon,
   KeyRoundIcon,
   PencilIcon,
@@ -15,7 +16,6 @@ import {
   UsersIcon,
 } from "lucide-react"
 import { useRef, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -165,30 +165,27 @@ export function UsersPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1
-            ref={heading}
-            tabIndex={-1}
-            className="text-2xl font-semibold tracking-tight outline-none"
-          >
-            Users
-          </h1>
-          <p className="text-sm text-muted-foreground">
+      <PageHeader
+        title="Users"
+        headingRef={heading}
+        description={
+          <>
             Create accounts, reset passwords and deactivate people who&apos;ve
             left. Project access is set on each project.
-          </p>
-        </div>
-        <Button
-          onClick={() => {
-            setEditing(null)
-            setFormOpen(true)
-          }}
-        >
-          <PlusIcon data-icon="inline-start" />
-          New user
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button
+            onClick={() => {
+              setEditing(null)
+              setFormOpen(true)
+            }}
+          >
+            <PlusIcon data-icon="inline-start" />
+            New user
+          </Button>
+        }
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
@@ -211,20 +208,11 @@ export function UsersPage() {
       </div>
 
       {users.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load users</AlertTitle>
-          <AlertDescription>
-            {errorMessage(users.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void users.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load users"
+          error={users.error}
+          onRetry={() => void users.refetch()}
+        />
       ) : page && page.total === 0 ? (
         <Empty role="status" className="border border-dashed">
           <EmptyHeader>

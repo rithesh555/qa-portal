@@ -1,5 +1,10 @@
 import { PORTAL_ROLE_LABELS, type ProjectSummary } from "@qa/shared"
-import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react"
+import {
+  ChevronRightIcon,
+  ChevronsUpDownIcon,
+  KeyRoundIcon,
+  LogOutIcon,
+} from "lucide-react"
 import { useEffect, useLayoutEffect, useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router"
 import { Logo } from "@/components/brand/logo"
@@ -283,9 +288,10 @@ function headerTitle(pathname: string, project: CurrentProject | null) {
     return (
       <>
         <span className="text-muted-foreground">{project.name}</span>
-        <span aria-hidden="true" className="text-muted-foreground">
-          /
-        </span>
+        <ChevronRightIcon
+          aria-hidden="true"
+          className="size-3.5 shrink-0 text-muted-foreground"
+        />
         <span>{page.title}</span>
       </>
     )

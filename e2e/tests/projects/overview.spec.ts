@@ -14,7 +14,12 @@ test.describe("as the lead", () => {
     as,
   }) => {
     await page.goto(`/projects/${project.key}`)
-    await expect(page.getByText("You: QA Lead")).toBeVisible()
+    await expect(
+      page
+        .getByRole("group", { name: `${project.name} details` })
+        .getByRole("listitem")
+        .filter({ hasText: "You" })
+    ).toContainText("QA Lead")
     await expect(
       page.getByText(`QA Leads: ${displayName("lead", slot)}`)
     ).toBeVisible()
@@ -31,7 +36,12 @@ test.describe("as the lead", () => {
 
     const tester = await as("tester")
     await tester.page.goto(`/projects/${project.key}`)
-    await expect(tester.page.getByText("You: Tester")).toBeVisible()
+    await expect(
+      tester.page
+        .getByRole("group", { name: `${project.name} details` })
+        .getByRole("listitem")
+        .filter({ hasText: "You" })
+    ).toContainText("Tester")
     await expect(
       tester.page.getByRole("link", { name: "See members" })
     ).toBeVisible()

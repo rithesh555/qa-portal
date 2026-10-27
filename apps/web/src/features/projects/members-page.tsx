@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/composites/page-header"
+import { DataError } from "@/components/composites/data-state"
 import {
   type Member,
   memberListQuerySchema,
@@ -5,12 +7,11 @@ import {
   PROJECT_ROLES,
   type ProjectRole,
 } from "@qa/shared"
-import { CircleAlertIcon, PlusIcon, UsersRoundIcon } from "lucide-react"
+import { PlusIcon, UsersRoundIcon } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -250,21 +251,27 @@ export function MembersPage() {
 
   return (
     <div className="flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Members</h1>
-          <p className="text-sm text-muted-foreground">
+      <PageHeader
+        title="Members"
+        description={
+          <>
             {active} active {active === 1 ? "member" : "members"}. Admins can
             open every project and aren&apos;t listed here.
-          </p>
-        </div>
-        {canManage && (
-          <Button onClick={() => setAdding(true)}>
-            <PlusIcon data-icon="inline-start" />
-            Add members
-          </Button>
-        )}
-      </div>
+          </>
+        }
+        facts={PROJECT_ROLES.map((role) => ({
+          label: `${PROJECT_ROLE_LABELS[role]}s`,
+          value: project.roleCounts[role],
+        }))}
+        actions={
+          canManage && (
+            <Button onClick={() => setAdding(true)}>
+              <PlusIcon data-icon="inline-start" />
+              Add members
+            </Button>
+          )
+        }
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
@@ -290,20 +297,11 @@ export function MembersPage() {
       </div>
 
       {members.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load members</AlertTitle>
-          <AlertDescription>
-            {errorMessage(members.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void members.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load members"
+          error={members.error}
+          onRetry={() => void members.refetch()}
+        />
       ) : page && page.total === 0 ? (
         <Empty role="status" className="border border-dashed">
           <EmptyHeader>

@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/composites/page-header"
+import { DataError } from "@/components/composites/data-state"
 import {
   completion,
   countTotal,
@@ -6,11 +8,10 @@ import {
   runListQuerySchema,
   type RunSummary,
 } from "@qa/shared"
-import { CircleAlertIcon, PlayIcon, PlusIcon } from "lucide-react"
+import { PlayIcon, PlusIcon } from "lucide-react"
 import { Link } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
@@ -43,7 +44,6 @@ import { Toggle } from "@/components/ui/toggle"
 import { useReleases } from "@/features/projects/api"
 import { useProjectContext } from "@/features/projects/project-layout"
 import { useListParams } from "@/hooks/use-list-params"
-import { errorMessage } from "@/lib/api"
 import { exactTime, timeAgo } from "@/lib/time"
 import { useRuns } from "./api"
 import { initials } from "./format"
@@ -62,7 +62,7 @@ function Assignees({ people }: { people: RunSummary["assignees"] }) {
       <AvatarGroup aria-hidden>
         {shown.map((p) => (
           <Avatar key={p.id} size="sm">
-            <AvatarFallback className="text-[0.6rem]">
+            <AvatarFallback className="text-2xs">
               {initials(p.name)}
             </AvatarFallback>
           </Avatar>
@@ -178,21 +178,19 @@ export function RunsPage() {
   ]
 
   const header = (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex max-w-2xl flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Test runs</h1>
-        <p className="text-sm text-muted-foreground">
-          Each run keeps a copy of its cases as they were when it started, so
-          results stay accurate when cases change.
-        </p>
-      </div>
-      {canRun && !noRunsAtAll && (
-        <ButtonLink to="new">
-          <PlusIcon data-icon="inline-start" />
-          New run
-        </ButtonLink>
-      )}
-    </div>
+    <PageHeader
+      title="Test runs"
+      description="Each run keeps a copy of its cases as they were when it started, so results stay accurate when cases change."
+      actions={
+        canRun &&
+        !noRunsAtAll && (
+          <ButtonLink to="new">
+            <PlusIcon data-icon="inline-start" />
+            New run
+          </ButtonLink>
+        )
+      }
+    />
   )
 
   if (noRunsAtAll) {
@@ -284,20 +282,11 @@ export function RunsPage() {
       </div>
 
       {runs.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load test runs</AlertTitle>
-          <AlertDescription>
-            {errorMessage(runs.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void runs.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load test runs"
+          error={runs.error}
+          onRetry={() => void runs.refetch()}
+        />
       ) : !page ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : page.total === 0 ? (

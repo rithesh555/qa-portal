@@ -63,7 +63,7 @@ test.describe("as a tester", () => {
         name: "Receipt shows the wrong currency",
       })
     ).toBeVisible()
-    await expect(page.getByText(/Logged by hand by/)).toBeVisible()
+    await expect(page.getByText(/, by hand/)).toBeVisible()
     await expect(page.getByRole("list", { name: "Status history" })).toHaveText(
       "New"
     )

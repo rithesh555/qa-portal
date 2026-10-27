@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import {
   DEFECT_STATUS_LABELS,
   type Defect,
@@ -44,7 +45,6 @@ import {
   useUpdateDefect,
 } from "./api"
 import { describeDefectActivity } from "./defect-activity-text"
-import { DefectStatusBadge } from "./defect-badges"
 import { DefectFields } from "./defect-fields"
 import { DefectWorkflow } from "./defect-workflow"
 import { PageLoading } from "@/components/page-loading"
@@ -449,7 +449,7 @@ function Activity({ defect }: { defect: Defect }) {
             <li key={e.id} className="flex gap-3">
               <span
                 aria-hidden
-                className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-[0.65rem] font-semibold text-accent-foreground"
+                className="grid size-7 shrink-0 place-items-center rounded-full bg-accent text-2xs font-semibold text-accent-foreground"
               >
                 {initials(e.actor.name)}
               </span>
@@ -560,39 +560,40 @@ export function DefectPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              render={<Link to={projectPath(project.key, "defects")} />}
-            >
-              Defects
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{defect.key}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-[1_1_28rem] flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="font-mono text-xs text-muted-foreground">
-              {defect.key}
-            </span>
-            <DefectStatusBadge status={defect.status} />
-            <span className="text-sm text-muted-foreground">
-              {defect.source === "result" && firstLink
-                ? `Logged by ${defect.reporter.name} from a ${RUN_CASE_STATUS_LABELS[firstLink.kind].toLowerCase()} result`
-                : `Logged by hand by ${defect.reporter.name}`}{" "}
-              · {timeAgo(defect.createdAt)}
-            </span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight break-words">
-            {defect.title}
-          </h1>
+      <PageHeader
+        title={defect.title}
+        before={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  render={<Link to={projectPath(project.key, "defects")} />}
+                >
+                  Defects
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{defect.key}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+        factsLabel={`${defect.key} details`}
+        facts={[
+          {
+            label: "Logged",
+            value: `${
+              defect.source === "result" && firstLink
+                ? `${defect.reporter.name}, from a ${RUN_CASE_STATUS_LABELS[firstLink.kind].toLowerCase()} result`
+                : `${defect.reporter.name}, by hand`
+            }, ${timeAgo(defect.createdAt)}`,
+          },
+        ]}
+        actions={<DefectWorkflow defect={defect} />}
+      >
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted-foreground">Status</span>
           <ol
             aria-label="Status history"
             className="flex flex-wrap items-center gap-1 text-xs"
@@ -620,31 +621,30 @@ export function DefectPage() {
               )
             })}
           </ol>
-          {defect.resolution && (
-            <p className="text-sm">
-              <span className="font-semibold">
-                Resolution: {RESOLUTION_LABELS[defect.resolution]}
-              </span>
-              {defect.duplicateOf && (
-                <>
-                  {" "}
-                  of{" "}
-                  <Link
-                    to={projectPath(
-                      project.key,
-                      `defects/${defect.duplicateOf.key}`
-                    )}
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
-                    {defect.duplicateOf.key} · {defect.duplicateOf.title}
-                  </Link>
-                </>
-              )}
-            </p>
-          )}
         </div>
-        <DefectWorkflow defect={defect} />
-      </div>
+        {defect.resolution && (
+          <p className="text-sm">
+            <span className="font-semibold">
+              Resolution: {RESOLUTION_LABELS[defect.resolution]}
+            </span>
+            {defect.duplicateOf && (
+              <>
+                {" "}
+                of{" "}
+                <Link
+                  to={projectPath(
+                    project.key,
+                    `defects/${defect.duplicateOf.key}`
+                  )}
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  {defect.duplicateOf.key} · {defect.duplicateOf.title}
+                </Link>
+              </>
+            )}
+          </p>
+        )}
+      </PageHeader>
 
       {project.myRole === "viewer" && (
         <p className="rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">

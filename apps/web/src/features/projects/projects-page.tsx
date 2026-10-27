@@ -1,22 +1,17 @@
+import { DataError } from "@/components/composites/data-state"
 import {
   PROJECT_ROLE_LABELS,
   PROJECT_STATUSES,
   type ProjectSummary,
   projectListQuerySchema,
 } from "@qa/shared"
-import {
-  CircleAlertIcon,
-  FolderKanbanIcon,
-  PlusIcon,
-  TriangleAlertIcon,
-} from "lucide-react"
+import { FolderKanbanIcon, PlusIcon, TriangleAlertIcon } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router"
 import { PageHeader } from "@/components/composites/page-header"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { ProjectTile } from "@/components/project-tile"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,7 +34,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCan } from "@/hooks/use-can"
 import { useSession } from "@/features/auth/session"
 import { useListParams } from "@/hooks/use-list-params"
-import { errorMessage } from "@/lib/api"
 import { useProjects } from "./api"
 import { NewProjectDialog } from "./new-project-dialog"
 
@@ -211,20 +205,11 @@ export function ProjectsPage() {
       </div>
 
       {projects.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load projects</AlertTitle>
-          <AlertDescription>
-            {errorMessage(projects.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void projects.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load projects"
+          error={projects.error}
+          onRetry={() => void projects.refetch()}
+        />
       ) : !page ? (
         // Placeholders shaped like the result: table rows for admins, cards
         // for members, so nothing jumps when the data arrives.

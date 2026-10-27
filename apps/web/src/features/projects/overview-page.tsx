@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import { PROJECT_ROLE_LABELS, RELEASE_STATUS_LABELS } from "@qa/shared"
 import {
   ArchiveIcon,
@@ -18,7 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -292,28 +292,21 @@ export function ProjectOverviewPage() {
 
   return (
     <div className="flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-start gap-4">
-        <ProjectTile projectKey={project.key} size="xl" />
-        <div className="flex min-w-60 flex-1 flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {project.name}
-            </h1>
-            <Badge
-              variant={project.myRole === "lead" ? "default" : "secondary"}
-            >
-              You:{" "}
-              {project.myRole ? PROJECT_ROLE_LABELS[project.myRole] : "Admin"}
-            </Badge>
-          </div>
-          {project.description && (
-            <p className="text-sm text-muted-foreground">
-              {project.description}
-            </p>
-          )}
-        </div>
-        {allowed("projects:manage") && <AdminMenu />}
-      </div>
+      <PageHeader
+        title={project.name}
+        media={<ProjectTile projectKey={project.key} size="xl" />}
+        description={project.description || undefined}
+        facts={[
+          { label: "Key", value: project.key },
+          {
+            label: "You",
+            value: project.myRole
+              ? PROJECT_ROLE_LABELS[project.myRole]
+              : "Admin",
+          },
+        ]}
+        actions={allowed("projects:manage") && <AdminMenu />}
+      />
       <div className="grid gap-4 md:grid-cols-2">
         <CurrentRelease />
         <Team />

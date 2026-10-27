@@ -1,5 +1,6 @@
 import type { RunCaseStatus } from "@qa/shared"
 import { fireEvent, render, screen, within } from "@testing-library/react"
+import { createRef } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { CaseLane, type LaneCase } from "./case-lane"
 import { DataError } from "./data-state"
@@ -42,6 +43,40 @@ describe("PageHeader", () => {
   it("renders no facts group without facts", () => {
     render(<PageHeader title="Projects" />)
     expect(screen.queryByRole("group")).toBeNull()
+  })
+
+  it("puts breadcrumbs before the title and media beside it", () => {
+    render(
+      <PageHeader
+        title="New defect"
+        before={<nav aria-label="Breadcrumb">Defects</nav>}
+        media={<span data-testid="tile" />}
+      />
+    )
+    const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" })
+    const heading = screen.getByRole("heading", { level: 1 })
+    expect(
+      crumbs.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    expect(screen.getByTestId("tile")).toBeInTheDocument()
+  })
+
+  it("gives a page its heading to move focus to", () => {
+    const ref = createRef<HTMLHeadingElement>()
+    render(<PageHeader title="Users" headingRef={ref} />)
+    ref.current!.focus()
+    expect(screen.getByRole("heading", { name: "Users" })).toHaveFocus()
+  })
+
+  it("names the facts group from factsLabel when given", () => {
+    render(
+      <PageHeader
+        title="Good morning, Ana"
+        factsLabel="Today"
+        facts={[{ label: "Date", value: "Tuesday" }]}
+      />
+    )
+    expect(screen.getByRole("group", { name: "Today" })).toBeVisible()
   })
 })
 

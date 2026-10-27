@@ -1,5 +1,6 @@
+import { DataError } from "@/components/composites/data-state"
 import type { Action, Project } from "@qa/shared"
-import { ArchiveIcon, CircleAlertIcon, FolderXIcon } from "lucide-react"
+import { ArchiveIcon, FolderXIcon } from "lucide-react"
 import {
   Navigate,
   Outlet,
@@ -9,7 +10,6 @@ import {
 } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ButtonLink } from "@/components/button-link"
-import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useSession } from "@/features/auth/session"
-import { ApiError, errorMessage } from "@/lib/api"
+import { ApiError } from "@/lib/api"
 import { useProject } from "./api"
 import { PageLoading } from "@/components/page-loading"
 import { usePageTitle } from "@/hooks/use-page-title"
@@ -93,20 +93,11 @@ export function ProjectLayout() {
   }
   if (project.isError || !user) {
     return (
-      <Alert variant="destructive">
-        <CircleAlertIcon />
-        <AlertTitle>Couldn&apos;t load this project</AlertTitle>
-        <AlertDescription>
-          {errorMessage(project.error)}{" "}
-          <Button
-            variant="link"
-            className="h-auto p-0"
-            onClick={() => void project.refetch()}
-          >
-            Try again
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <DataError
+        title="Couldn't load this project"
+        error={project.error}
+        onRetry={() => void project.refetch()}
+      />
     )
   }
 

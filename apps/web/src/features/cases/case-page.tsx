@@ -31,9 +31,7 @@ export function CasePage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="rounded-xl border bg-card p-4 sm:p-6">
-        <CaseDetails caseRef={ref} headingLevel={1} />
-      </div>
+      <CaseDetails caseRef={ref} headingLevel={1} />
     </div>
   )
 }

@@ -1,7 +1,8 @@
+import { DataError } from "@/components/composites/data-state"
+import { PageHeader } from "@/components/composites/page-header"
 import { FlagIcon } from "lucide-react"
 import { useMemo } from "react"
 import { SearchBox } from "@/components/search-box"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -22,7 +23,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Toggle } from "@/components/ui/toggle"
 import { DownloadIcon } from "lucide-react"
 import { useCan } from "@/hooks/use-can"
-import { errorMessage } from "@/lib/api"
 import { useReleasesOverview } from "./api"
 import { downloadCsv } from "./csv"
 import {
@@ -128,28 +128,23 @@ export function ReleasesOverviewPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex max-w-3xl flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">All releases</h1>
-        <p className="text-sm text-muted-foreground">
-          Active releases in {scope}, those needing attention first. Each
-          project&apos;s numbers are counted on its own; nothing is averaged
-          across projects.
-        </p>
-      </div>
+      <PageHeader
+        title="All releases"
+        description={
+          <>
+            Active releases in {scope}, those needing attention first. Each
+            project&apos;s numbers are counted on its own; nothing is averaged
+            across projects.
+          </>
+        }
+      />
 
       {overview.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-            {errorMessage(overview.error)}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void overview.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load releases"
+          error={overview.error}
+          onRetry={() => void overview.refetch()}
+        />
       ) : !all ? (
         <Skeleton className="h-72" aria-busy="true" />
       ) : all.length === 0 ? (

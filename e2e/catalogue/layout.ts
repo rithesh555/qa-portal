@@ -44,6 +44,85 @@ const suites: CatalogueSuite[] = [
           ],
         ],
       },
+      {
+        id: "E2E-LAYOUT-004",
+        title: "Home and All releases headers fit at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as an admin",
+        steps: [
+          [
+            "At 375 × 812, open Home and All releases",
+            "The page title shows and nothing scrolls sideways",
+          ],
+        ],
+      },
+      {
+        id: "E2E-LAYOUT-005",
+        title:
+          "Project overview, members and releases headers fit at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as a QA Lead; BASE project",
+        steps: [
+          [
+            "At 375 × 812, open the overview, Members and Releases",
+            "The page title shows and nothing scrolls sideways; overview and Members show their facts",
+          ],
+        ],
+      },
+      {
+        id: "E2E-LAYOUT-006",
+        title: "The Users header fits at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as an admin",
+        steps: [
+          [
+            "At 375 × 812, open Users",
+            "The page title shows and nothing scrolls sideways",
+          ],
+        ],
+      },
+      {
+        id: "E2E-LAYOUT-007",
+        title: "Test cases and import headers fit at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as a QA Lead; BASE project",
+        steps: [
+          [
+            "At 375 × 812, open Test cases and Import",
+            "The page title shows and nothing scrolls sideways",
+          ],
+        ],
+      },
+      {
+        id: "E2E-LAYOUT-008",
+        title: "Defects list and defect page headers fit at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as a QA Lead; BASE project",
+        steps: [
+          [
+            "At 375 × 812, open Defects, a defect and New defect",
+            "The page title shows and nothing scrolls sideways; the defect shows its facts",
+          ],
+        ],
+      },
+      {
+        id: "E2E-LAYOUT-009",
+        title: "Test runs and new run headers fit at phone width",
+        priority: "low",
+        type: "usability",
+        preconditions: "Signed in as a tester; BASE project",
+        steps: [
+          [
+            "At 375 × 812, open Test runs and New run",
+            "The page title shows and nothing scrolls sideways",
+          ],
+        ],
+      },
     ],
   },
 ]

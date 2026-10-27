@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import { trackerUrlSchema } from "@qa/shared"
 import { ArchivedNotice } from "@/components/archived-notice"
 import { CircleAlertIcon } from "lucide-react"
@@ -110,29 +111,33 @@ export function NewDefectPage() {
 
   return (
     <div className="flex max-w-4xl flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                render={<Link to={projectPath(project.key, "defects")} />}
-              >
-                Defects
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>New defect</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <h1 className="text-2xl font-semibold tracking-tight">New defect</h1>
-        <p className="text-sm text-muted-foreground">
-          For problems found outside a test run, such as exploratory testing or
-          UAT. Found it while running a case? Use “Log defect” on the result
-          instead: it fills most of this in.
-        </p>
-      </div>
+      <PageHeader
+        title="New defect"
+        before={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink
+                  render={<Link to={projectPath(project.key, "defects")} />}
+                >
+                  Defects
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>New defect</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+        description={
+          <>
+            For problems found outside a test run, such as exploratory testing
+            or UAT. Found it while running a case? Use “Log defect” on the
+            result instead: it fills most of this in.
+          </>
+        }
+      />
       <form
         noValidate
         className="flex flex-col gap-5 rounded-xl border bg-card p-6"

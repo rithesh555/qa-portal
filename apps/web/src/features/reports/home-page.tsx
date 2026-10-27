@@ -1,9 +1,9 @@
+import { DataError } from "@/components/composites/data-state"
+import { PageHeader } from "@/components/composites/page-header"
 import type { Home } from "@qa/shared"
 import { FolderKanbanIcon } from "lucide-react"
 import { Link } from "react-router"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ButtonLink } from "@/components/button-link"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardAction,
@@ -29,7 +29,6 @@ import {
 import { describeActivity } from "@/features/projects/activity-text"
 import { initials } from "@/features/runs/format"
 import { ProgressBar } from "@/features/runs/run-status"
-import { errorMessage } from "@/lib/api"
 import { exactTime, timeAgo } from "@/lib/time"
 import { useCan } from "@/hooks/use-can"
 import { useHome } from "./api"
@@ -63,30 +62,17 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {greeting()}
-          {firstName && `, ${firstName}`}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {today.format(new Date())}
-          {h && h.hasProjects && ` · ${summary(h)}`}
-        </p>
-      </div>
+      <PageHeader
+        title={`${greeting()}${firstName ? `, ${firstName}` : ""}`}
+        description={`${today.format(new Date())}.${h && h.hasProjects ? ` ${summary(h)}` : ""}`}
+      />
 
       {home.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-            {errorMessage(home.error)}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void home.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load your work"
+          error={home.error}
+          onRetry={() => void home.refetch()}
+        />
       ) : !h ? (
         <div className="flex flex-col gap-6" aria-busy="true">
           <span className="sr-only">Loading your work…</span>
@@ -417,7 +403,7 @@ function Activity({ home: h }: { home: Home }) {
               <li key={a.id} className="flex items-start gap-3 py-2.5 text-sm">
                 <span
                   aria-hidden
-                  className="grid size-7 shrink-0 place-items-center rounded-full bg-muted text-[11px] font-semibold"
+                  className="grid size-7 shrink-0 place-items-center rounded-full bg-muted text-2xs font-semibold"
                 >
                   {initials(a.actor.name)}
                 </span>

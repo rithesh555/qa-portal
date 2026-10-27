@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import {
   CASE_PRIORITIES,
   CASE_PRIORITY_LABELS,
@@ -582,22 +583,24 @@ export function ImportPage() {
 
   return (
     <div className="flex max-w-6xl flex-col gap-5">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<Link to={listPath} />}>
-              Test cases
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Import</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Import test cases
-      </h1>
+      <PageHeader
+        title="Import test cases"
+        before={
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink render={<Link to={listPath} />}>
+                  Test cases
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Import</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        }
+      />
       <Stepper step={step} />
       <h2 ref={stepHeading} tabIndex={-1} className="sr-only">
         Step {STEPS.findIndex((s) => s.id === step) + 1} of {STEPS.length}:{" "}

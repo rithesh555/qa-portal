@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/composites/page-header"
+import { DataError } from "@/components/composites/data-state"
 import {
   DEFECT_PRIORITIES,
   DEFECT_PRIORITY_LABELS,
@@ -9,11 +11,10 @@ import {
   SEVERITIES,
   SEVERITY_LABELS,
 } from "@qa/shared"
-import { BugIcon, CircleAlertIcon, PlusIcon } from "lucide-react"
+import { BugIcon, PlusIcon } from "lucide-react"
 import { Link } from "react-router"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ButtonLink } from "@/components/button-link"
 import { Button } from "@/components/ui/button"
 import {
@@ -49,7 +50,6 @@ import { useProjectContext } from "@/features/projects/project-layout"
 import { initials } from "@/features/runs/format"
 import { useAssignable } from "@/features/runs/run-people"
 import { useListParams } from "@/hooks/use-list-params"
-import { errorMessage } from "@/lib/api"
 import { exactTime, timeAgo } from "@/lib/time"
 import { useDefects } from "./api"
 import { DefectStatusBadge, SeverityIndicator } from "./defect-badges"
@@ -146,7 +146,7 @@ function DefectRow({
           <span className="inline-flex items-center gap-2 text-sm whitespace-nowrap">
             <span
               aria-hidden
-              className="grid size-6 place-items-center rounded-full bg-accent text-[0.6rem] font-semibold text-accent-foreground"
+              className="grid size-6 place-items-center rounded-full bg-accent text-2xs font-semibold text-accent-foreground"
             >
               {initials(defect.assignee.name)}
             </span>
@@ -243,22 +243,19 @@ export function DefectsPage() {
   const newCount = newDefects.data?.total ?? 0
 
   const header = (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex max-w-2xl flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Defects</h1>
-        <p className="text-sm text-muted-foreground">
-          Problems found while testing. Most are logged from a failed or blocked
-          result, so they link back to the run and case. Defects are never
-          deleted; a QA Lead rejects the ones that aren&apos;t real.
-        </p>
-      </div>
-      {canEdit && !nothingYet && (
-        <ButtonLink to="new">
-          <PlusIcon data-icon="inline-start" />
-          New defect
-        </ButtonLink>
-      )}
-    </div>
+    <PageHeader
+      title="Defects"
+      description="Problems found while testing. Most are logged from a failed or blocked result, so they link back to the run and case. Defects are never deleted; a QA Lead rejects the ones that aren't real."
+      actions={
+        canEdit &&
+        !nothingYet && (
+          <ButtonLink to="new">
+            <PlusIcon data-icon="inline-start" />
+            New defect
+          </ButtonLink>
+        )
+      }
+    />
   )
 
   if (nothingYet) {
@@ -447,20 +444,11 @@ export function DefectsPage() {
         )}
 
       {defects.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load defects</AlertTitle>
-          <AlertDescription>
-            {errorMessage(defects.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void defects.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load defects"
+          error={defects.error}
+          onRetry={() => void defects.refetch()}
+        />
       ) : !page ? (
         <Skeleton className="h-64 rounded-xl" />
       ) : page.total === 0 ? (

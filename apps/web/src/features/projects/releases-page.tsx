@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/composites/page-header"
+import { DataError } from "@/components/composites/data-state"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   RELEASE_STATUS_LABELS,
@@ -10,7 +12,7 @@ import { CircleAlertIcon, FlagIcon, PencilIcon, PlusIcon } from "lucide-react"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { z } from "zod"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -298,41 +300,30 @@ export function ReleasesPage() {
 
   return (
     <div className="flex max-w-5xl flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Releases</h1>
-          <p className="text-sm text-muted-foreground">
-            Test runs and reports are grouped by release.
-          </p>
-        </div>
-        {canManage && (
-          <Button
-            onClick={() => {
-              setEditing(null)
-              setOpen(true)
-            }}
-          >
-            <PlusIcon data-icon="inline-start" />
-            New release
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Releases"
+        description="Test runs and reports are grouped by release."
+        actions={
+          canManage && (
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setOpen(true)
+              }}
+            >
+              <PlusIcon data-icon="inline-start" />
+              New release
+            </Button>
+          )
+        }
+      />
 
       {releases.isError ? (
-        <Alert variant="destructive">
-          <CircleAlertIcon />
-          <AlertTitle>Couldn&apos;t load releases</AlertTitle>
-          <AlertDescription>
-            {errorMessage(releases.error)}{" "}
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => void releases.refetch()}
-            >
-              Try again
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <DataError
+          title="Couldn't load releases"
+          error={releases.error}
+          onRetry={() => void releases.refetch()}
+        />
       ) : items && items.length === 0 ? (
         <Empty className="border border-dashed">
           <EmptyHeader>

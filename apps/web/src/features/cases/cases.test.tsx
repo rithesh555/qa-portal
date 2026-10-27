@@ -215,7 +215,7 @@ describe("CasesPage", () => {
     expect(
       await within(preview).findByText("Pay with the declined card")
     ).toBeInTheDocument()
-    expect(within(preview).getByText("· version 3")).toBeInTheDocument()
+    expect(within(preview).getByText("version 3")).toBeInTheDocument()
     expect(screen.getByTestId("where")).toHaveTextContent("/projects/PAY/cases")
     // Testers edit but don't archive.
     expect(

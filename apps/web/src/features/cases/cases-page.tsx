@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import {
   CASE_PRIORITIES,
   CASE_PRIORITY_LABELS,
@@ -223,36 +224,41 @@ export function CasesPage() {
   const newCaseLink = selectedSuite ? `new?suite=${selectedSuite.id}` : "new"
 
   const header = (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Test cases</h1>
-        <p className="text-sm text-muted-foreground">
-          {suitesQuery.isSuccess
-            ? `${totalActive} active ${totalActive === 1 ? "case" : "cases"} in ${suites.length} ${suites.length === 1 ? "suite" : "suites"}`
-            : " "}
-        </p>
-      </div>
-      {!projectEmpty && (
-        <div className="flex flex-wrap gap-2">
-          {canEdit && (
-            <ButtonLink variant="outline" to="import">
-              <UploadIcon data-icon="inline-start" />
-              Import
-            </ButtonLink>
-          )}
-          <Button variant="outline" onClick={() => setExporting(true)}>
-            <DownloadIcon data-icon="inline-start" />
-            Export
-          </Button>
-          {canEdit && (
-            <ButtonLink to={newCaseLink}>
-              <PlusIcon data-icon="inline-start" />
-              New test case
-            </ButtonLink>
-          )}
-        </div>
-      )}
-    </div>
+    <PageHeader
+      title="Test cases"
+      description={
+        suitesQuery.isSuccess ? (
+          `${totalActive} active ${totalActive === 1 ? "case" : "cases"} in ${suites.length} ${suites.length === 1 ? "suite" : "suites"}`
+        ) : (
+          <span
+            aria-hidden
+            className="inline-block h-4 w-48 animate-pulse rounded-md bg-muted align-middle"
+          />
+        )
+      }
+      actions={
+        !projectEmpty && (
+          <>
+            {canEdit && (
+              <ButtonLink variant="outline" to="import">
+                <UploadIcon data-icon="inline-start" />
+                Import
+              </ButtonLink>
+            )}
+            <Button variant="outline" onClick={() => setExporting(true)}>
+              <DownloadIcon data-icon="inline-start" />
+              Export
+            </Button>
+            {canEdit && (
+              <ButtonLink to={newCaseLink}>
+                <PlusIcon data-icon="inline-start" />
+                New test case
+              </ButtonLink>
+            )}
+          </>
+        )
+      }
+    />
   )
 
   if (projectEmpty) {

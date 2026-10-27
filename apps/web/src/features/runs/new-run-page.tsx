@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/composites/page-header"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArchivedNotice } from "@/components/archived-notice"
 import { countTotal, type CreateRunInput, createRunSchema } from "@qa/shared"
@@ -6,7 +7,7 @@ import { useId, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Link, useNavigate, useSearchParams } from "react-router"
 import type { z } from "zod"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -95,7 +96,8 @@ function ReleaseSelect({
   )
 }
 
-function PageHeader({
+/** The shared page header with the way back to Test runs. */
+function RunPageHeader({
   crumb,
   title,
   note,
@@ -106,27 +108,27 @@ function PageHeader({
 }) {
   const { project } = useProjectContext()
   return (
-    <div className="flex flex-col gap-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              render={<Link to={projectPath(project.key, "runs")} />}
-            >
-              Test runs
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{crumb}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      {note && (
-        <p className="max-w-2xl text-sm text-muted-foreground">{note}</p>
-      )}
-    </div>
+    <PageHeader
+      title={title}
+      description={note}
+      before={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                render={<Link to={projectPath(project.key, "runs")} />}
+              >
+                Test runs
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{crumb}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+    />
   )
 }
 
@@ -156,9 +158,10 @@ function CopyRunForm({
   if (source.isError)
     return (
       <div className="flex max-w-2xl flex-col gap-6">
-        <PageHeader crumb="New run" title="Can't copy this run" />
+        <RunPageHeader crumb="New run" title="Can't copy this run" />
         <Alert variant="destructive">
           <CircleAlertIcon />
+          <AlertTitle>Couldn&apos;t copy this run</AlertTitle>
           <AlertDescription>
             {errorMessage(source.error)}{" "}
             <Link
@@ -175,7 +178,7 @@ function CopyRunForm({
   if (only === "failedOrBlocked" && failing === 0)
     return (
       <div className="flex max-w-2xl flex-col gap-6">
-        <PageHeader crumb="Re-test failures" title="Nothing to re-test" />
+        <RunPageHeader crumb="Re-test failures" title="Nothing to re-test" />
         <Alert>
           <AlertDescription>
             Nothing failed or was blocked in {source.data.key} (
@@ -255,7 +258,7 @@ function CopyRunFields({
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">
-      <PageHeader crumb={crumb} title={title} note={note} />
+      <RunPageHeader crumb={crumb} title={title} note={note} />
       <form
         noValidate
         className="flex flex-col gap-6 rounded-xl border bg-card p-6"
@@ -393,7 +396,7 @@ function NewRunForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader crumb="New run" title="New test run" />
+      <RunPageHeader crumb="New run" title="New test run" />
       <form
         noValidate
         onSubmit={submit}
