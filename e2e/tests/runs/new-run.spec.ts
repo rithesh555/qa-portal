@@ -127,12 +127,12 @@ test("E2E-RUN-013 release, environment and assignee carry into the run", async (
     page.getByRole("heading", { level: 1, name: "Chrome on staging" })
   ).toBeVisible()
   await expect(
-    page.getByText("Release 5.0", { exact: false }).first()
+    page.getByText("Release: 5.0", { exact: false }).first()
   ).toBeVisible()
   await expect(
     page.getByText("Environment: Chrome 130 · build 5.0.1")
   ).toBeVisible()
   await expect(
-    page.getByText(new RegExp(`· assigned to ${displayName("tester", slot)}$`))
+    page.getByText(`Assigned to: ${displayName("tester", slot)}`)
   ).toBeVisible()
 })

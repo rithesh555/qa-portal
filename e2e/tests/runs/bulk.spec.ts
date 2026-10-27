@@ -58,7 +58,7 @@ test("E2E-RUN-027 assign cases to someone", async ({ page, project, slot }) => {
   const run = await startRun(project)
   await page.goto(runUrl(project, run.key))
   await expect(currentCase(page)).toHaveText("Run case 1")
-  await expect(page.getByText(/· unassigned$/)).toBeVisible()
+  await expect(page.getByText("Assigned to: No one")).toBeVisible()
   await select(page, [`${project.key}-TC-1`])
   await caseList(page).getByRole("button", { name: "Assign to…" }).click()
 
@@ -69,9 +69,7 @@ test("E2E-RUN-027 assign cases to someone", async ({ page, project, slot }) => {
     page.getByText(`1 case assigned to ${displayName("tester", slot)}`)
   ).toBeVisible()
   await expect(
-    page
-      .getByText(`assigned to ${displayName("tester", slot)}`, { exact: false })
-      .first()
+    page.getByText(`Assigned to: ${displayName("tester", slot)}`).first()
   ).toBeVisible()
 })
 

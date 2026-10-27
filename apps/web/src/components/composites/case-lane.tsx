@@ -11,8 +11,10 @@ export interface LaneCase {
 
 /**
  * The run as a lane of case pills: filled once recorded, the current case
- * ringed in coral. Each pill says its key and result; a big run wraps inside
+ * ringed in ink. Each pill says its key and result; a big run wraps inside
  * its own scroll box (about four rows) and keeps the current case in view.
+ * The box is one Tab stop (it scrolls with the arrow keys); the pills are for
+ * pointer and touch, and the case list is the keyboard route to a case.
  */
 export function CaseLane({
   cases,
@@ -36,7 +38,11 @@ export function CaseLane({
     <div
       role="group"
       aria-label={label}
-      className={cn("max-h-40 overflow-y-auto", className)}
+      tabIndex={0}
+      className={cn(
+        "max-h-40 overflow-y-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className
+      )}
     >
       <ul className="flex flex-wrap gap-1.5 p-1">
         {cases.map((c) => {
@@ -47,18 +53,21 @@ export function CaseLane({
               <button
                 ref={current ? currentRef : undefined}
                 type="button"
+                tabIndex={-1}
                 aria-current={current ? "true" : undefined}
                 aria-label={`${c.key}, ${RUN_CASE_STATUS_LABELS[c.status]}`}
                 onClick={() => onPick(c.id)}
                 className={cn(
-                  "h-7 rounded-full border px-3 font-mono text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  "h-7 rounded-full border px-3 font-mono text-xs transition-colors",
                   recorded
                     ? cn(
                         STATUS_FILL[c.status],
-                        "border-transparent text-on-status"
+                        // Stripes in a left band, so the number sits on solid colour.
+                        "border-transparent bg-[length:0.5rem_100%] bg-no-repeat text-on-status"
                       )
                     : "border-rule-strong bg-card text-foreground hover:bg-muted",
-                  current && "ring-2 ring-brand ring-offset-2 ring-offset-card"
+                  current &&
+                    "ring-2 ring-foreground ring-offset-2 ring-offset-card"
                 )}
               >
                 {c.key.split("-").at(-1)}

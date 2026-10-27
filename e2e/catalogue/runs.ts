@@ -274,6 +274,33 @@ const suites: CatalogueSuite[] = [
         ],
       },
       {
+        id: "E2E-RUN-048",
+        title: "The current case and result buttons show a focus ring on Tab",
+        priority: "medium",
+        type: "usability",
+        steps: [
+          [
+            "Tab to the current case in the list",
+            "It shows a solid focus outline",
+          ],
+          ["Tab on to Passed", "It shows a solid focus outline"],
+        ],
+      },
+      {
+        id: "E2E-RUN-049",
+        title:
+          "The case lane fits phone width and keeps the current case in view",
+        priority: "medium",
+        type: "usability",
+        preconditions: "A run of 40 cases, opened on case 36, at 375px wide",
+        steps: [
+          [
+            "Look at the case lane",
+            "No sideways page scroll; the ringed current case is inside the lane's visible box",
+          ],
+        ],
+      },
+      {
         id: "E2E-RUN-020",
         title: "U undoes the last result",
         priority: "high",
@@ -430,8 +457,8 @@ const suites: CatalogueSuite[] = [
         priority: "critical",
         steps: [
           [
-            "As the lead, look under the progress",
-            '"2 cases are untested. You can still close the run…"',
+            "As the lead, look at Close run",
+            "It is enabled, with no hint under the progress",
           ],
           [
             "Close run, confirm",

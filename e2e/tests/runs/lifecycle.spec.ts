@@ -29,11 +29,9 @@ test.describe("as a QA Lead", () => {
       expectedVersion: first!.version,
     })
     await page.goto(runUrl(project, run.key))
-    await expect(
-      page.getByText(
-        "2 cases are untested. You can still close the run; they stay untested."
-      )
-    ).toBeVisible()
+    // A lead may close early, so the button isn't disabled and needs no hint.
+    await expect(page.getByRole("button", { name: "Close run" })).toBeEnabled()
+    await expect(page.getByText(/You can close this run once/)).toHaveCount(0)
 
     await page.getByRole("button", { name: "Close run" }).click()
     const confirm = page.getByRole("alertdialog", { name: `Close ${run.key}?` })

@@ -109,7 +109,7 @@ test("E2E-RUN-018 f opens the note, and letters typed there aren't shortcuts", a
 
 test("E2E-RUN-019 j, n and k move between cases", async ({ page, project }) => {
   await openRun(page, project)
-  const position = (n: number) => page.getByText(new RegExp(`· ${n} of 3$`))
+  const position = (n: number) => page.getByText(`Position: ${n} of 3`)
   await expect(position(1)).toBeVisible()
   await page.keyboard.press("j")
   await expect(position(2)).toBeVisible()

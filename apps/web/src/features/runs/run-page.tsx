@@ -85,6 +85,8 @@ import {
 } from "./run-dialogs"
 import { ProgressBar, RunCaseStatusIcon } from "./run-status"
 import { useShortcutsSetting } from "./use-run-shortcuts"
+import { CaseLane } from "@/components/composites/case-lane"
+import { PageHeader } from "@/components/composites/page-header"
 import { PageLoading } from "@/components/page-loading"
 import { useLatestSearchParams } from "@/hooks/use-latest-search-params"
 
@@ -135,11 +137,15 @@ function RunHeader({
 }) {
   const { project } = useProjectContext()
   const failedOrBlocked = run.counts.failed + run.counts.blocked
-  const meta = [
-    run.key,
-    run.release ? `Release ${run.release.name}` : null,
-    `started ${exactTime.format(new Date(run.createdAt))} by ${run.createdBy.name}`,
-  ].filter(Boolean)
+  const facts = [
+    { label: "Key", value: run.key },
+    ...(run.release ? [{ label: "Release", value: run.release.name }] : []),
+    { label: "Environment", value: run.environment || "Not set" },
+    {
+      label: "Started",
+      value: `${exactTime.format(new Date(run.createdAt))} by ${run.createdBy.name}`,
+    },
+  ]
   const newRunLink = (only: string) =>
     projectPath(
       project.key,
@@ -147,36 +153,29 @@ function RunHeader({
     )
 
   return (
-    <div className="flex flex-col gap-2">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              render={<Link to={projectPath(project.key, "runs")} />}
-            >
-              Test runs
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{run.key}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <p className="text-xs text-muted-foreground">{meta.join(" · ")}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">{run.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            Environment: {run.environment || "not set"}
-          </p>
-          {run.description && (
-            <p className="max-w-3xl text-sm whitespace-pre-wrap">
-              {run.description}
-            </p>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
+    <PageHeader
+      title={run.name}
+      facts={facts}
+      factsLabel="Run details"
+      before={
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                render={<Link to={projectPath(project.key, "runs")} />}
+              >
+                Test runs
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{run.key}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      }
+      actions={
+        <>
           <Button
             variant="ghost"
             onClick={() => onDialog("help")}
@@ -221,6 +220,8 @@ function RunHeader({
           )}
           {run.state === "open" && mayClose && (
             <Button
+              // Recording is the main task while cases are untested.
+              variant={run.counts.untested > 0 ? "outline" : "default"}
               onClick={() => onDialog("close")}
               disabled={closeBlocked}
               aria-describedby={closeBlocked ? "close-why" : undefined}
@@ -234,9 +235,15 @@ function RunHeader({
               Reopen run
             </Button>
           )}
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {run.description && (
+        <p className="mt-1 max-w-3xl text-sm whitespace-pre-wrap">
+          {run.description}
+        </p>
+      )}
+    </PageHeader>
   )
 }
 
@@ -414,12 +421,12 @@ export function RunPage() {
   const closeBlocked = !isLead && untested > 0
   const failedOrBlocked = run.counts.failed + run.counts.blocked
   const total = countTotal(run.counts)
+  // Said only while the button is disabled; the close dialog tells a lead
+  // what stays untested.
   const closeWhy =
-    run.state !== "open" || !mayClose || untested === 0
-      ? ""
-      : isLead
-        ? `${untested} ${untested === 1 ? "case is" : "cases are"} untested. You can still close the run; they stay untested.`
-        : `You can close this run once every case has a result (${untested} left).`
+    run.state === "open" && mayClose && closeBlocked
+      ? `You can close this run once every case has a result (${untested} left).`
+      : ""
 
   function openDialog(d: Dialog) {
     setDialogKey((k) => k + 1)
@@ -725,11 +732,25 @@ export function RunPage() {
             {list}
           </aside>
           <div className="flex min-w-0 flex-1 flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 lg:hidden">
-              <Button variant="outline" onClick={() => setListOpen(true)}>
+            <div className="flex flex-col gap-2 lg:hidden">
+              <Button
+                variant="outline"
+                className="self-start"
+                onClick={() => setListOpen(true)}
+              >
                 <ListIcon data-icon="inline-start" />
                 Cases ({untested} left)
               </Button>
+              <CaseLane
+                cases={shown.map((c) => ({
+                  id: c.id,
+                  key: c.caseKey,
+                  status: c.status,
+                }))}
+                currentId={current?.id ?? null}
+                onPick={open}
+                className="rounded-xl border bg-card p-2"
+              />
             </div>
             {current && (
               <RunCasePane

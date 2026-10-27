@@ -5,7 +5,6 @@ import {
   RUN_CASE_STATUS_LABELS,
   type ResultStatus,
   type RunCase,
-  type RunCaseDetail,
   type RunCaseStatus,
   type TestRun,
 } from "@qa/shared"
@@ -34,14 +33,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import {
   Select,
@@ -53,23 +44,19 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
-import { useCase } from "@/features/cases/api"
 import { LabelChip } from "@/features/cases/case-badges"
 import { useProjectContext } from "@/features/projects/project-layout"
 import { ApiError, errorMessage } from "@/lib/api"
 import { cn } from "@/lib/utils"
-import { exactTime } from "@/lib/time"
 import { useRecordResult, useRefreshCase, useRunCase } from "./api"
-import {
-  RunCaseStatusBadge,
-  RunCaseStatusIcon,
-  STATUS_PRESSED,
-} from "./run-status"
+import { CompareDialog } from "./compare-dialog"
+import { EarlierResults } from "./earlier-results"
+import { RunCaseStatusBadge, STATUS_PRESSED } from "./run-status"
 import { type ShortcutAction, useRunShortcuts } from "./use-run-shortcuts"
 import { useKnownDefects } from "@/features/defects/api"
 import { KnownDefects } from "@/features/defects/known-defects"
 import { LogDefectDialog } from "@/features/defects/log-defect-dialog"
-import { InlineError } from "@/components/inline-error"
+import { FactPills } from "@/components/composites/page-header"
 import { useStickyFooter } from "@/hooks/use-sticky-footer"
 
 const RESULT_KEYS: Record<ResultStatus, string> = {
@@ -98,158 +85,6 @@ export interface Recorded {
 }
 
 const NO_STEP = "__none__"
-
-function EarlierResults({ detail }: { detail: RunCaseDetail }) {
-  if (detail.results.length === 0) return null
-  return (
-    <section aria-labelledby="earlier-results" className="flex flex-col gap-2">
-      <h3
-        id="earlier-results"
-        className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
-      >
-        <HistoryIcon aria-hidden className="size-3.5" />
-        Results in this run ({detail.results.length})
-      </h3>
-      <ol className="flex flex-col gap-2">
-        {detail.results.map((r) => (
-          <li key={r.id} className="flex gap-2 text-sm">
-            <RunCaseStatusIcon status={r.status} className="mt-0.5" />
-            <div className="min-w-0">
-              <p>
-                <span className="font-medium">
-                  {RUN_CASE_STATUS_LABELS[r.status]}
-                  {r.failedStep !== null && ` at step ${r.failedStep}`}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  by {r.recordedBy.name} ·{" "}
-                  {exactTime.format(new Date(r.recordedAt))} · version{" "}
-                  {r.revision}
-                </span>
-              </p>
-              {r.note && (
-                <p className="break-words whitespace-pre-wrap text-muted-foreground">
-                  “{r.note}”
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
-  )
-}
-
-/** The run's copy next to the case as it is now, changed fields only. */
-function CompareDialog({
-  detail,
-  open,
-  onOpenChange,
-  onUseLatest,
-  canUpdate,
-}: {
-  detail: RunCaseDetail
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onUseLatest: () => void
-  canUpdate: boolean
-}) {
-  const { project } = useProjectContext()
-  const latest = useCase(project.key, open ? detail.caseKey : null)
-  const rows: { field: string; before: string; after: string }[] = []
-  if (latest.data) {
-    const now = latest.data
-    if (now.title !== detail.title)
-      rows.push({ field: "Title", before: detail.title, after: now.title })
-    if (now.preconditions !== detail.preconditions)
-      rows.push({
-        field: "Preconditions",
-        before: detail.preconditions || "—",
-        after: now.preconditions || "—",
-      })
-    const steps = Math.max(now.steps.length, detail.steps.length)
-    const text = (s?: { action: string; expected: string }) =>
-      s ? `${s.action}${s.expected ? ` → ${s.expected}` : ""}` : "—"
-    for (let i = 0; i < steps; i++) {
-      const a = detail.steps[i]
-      const b = now.steps[i]
-      if (a?.action !== b?.action || a?.expected !== b?.expected)
-        rows.push({
-          field: `Step ${i + 1}`,
-          before: a ? text(a) : "—",
-          after: b ? text(b) : "Removed",
-        })
-    }
-  }
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>
-            {detail.caseKey}: version {detail.revision} →{" "}
-            {detail.latestRevision}
-          </DialogTitle>
-          <DialogDescription>
-            Only the fields that changed are listed.
-          </DialogDescription>
-        </DialogHeader>
-        {latest.isPending ? (
-          <Skeleton className="h-32" />
-        ) : latest.isError ? (
-          <InlineError
-            what="Couldn't load the latest version."
-            error={latest.error}
-            onRetry={() => void latest.refetch()}
-          />
-        ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            The title, preconditions and steps are the same; only details such
-            as priority or labels changed.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="py-2 pe-3 font-semibold">Field</th>
-                  <th className="py-2 pe-3 font-semibold">
-                    In this run (v{detail.revision})
-                  </th>
-                  <th className="py-2 font-semibold">
-                    Latest (v{detail.latestRevision})
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => (
-                  <tr key={r.field} className="border-b align-top">
-                    <th
-                      scope="row"
-                      className="py-2 pe-3 text-left font-medium whitespace-nowrap"
-                    >
-                      {r.field}
-                    </th>
-                    <td className="py-2 pe-3 whitespace-pre-wrap">
-                      {r.before}
-                    </td>
-                    <td className="py-2 whitespace-pre-wrap">{r.after}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          {canUpdate && (
-            <Button onClick={onUseLatest}>Use the latest version…</Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
 
 export function RunCasePane({
   run,
@@ -474,10 +309,14 @@ export function RunCasePane({
     >
       <div className="flex flex-col gap-4 p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="font-mono text-xs text-muted-foreground">
-            {item.caseKey} · copied at version {detail?.revision ?? "…"} ·{" "}
-            {position}
-          </p>
+          <FactPills
+            label="Where this case is"
+            facts={[
+              { label: "Case", value: item.caseKey },
+              { label: "Copied at version", value: detail?.revision ?? "…" },
+              { label: "Position", value: position },
+            ]}
+          />
           <div className="flex gap-1">
             <Button
               variant="outline"
@@ -523,19 +362,18 @@ export function RunCasePane({
             id="run-case-title"
             ref={headingRef}
             tabIndex={-1}
-            className="text-xl font-semibold tracking-tight outline-none"
+            className="text-2xl font-semibold tracking-tight break-words outline-none"
           >
             {item.title}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            {[
-              item.suitePath || "No suite",
-              CASE_PRIORITY_LABELS[item.priority],
-              item.assignee
-                ? `assigned to ${item.assignee.name}`
-                : "unassigned",
-            ].join(" · ")}
-          </p>
+          <FactPills
+            label="Case facts"
+            facts={[
+              { label: "Suite", value: item.suitePath || "No suite" },
+              { label: "Priority", value: CASE_PRIORITY_LABELS[item.priority] },
+              { label: "Assigned to", value: item.assignee?.name ?? "No one" },
+            ]}
+          />
           {detail && detail.labels.length > 0 && (
             <div className="mt-1 flex flex-wrap gap-1">
               {detail.labels.map((l) => (
@@ -761,7 +599,7 @@ export function RunCasePane({
                     focusableWhenDisabled
                     onClick={() => choose(status)}
                     className={cn(
-                      "h-10 gap-2 px-3",
+                      "h-10 gap-2 px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
                       on && STATUS_PRESSED[status]
                     )}
                   >
@@ -831,7 +669,7 @@ export function RunCasePane({
                 </FieldLabel>
                 <Select
                   items={[
-                    { value: NO_STEP, label: "—" },
+                    { value: NO_STEP, label: "No specific step" },
                     ...detail.steps.map((_, i) => ({
                       value: String(i + 1),
                       label: `Step ${i + 1}`,
@@ -846,7 +684,7 @@ export function RunCasePane({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={NO_STEP}>—</SelectItem>
+                    <SelectItem value={NO_STEP}>No specific step</SelectItem>
                     {detail.steps.map((_, i) => (
                       <SelectItem key={i} value={String(i + 1)}>
                         Step {i + 1}

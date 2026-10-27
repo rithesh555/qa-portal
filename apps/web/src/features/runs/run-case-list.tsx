@@ -185,9 +185,9 @@ export function RunCaseList({
                           aria-current={current ? "true" : undefined}
                           onClick={() => onOpen(c.id)}
                           className={cn(
-                            "flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left text-sm outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+                            "flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2 text-left text-sm outline-none hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid",
                             current &&
-                              "bg-accent shadow-[inset_3px_0_0_var(--color-primary)]"
+                              "bg-accent font-medium shadow-[inset_3px_0_0_var(--color-foreground)]"
                           )}
                         >
                           <RunCaseStatusIcon status={c.status} decorative />

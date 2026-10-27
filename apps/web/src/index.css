@@ -1,5 +1,5 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: Coral (by request) · redesign: restyle
- * nav: kept, restyled in the pilot · signature: the case lane (a run as case pills, the current one ringed in coral) · states: loading, empty, error, no-permission
+ * nav: kept, restyled in the pilot · signature: the case lane (a run as case pills, the current one ringed in ink) · states: loading, empty, error, no-permission
  * axes: light/grotesk-sans/warm · posture: restrained · contrast: pass · v2.5.0 */
 /* Hallmark · pre-emit critique: P3 H4 E4 S3 R4 V4 · weakest: S, the case lane and the Q check mark carry the identity */
 @import "tailwindcss";
@@ -121,8 +121,10 @@
   --destructive: oklch(0.5 0.182 30);
   --border: oklch(0.883 0.013 71);
   --rule-strong: oklch(0.831 0.017 70);
-  --input: oklch(0.831 0.017 70);
-  --ring: oklch(0.542 0.155 32);
+  /* Control borders: 3:1 or more on the page and on cards (WCAG 1.4.11). */
+  --input: oklch(0.62 0.017 70);
+  /* Focus is ink, not coral: coral sits too close to the fail red. */
+  --ring: oklch(0.229 0.013 51);
   --brand: oklch(0.542 0.155 32);
   --brand-ink: oklch(0.496 0.141 32);
   --chart-1: oklch(0.325 0.017 56);
@@ -138,7 +140,7 @@
   --sidebar-accent: oklch(0.915 0.01 73);
   --sidebar-accent-foreground: oklch(0.229 0.013 51);
   --sidebar-border: oklch(0.883 0.013 71);
-  --sidebar-ring: oklch(0.542 0.155 32);
+  --sidebar-ring: oklch(0.229 0.013 51);
   /* Result fills carry white text (on-status); the -ink shades are for text and icons on paper. */
   --status-pass: oklch(0.529 0.106 154);
   --status-fail: oklch(0.5 0.182 30);
@@ -205,8 +207,9 @@
   --destructive: oklch(0.759 0.144 26);
   --border: oklch(0.324 0.016 59);
   --rule-strong: oklch(0.379 0.019 61);
-  --input: oklch(0.379 0.019 61);
-  --ring: oklch(0.738 0.13 34);
+  /* 3:1 or more on the dark page and cards. */
+  --input: oklch(0.54 0.019 61);
+  --ring: oklch(0.949 0.01 68);
   --brand: oklch(0.738 0.13 34);
   --brand-ink: oklch(0.738 0.13 34);
   --chart-1: oklch(0.872 0.016 68);
@@ -221,7 +224,7 @@
   --sidebar-accent: oklch(0.269 0.013 62);
   --sidebar-accent-foreground: oklch(0.949 0.01 68);
   --sidebar-border: oklch(0.324 0.016 59);
-  --sidebar-ring: oklch(0.738 0.13 34);
+  --sidebar-ring: oklch(0.949 0.01 68);
   --status-pass: oklch(0.781 0.123 156);
   --status-fail: oklch(0.759 0.144 26);
   --status-blocked: oklch(0.817 0.14 80);
@@ -260,6 +263,16 @@
 @utility hatched {
   background-image: repeating-linear-gradient(
     -45deg,
+    color-mix(in oklch, var(--on-status) 28%, transparent) 0 2px,
+    transparent 2px 6px
+  );
+}
+
+/* Blocked leans the other way, so it differs from failed by more than hue
+   (the two are close for deutan colour vision). */
+@utility hatched-reverse {
+  background-image: repeating-linear-gradient(
+    45deg,
     color-mix(in oklch, var(--on-status) 28%, transparent) 0 2px,
     transparent 2px 6px
   );

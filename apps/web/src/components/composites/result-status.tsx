@@ -16,11 +16,11 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-/** Fill colour per status; failed and blocked are striped so colour is never the only cue. */
+/** Fill colour per status; failed and blocked are striped (in opposite directions) so colour is never the only cue. */
 export const STATUS_FILL: Record<RunCaseStatus, string> = {
   passed: "bg-status-pass",
   failed: "bg-status-fail hatched",
-  blocked: "bg-status-blocked hatched",
+  blocked: "bg-status-blocked hatched-reverse",
   skipped: "bg-status-skipped",
   untested: "bg-muted",
 }
@@ -41,11 +41,13 @@ const STATUS_TEXT: Record<RunCaseStatus, string> = {
   untested: "text-muted-foreground",
 }
 
-/** A selected result button: the status fill with text that keeps 4.5:1 in both themes. */
+/** A selected result button: the status fill with text that keeps 4.5:1 in both themes. Stripes sit in a left band, never under the label. */
 export const STATUS_PRESSED: Record<RunCaseStatus, string> = {
   passed: "bg-status-pass hover:bg-status-pass text-on-status",
-  failed: "bg-status-fail hover:bg-status-fail hatched text-on-status",
-  blocked: "bg-status-blocked hover:bg-status-blocked hatched text-on-status",
+  failed:
+    "bg-status-fail hover:bg-status-fail hatched bg-[length:0.5rem_100%] bg-no-repeat text-on-status",
+  blocked:
+    "bg-status-blocked hover:bg-status-blocked hatched-reverse bg-[length:0.5rem_100%] bg-no-repeat text-on-status",
   skipped: "bg-status-skipped hover:bg-status-skipped text-on-status",
   untested: "",
 }
@@ -69,7 +71,7 @@ export function ProgressBar({
       role="img"
       aria-label={label}
       className={cn(
-        "flex h-3 overflow-hidden rounded-full bg-muted ring-1 ring-border ring-inset",
+        "flex h-3 overflow-hidden rounded-full bg-muted ring-1 ring-input ring-inset",
         className
       )}
     >
@@ -105,7 +107,7 @@ export function StatusLegend({ className }: { className?: string }) {
             className={cn(
               "size-2.5 rounded-[3px]",
               STATUS_FILL[s],
-              s === "untested" && "ring-1 ring-border ring-inset"
+              s === "untested" && "ring-1 ring-input ring-inset"
             )}
           />
           {RUN_CASE_STATUS_LABELS[s]}

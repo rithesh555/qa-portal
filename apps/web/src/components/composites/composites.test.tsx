@@ -117,6 +117,14 @@ describe("CaseLane", () => {
     expect(onPick).toHaveBeenCalledWith("c3")
   })
 
+  it("is one Tab stop: the box takes focus, the pills don't", () => {
+    render(<CaseLane cases={cases} currentId="c2" onPick={() => {}} />)
+    const lane = screen.getByRole("group", { name: "Cases in this run" })
+    expect(lane).toHaveAttribute("tabindex", "0")
+    for (const pill of within(lane).getAllByRole("button"))
+      expect(pill).toHaveAttribute("tabindex", "-1")
+  })
+
   it("holds a big run in one scroll box and brings the current case into view", () => {
     const many: LaneCase[] = Array.from({ length: 300 }, (_, i) => ({
       id: `c${i}`,
