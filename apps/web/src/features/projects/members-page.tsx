@@ -50,6 +50,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "@/components/ui/toast"
 import { useSession } from "@/features/auth/session"
+import { useCan } from "@/hooks/use-can"
 import { useListParams } from "@/hooks/use-list-params"
 import { errorMessage } from "@/lib/api"
 import { AddMembersDialog } from "./add-members-dialog"
@@ -234,7 +235,8 @@ export function MembersPage() {
   const [query, setQuery] = useListParams(memberListQuerySchema)
   const members = useMembers(project.key, query)
   const { data: me } = useSession()
-  const isAdmin = me?.role === "admin"
+  // Only admins may change or remove the last QA Lead.
+  const isAdmin = useCan()("projects:manage")
   const canManage = allowed("members:manage")
   const [adding, setAdding] = useState(false)
   const [removing, setRemoving] = useState<Member | null>(null)

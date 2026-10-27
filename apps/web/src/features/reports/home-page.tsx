@@ -31,6 +31,7 @@ import { initials } from "@/features/runs/format"
 import { ProgressBar } from "@/features/runs/run-status"
 import { errorMessage } from "@/lib/api"
 import { exactTime, timeAgo } from "@/lib/time"
+import { useCan } from "@/hooks/use-can"
 import { useHome } from "./api"
 import { ReleaseTable } from "./release-table"
 
@@ -52,6 +53,7 @@ const plural = (n: number, one: string, many = `${one}s`) =>
 
 export function HomePage() {
   const me = useSession().data
+  const isAdmin = useCan()("projects:manage")
   const home = useHome()
   const h = home.data
   const firstName = me?.name.split(" ")[0] ?? ""
@@ -103,13 +105,11 @@ export function HomePage() {
             </EmptyMedia>
             <EmptyTitle>
               <h2>
-                {me?.role === "admin"
-                  ? "No projects yet"
-                  : "You're not in any project yet"}
+                {isAdmin ? "No projects yet" : "You're not in any project yet"}
               </h2>
             </EmptyTitle>
             <EmptyDescription>
-              {me?.role === "admin" ? (
+              {isAdmin ? (
                 <>
                   Create the first one on the{" "}
                   <Link to="/projects" className="underline">

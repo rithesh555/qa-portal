@@ -1,5 +1,4 @@
 import {
-  can,
   PROJECT_ROLE_LABELS,
   PROJECT_STATUSES,
   type ProjectSummary,
@@ -36,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCan } from "@/hooks/use-can"
 import { useSession } from "@/features/auth/session"
 import { useListParams } from "@/hooks/use-list-params"
 import { errorMessage } from "@/lib/api"
@@ -164,9 +164,7 @@ export function ProjectsPage() {
   const [query, setQuery] = useListParams(projectListQuerySchema)
   const projects = useProjects(query)
   const { data: user } = useSession()
-  const isAdmin = user
-    ? can("projects:manage", { portalRole: user.role })
-    : false
+  const isAdmin = useCan()("projects:manage")
   const [creating, setCreating] = useState(false)
 
   const page = projects.data

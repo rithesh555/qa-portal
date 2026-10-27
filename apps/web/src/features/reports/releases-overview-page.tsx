@@ -21,7 +21,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toggle } from "@/components/ui/toggle"
 import { DownloadIcon } from "lucide-react"
-import { useSession } from "@/features/auth/session"
+import { useCan } from "@/hooks/use-can"
 import { errorMessage } from "@/lib/api"
 import { useReleasesOverview } from "./api"
 import { downloadCsv } from "./csv"
@@ -43,7 +43,7 @@ const WITHIN = [
 const RANK = { no: 0, na: 1, yes: 2 } as const
 
 export function ReleasesOverviewPage() {
-  const me = useSession().data
+  const isAdmin = useCan()("projects:manage")
   const overview = useReleasesOverview()
   const [params, setParams] = useLatestSearchParams()
   const q = params.get("q") ?? ""
@@ -90,7 +90,7 @@ export function ReleasesOverviewPage() {
       )
   }, [all, q, notReady, within])
 
-  const scope = me?.role === "admin" ? "every project" : "the projects you lead"
+  const scope = isAdmin ? "every project" : "the projects you lead"
   const filtered = Boolean(q || notReady || within !== "any")
 
   function csv() {
@@ -162,7 +162,7 @@ export function ReleasesOverviewPage() {
               <h2>No active releases</h2>
             </EmptyTitle>
             <EmptyDescription>
-              {me?.role === "admin"
+              {isAdmin
                 ? "No project has a release that's planned or in progress."
                 : "This lists the releases of projects you lead as QA Lead. None of them has a release that's planned or in progress."}
             </EmptyDescription>

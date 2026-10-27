@@ -1,4 +1,4 @@
-import { type Action, can, type Project } from "@qa/shared"
+import type { Action, Project } from "@qa/shared"
 import { ArchiveIcon, CircleAlertIcon, FolderXIcon } from "lucide-react"
 import {
   Navigate,
@@ -24,6 +24,7 @@ import { ApiError, errorMessage } from "@/lib/api"
 import { useProject } from "./api"
 import { PageLoading } from "@/components/page-loading"
 import { usePageTitle } from "@/hooks/use-page-title"
+import { canFor } from "@/hooks/use-can"
 
 export interface ProjectContext {
   project: Project
@@ -88,7 +89,7 @@ export function ProjectLayout() {
     )
   }
   if (project.error instanceof ApiError && project.error.status === 404) {
-    return <ProjectNotFound isAdmin={user?.role === "admin"} />
+    return <ProjectNotFound isAdmin={canFor(user)("projects:manage")} />
   }
   if (project.isError || !user) {
     return (
@@ -112,10 +113,7 @@ export function ProjectLayout() {
   const data = project.data
   const context: ProjectContext = {
     project: data,
-    allowed: (action) =>
-      // Archived projects are read-only for everyone except restoring them.
-      (!data.archived || action === "projects:manage") &&
-      can(action, { portalRole: user.role, projectRole: data.myRole }),
+    allowed: canFor(user, data),
   }
 
   return (
@@ -125,7 +123,7 @@ export function ProjectLayout() {
           <ArchiveIcon />
           <AlertTitle>This project is archived</AlertTitle>
           <AlertDescription>
-            {user.role === "admin"
+            {canFor(user)("projects:manage")
               ? "It's read-only. Restore it from Project actions on the overview."
               : "It's read-only. An admin can restore it."}
           </AlertDescription>

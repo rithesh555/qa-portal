@@ -1,4 +1,5 @@
-import { type Action, can } from "@qa/shared"
+import type { Action } from "@qa/shared"
+import { useCan } from "@/hooks/use-can"
 import { CloudOffIcon } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Navigate, Outlet, useLocation } from "react-router"
@@ -80,7 +81,7 @@ export function RequireAuth() {
 
 /** Renders child routes only when the portal-wide `action` is allowed. Use inside RequireAuth. */
 export function RequirePermission({ action }: { action: Action }) {
-  const { data: user } = useSession()
-  if (!user || !can(action, { portalRole: user.role })) return <NoAccess />
+  const can = useCan()
+  if (!can(action)) return <NoAccess />
   return <Outlet />
 }
