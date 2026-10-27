@@ -1,13 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- The QA Portal mark: a run's result bar (passed, failed, blocked, skipped) on a tile. -->
-  <rect width="32" height="32" rx="7" fill="#1f2a37"/>
-  <g transform="translate(4 13)">
-    <clipPath id="bar"><rect width="24" height="6" rx="3"/></clipPath>
-    <g clip-path="url(#bar)">
-      <rect x="0" width="13.4" height="6" fill="#3fbf7f"/>
-      <rect x="14" width="3" height="6" fill="#d23f3f"/>
-      <rect x="17.6" width="2" height="6" fill="#f1c24b"/>
-      <rect x="20.2" width="3.8" height="6" fill="#7b8494"/>
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- The QA Portal mark, "Q check": a ring with a check makes the Q, a coral tail finishes it. Same as components/brand/logo.tsx. -->
+  <rect width="48" height="48" rx="14" fill="#221b17"/>
+  <circle cx="22" cy="22" r="11" fill="none" stroke="#f6f3ef" stroke-width="4"/>
+  <path d="M16.5 22.5l4 4 7-8" fill="none" stroke="#f6f3ef" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M30.5 30.5l7 7" stroke="#f08a72" stroke-width="4.5" stroke-linecap="round"/>
 </svg>

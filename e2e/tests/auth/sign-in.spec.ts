@@ -95,3 +95,21 @@ test("E2E-AUTH-007 too many sign-in attempts are slowed down with a clear messag
     "Too many sign-in attempts. Wait a minute, then try again."
   )
 })
+
+test("E2E-AUTH-016 the sign-in page tours the features and can be paused", async ({
+  page,
+}) => {
+  await page.goto("/login")
+  const about = page.getByRole("region", { name: "About QA Portal" })
+  const feature = about
+    .getByRole("region", { name: "Features" })
+    .locator("[data-title]")
+  await expect(feature).toHaveText("Write cases once.")
+  await expect(feature).toHaveText("Run them fast.", { timeout: 8_000 })
+  await about.getByRole("button", { name: "Pause" }).click()
+  await about.getByRole("button", { name: /^Show feature 4 of 5/ }).click()
+  await expect(feature).toHaveText("Know where a release stands.")
+  await expect(about.getByRole("button", { name: "Play" })).toBeVisible()
+  await page.waitForTimeout(6_000)
+  await expect(feature).toHaveText("Know where a release stands.")
+})

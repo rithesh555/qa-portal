@@ -83,7 +83,7 @@ export function ProjectSwitcher({
         render={
           <SidebarMenuButton
             size="lg"
-            className="border bg-background data-popup-open:bg-sidebar-accent"
+            className="border border-rule-strong bg-background ps-1.5 data-popup-open:bg-sidebar-accent"
             tooltip={current ? `Project: ${current.name}` : "Choose a project"}
           />
         }

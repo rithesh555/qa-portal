@@ -87,6 +87,22 @@ const suites: CatalogueSuite[] = [
           ],
         ],
       },
+      {
+        id: "E2E-AUTH-016",
+        title: "The sign-in page tours the features and can be paused",
+        priority: "low",
+        preconditions: "Signed out, on a wide screen",
+        steps: [
+          [
+            "Open /login",
+            "The first feature shows; the tour moves on by itself",
+          ],
+          [
+            "Select Pause, then choose feature 4",
+            "Feature 4 shows and stays; the button reads Play",
+          ],
+        ],
+      },
     ],
   },
   {

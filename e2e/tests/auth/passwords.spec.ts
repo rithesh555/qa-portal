@@ -70,6 +70,8 @@ test("E2E-AUTH-012 after choosing a password the app opens and the new password 
 
   await page.getByRole("button", { name: new RegExp(user.name) }).click()
   await page.getByRole("menuitem", { name: "Sign out" }).click()
+  // Signing out lands on /login; wait so the next goto doesn't race it.
+  await expect(page).toHaveURL(/\/login$/)
   await signInWithForm(page, user.username, chosen)
   await expect(page).toHaveURL("/")
   await expect(dialog(page)).toBeHidden()

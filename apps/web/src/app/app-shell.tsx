@@ -2,7 +2,7 @@ import { PORTAL_ROLE_LABELS, type ProjectSummary } from "@qa/shared"
 import { ChevronsUpDownIcon, KeyRoundIcon, LogOutIcon } from "lucide-react"
 import { useEffect, useLayoutEffect, useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router"
-import { BrandMark } from "@/components/brand-mark"
+import { Logo } from "@/components/brand/logo"
 import { useTheme } from "@/components/theme-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -171,7 +171,7 @@ function AppSidebar({
               render={<NavLink to="/" onClick={closeOnMobile} />}
             >
               <span className="flex size-8 shrink-0 items-center justify-center">
-                <BrandMark className="w-7" />
+                <Logo className="size-8!" />
               </span>
               <span className="truncate font-semibold">QA Portal</span>
             </SidebarMenuButton>

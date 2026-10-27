@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router"
+import { PageHeader } from "@/components/composites/page-header"
 import { ListPagination } from "@/components/list-pagination"
 import { SearchBox } from "@/components/search-box"
 import { ProjectTile } from "@/components/project-tile"
@@ -57,12 +58,12 @@ function RoleBadge({ project }: { project: ProjectSummary }) {
 
 function ProjectCards({ projects }: { projects: ProjectSummary[] }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <ul className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
       {projects.map((project) => (
         <li key={project.id}>
           <Link
             to={`/projects/${project.key}`}
-            className="flex h-full flex-col gap-3.5 rounded-xl border bg-card p-5 transition-colors outline-none hover:border-ring/60 focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="flex h-full flex-col gap-3.5 rounded-xl border bg-card p-5 transition-colors outline-none hover:border-rule-strong focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <div className="flex items-center gap-3">
               <ProjectTile projectKey={project.key} size="lg" />
@@ -82,7 +83,7 @@ function ProjectCards({ projects }: { projects: ProjectSummary[] }) {
               </p>
             )}
             <div className="mt-auto flex gap-4 border-t pt-3 text-xs text-muted-foreground">
-              <span>
+              <span className="tabular-nums">
                 {project.memberCount}{" "}
                 {project.memberCount === 1 ? "member" : "members"}
               </span>
@@ -101,7 +102,7 @@ function ProjectCards({ projects }: { projects: ProjectSummary[] }) {
 
 function ProjectTable({ projects }: { projects: ProjectSummary[] }) {
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <div className="overflow-x-auto rounded-xl border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -141,12 +142,12 @@ function ProjectTable({ projects }: { projects: ProjectSummary[] }) {
                   </span>
                 )}
               </TableCell>
-              <TableCell className="hidden sm:table-cell">
+              <TableCell className="hidden tabular-nums sm:table-cell">
                 {project.memberCount}
               </TableCell>
               <TableCell className="hidden md:table-cell">
                 {project.currentRelease?.name ?? (
-                  <span className="text-muted-foreground">—</span>
+                  <span className="text-muted-foreground">None</span>
                 )}
               </TableCell>
               <TableCell className="hidden whitespace-nowrap text-muted-foreground lg:table-cell">
@@ -172,22 +173,22 @@ export function ProjectsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground">
-            {isAdmin
-              ? "As an admin you see every project. Each project's QA Leads manage its members."
-              : "The projects you're a member of. An admin or a project's QA Lead can add you to others."}
-          </p>
-        </div>
-        {isAdmin && (
-          <Button onClick={() => setCreating(true)}>
-            <PlusIcon data-icon="inline-start" />
-            New project
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Projects"
+        description={
+          isAdmin
+            ? "As an admin you see every project. Each project's QA Leads manage its members."
+            : "The projects you're a member of. An admin or a project's QA Lead can add you to others."
+        }
+        actions={
+          isAdmin && (
+            <Button onClick={() => setCreating(true)}>
+              <PlusIcon data-icon="inline-start" />
+              New project
+            </Button>
+          )
+        }
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
@@ -228,13 +229,13 @@ export function ProjectsPage() {
         // Placeholders shaped like the result: table rows for admins, cards
         // for members, so nothing jumps when the data arrives.
         isAdmin ? (
-          <div className="flex flex-col gap-2 rounded-lg border p-3">
+          <div className="flex flex-col gap-2 rounded-xl border bg-card p-3">
             {Array.from({ length: 6 }, (_, i) => (
               <Skeleton key={i} className="h-10 w-full" />
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 3 }, (_, i) => (
               <Skeleton key={i} className="h-40 rounded-xl" />
             ))}

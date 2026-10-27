@@ -20,6 +20,8 @@
   --color-brand-ink: var(--brand-ink);
   --color-rule-strong: var(--rule-strong);
   --color-on-status: var(--on-status);
+  --color-logo-tail: var(--logo-tail);
+  --color-project-tile-foreground: var(--project-tile-foreground);
   --color-warning: var(--warning);
   --color-warning-ink: var(--warning-ink);
   --color-warning-surface: var(--warning-surface);
@@ -142,6 +144,18 @@
   --status-pass-ink: oklch(0.473 0.095 154);
   --status-blocked-ink: oklch(0.48 0.103 66);
   --on-status: oklch(1 0 0);
+  /* The Q check mark's tail: lifted coral on the ink tile, deep coral on the paper one. */
+  --logo-tail: oklch(0.738 0.13 34);
+  /* Project tiles: white text keeps 5:1 or better on each, in both modes. */
+  --project-tile-foreground: oklch(1 0 0);
+  --project-tile-1: #1f5a86;
+  --project-tile-2: #2d7a6e;
+  --project-tile-3: #7a4f9e;
+  --project-tile-4: #a05a2c;
+  --project-tile-5: #8a3b5c;
+  --project-tile-6: #3f6b2a;
+  --project-tile-7: #4b5a8c;
+  --project-tile-8: #6b5a1f;
   --warning: oklch(0.531 0.118 64);
   --warning-ink: oklch(0.48 0.103 66);
   --warning-surface: oklch(0.962 0.024 80);
@@ -212,6 +226,7 @@
   --status-pass-ink: var(--status-pass);
   --status-blocked-ink: var(--status-blocked);
   --on-status: oklch(0.208 0.009 59);
+  --logo-tail: oklch(0.542 0.155 32);
   --warning: oklch(0.817 0.14 80);
   --warning-ink: oklch(0.817 0.14 80);
   --warning-surface: oklch(0.285 0.029 73);

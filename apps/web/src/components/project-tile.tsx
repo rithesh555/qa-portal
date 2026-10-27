@@ -1,21 +1,12 @@
 import { cn } from "cn"
 
-// Dark enough for white text (≥4.5:1) in light and dark mode.
-const COLORS = [
-  "#1f5a86",
-  "#2d7a6e",
-  "#7a4f9e",
-  "#a05a2c",
-  "#8a3b5c",
-  "#3f6b2a",
-  "#4b5a8c",
-  "#6b5a1f",
-]
+const TILE_COUNT = 8
 
+/** One of the --project-tile-N tokens, picked from the key so it's stable. */
 function colorFor(key: string): string {
   let hash = 0
   for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
-  return COLORS[hash % COLORS.length]!
+  return `var(--project-tile-${(hash % TILE_COUNT) + 1})`
 }
 
 const SIZES = {
@@ -48,7 +39,7 @@ export function ProjectTile({
     <span
       aria-hidden="true"
       className={cn(
-        "flex shrink-0 items-center justify-center overflow-hidden font-mono leading-none font-semibold tracking-tight text-white",
+        "flex shrink-0 items-center justify-center overflow-hidden font-mono leading-none font-semibold tracking-tight text-project-tile-foreground",
         SIZES[size],
         className
       )}

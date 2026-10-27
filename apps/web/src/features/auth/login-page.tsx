@@ -5,17 +5,11 @@ import { CircleAlertIcon } from "lucide-react"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { Navigate, useLocation, useNavigate } from "react-router"
-import { BrandMark } from "@/components/brand-mark"
+import { LogoLockup } from "@/components/brand/logo"
 import { FullPageSpinner } from "@/components/full-page-spinner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   Field,
   FieldError,
@@ -25,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
+import { FeatureTour } from "./feature-tour"
 import { sessionQueryKey, useSession } from "./session"
 
 const NETWORK_ERROR = "We couldn't reach the server. Try again in a moment."
@@ -48,6 +43,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [formError, setFormError] = useState<string | null>(null)
+  // Tailwind's lg breakpoint: the tour only fits beside the form.
+  const wide = useMediaQuery("(min-width: 64rem)")
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -83,97 +80,89 @@ export function LoginPage() {
   const submitting = form.formState.isSubmitting
 
   return (
-    <div className="grid min-h-svh grid-rows-[auto_1fr] lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)] lg:grid-rows-1">
-      <section className="flex flex-col gap-6 bg-sidebar px-6 py-8 text-sidebar-foreground sm:px-10 lg:justify-between lg:gap-10 lg:px-16 lg:py-14">
-        <p className="flex items-center gap-3 font-semibold">
-          <BrandMark />
-          QA Portal
-        </p>
-        <div className="flex max-w-xl flex-col gap-6">
-          <BrandMark className="hidden h-5 w-full max-w-md rounded-sm lg:flex" />
-          <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl lg:text-4xl">
-            Plan the tests, run them, and follow every defect to a fix.
-          </h1>
-          <p className="hidden max-w-prose text-muted-foreground lg:block">
-            Your workspace for test cases, test runs, defects, and release
-            reports.
-          </p>
-        </div>
+    <div className="grid min-h-svh grid-rows-[auto_1fr] lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:grid-rows-1">
+      {/* Always the warm dark panel: "dark" switches the tokens inside it. */}
+      <section
+        aria-label="About QA Portal"
+        className="dark flex flex-col justify-between gap-10 border-border bg-background px-6 py-6 text-foreground sm:px-10 lg:border-e lg:px-14 lg:py-12 dark:bg-sidebar"
+      >
+        <LogoLockup tagline="Test, track, release" />
+        {/* Mounted only where it shows, so no timer runs on phones. */}
+        {wide && <FeatureTour />}
         <p className="hidden text-sm text-muted-foreground lg:block">
-          Accounts are created by an admin. Ask yours if you can&apos;t sign in.
+          Accounts are created by your admin.
         </p>
       </section>
 
       <main className="flex items-center justify-center px-6 py-10 sm:px-10">
-        <Card className="w-full max-w-sm">
-          <CardHeader>
-            <CardTitle>
-              <h2>Sign in</h2>
-            </CardTitle>
-            <CardDescription>
+        <div className="flex w-full max-w-sm flex-col gap-6">
+          <div className="flex flex-col gap-1.5">
+            <h1 className="text-3xl font-semibold tracking-tight">Sign in</h1>
+            <p className="text-sm text-muted-foreground">
               Use the username your admin gave you.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
-              <FieldGroup>
-                {formError && (
-                  <Alert variant="destructive">
-                    <CircleAlertIcon />
-                    <AlertTitle>Couldn&apos;t sign in</AlertTitle>
-                    <AlertDescription>{formError}</AlertDescription>
-                  </Alert>
+            </p>
+          </div>
+          <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+            <FieldGroup>
+              {formError && (
+                <Alert variant="destructive">
+                  <CircleAlertIcon />
+                  <AlertTitle>Couldn&apos;t sign in</AlertTitle>
+                  <AlertDescription>{formError}</AlertDescription>
+                </Alert>
+              )}
+              <Controller
+                name="username"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="login-username">Username</FieldLabel>
+                    <Input
+                      {...field}
+                      id="login-username"
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      autoFocus
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
                 )}
-                <Controller
-                  name="username"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="login-username">Username</FieldLabel>
-                      <Input
-                        {...field}
-                        id="login-username"
-                        autoComplete="username"
-                        autoCapitalize="none"
-                        spellCheck={false}
-                        autoFocus
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Controller
-                  name="password"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel htmlFor="login-password">Password</FieldLabel>
-                      <Input
-                        {...field}
-                        id="login-password"
-                        type="password"
-                        autoComplete="current-password"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
-                <Field>
-                  <Button type="submit" disabled={submitting}>
-                    {submitting && <Spinner data-icon="inline-start" />}
-                    Sign in
-                  </Button>
-                </Field>
-              </FieldGroup>
-            </form>
-          </CardContent>
-        </Card>
+              />
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                    <Input
+                      {...field}
+                      id="login-password"
+                      type="password"
+                      autoComplete="current-password"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Field>
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner data-icon="inline-start" />}
+                  Sign in
+                </Button>
+              </Field>
+            </FieldGroup>
+          </form>
+          <p className="text-sm text-muted-foreground">
+            Forgot your password? Ask an admin to reset it.
+          </p>
+        </div>
       </main>
     </div>
   )
