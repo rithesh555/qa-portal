@@ -1,0 +1,76 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigestsToSemver",
+    "docker:pinDigests"
+  ],
+  "description": "Pinned versions only, never younger than 14 days (matches pnpm minimumReleaseAge). Review every PR; nothing automerges.",
+  "timezone": "Asia/Kolkata",
+  "schedule": ["before 9am on monday"],
+  "minimumReleaseAge": "14 days",
+  "internalChecksFilter": "strict",
+  "rangeStrategy": "pin",
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies"],
+  "automerge": false,
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Prisma is pinned on purpose; upgrade only after the user agrees.",
+      "matchPackageNames": ["prisma", "@prisma/**"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Node stays on 22 LTS.",
+      "matchDepNames": ["node", "@types/node"],
+      "allowedVersions": "<23"
+    },
+    {
+      "groupName": "eslint and prettier",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "eslint-*",
+        "typescript-eslint",
+        "prettier",
+        "prettier-*"
+      ]
+    },
+    {
+      "groupName": "react",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ]
+    },
+    {
+      "groupName": "fastify",
+      "matchPackageNames": ["fastify", "@fastify/**", "fastify-*"]
+    },
+    {
+      "groupName": "playwright",
+      "matchPackageNames": [
+        "@playwright/test",
+        "playwright",
+        "@axe-core/playwright"
+      ]
+    },
+    {
+      "groupName": "commit tooling",
+      "matchPackageNames": ["@commitlint/**", "lefthook"]
+    },
+    {
+      "groupName": "github actions",
+      "matchManagers": ["github-actions"]
+    }
+  ]
+}

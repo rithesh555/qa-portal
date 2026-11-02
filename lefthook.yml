@@ -1,0 +1,26 @@
+# Local git hooks (https://lefthook.dev). Installed by `pnpm install`
+# (the root `prepare` script). Fast checks only; CI runs everything again.
+# Skip once with LEFTHOOK=0 git commit … (CI still blocks bad changes).
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: prettier
+      glob: "*.{js,ts,tsx,json,md,css,yml,yaml,html}"
+      run: pnpm exec prettier --check --ignore-unknown {staged_files}
+    - name: gitleaks
+      # Scans only what is staged. Uses a local gitleaks if installed,
+      # otherwise the pinned container image.
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks git --staged --redact --no-banner .
+        else
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git --staged --redact --no-banner /repo
+        fi
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}

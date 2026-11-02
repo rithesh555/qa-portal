@@ -9,6 +9,8 @@ allowBuilds:
   msw: false
   prisma@7.10.1: true
   "@prisma/engines@7.10.1": true
+  # Ships its binary as an optional dependency; hooks install via `prepare`.
+  lefthook: false
 
 # Dependencies must be at least 2 weeks old before they're resolved (minutes).
 minimumReleaseAge: 20160
