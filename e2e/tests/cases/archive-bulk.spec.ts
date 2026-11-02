@@ -18,7 +18,7 @@ test("E2E-CASE-034 archive a case with a reason", async ({ page, project }) => {
   await dialog.getByRole("button", { name: "Archive", exact: true }).click()
   await expect(page.getByText(`${c.key} archived`)).toBeVisible()
   await expect(page.getByRole("article")).toContainText(
-    "Archived — Cheques are no longer accepted"
+    "Archived: Cheques are no longer accepted"
   )
   await expect(page.getByText("Edit", { exact: true })).toHaveCount(0)
   await expect(page.getByRole("button", { name: "Restore" })).toBeVisible()
@@ -145,7 +145,7 @@ test("E2E-CASE-041 bulk archive", async ({ page, project }) => {
   await dialog.getByLabel("Reason").fill("Duplicates")
   await dialog.getByRole("button", { name: "Archive 2 test cases" }).click()
   await expect(page.getByText("2 test cases archived")).toBeVisible()
-  await expect(page.getByText("Showing 1–1 of 1 case")).toBeVisible()
+  await expect(page.getByText("Showing 1 to 1 of 1 case")).toBeVisible()
 })
 
 test("E2E-CASE-042 select every matching case across pages", async ({

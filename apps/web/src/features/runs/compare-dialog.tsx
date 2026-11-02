@@ -42,7 +42,7 @@ export function CompareDialog({
       })
     const steps = Math.max(now.steps.length, detail.steps.length)
     const text = (s?: { action: string; expected: string }) =>
-      s ? `${s.action}${s.expected ? ` → ${s.expected}` : ""}` : "—"
+      s ? `${s.action}${s.expected ? `. Expected: ${s.expected}` : ""}` : "—"
     for (let i = 0; i < steps; i++) {
       const a = detail.steps[i]
       const b = now.steps[i]
@@ -59,7 +59,7 @@ export function CompareDialog({
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {detail.caseKey}: version {detail.revision} →{" "}
+            {detail.caseKey}: version {detail.revision} and version{" "}
             {detail.latestRevision}
           </DialogTitle>
           <DialogDescription>

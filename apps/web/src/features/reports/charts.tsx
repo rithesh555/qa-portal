@@ -334,56 +334,51 @@ export function PassRateChart({
             className="stroke-chart-line"
           />
         )}
-        {points.map((p, i) => (
-          <g key={p.key}>
-            <circle
-              cx={x(i)}
-              cy={y(p.rate)}
-              r={4.5}
-              strokeWidth={2}
-              className={cn(
-                "stroke-chart-line",
-                p.open ? "fill-card" : "fill-chart-line"
-              )}
-            />
-            <text
-              x={x(i)}
-              y={H - 10}
-              textAnchor="middle"
-              className="fill-muted-foreground"
-            >
-              {p.label}
-            </text>
-            <rect
-              x={x(i) - slot / 2}
-              y={TOP}
-              width={slot}
-              height={H - TOP - BOTTOM}
-              fill="transparent"
-              tabIndex={0}
-              role="img"
-              aria-label={`${p.key}: ${Math.round(p.rate * 100)}%, ${p.detail}`}
-              className="outline-none focus-visible:stroke-ring"
-              onMouseEnter={() =>
-                setTip({
-                  x: x(i),
-                  y: y(p.rate),
-                  title: `${p.key}${p.open ? " (open)" : ""}`,
-                  text: `${Math.round(p.rate * 100)}% · ${p.detail}`,
-                })
-              }
-              onFocus={() =>
-                setTip({
-                  x: x(i),
-                  y: y(p.rate),
-                  title: `${p.key}${p.open ? " (open)" : ""}`,
-                  text: `${Math.round(p.rate * 100)}% · ${p.detail}`,
-                })
-              }
-              onBlur={() => setTip(null)}
-            />
-          </g>
-        ))}
+        {points.map((p, i) => {
+          const show = () =>
+            setTip({
+              x: x(i),
+              y: y(p.rate),
+              title: `${p.key}${p.open ? " (open)" : ""}`,
+              text: `${Math.round(p.rate * 100)}%, ${p.detail}`,
+            })
+          return (
+            <g key={p.key}>
+              <circle
+                cx={x(i)}
+                cy={y(p.rate)}
+                r={4.5}
+                strokeWidth={2}
+                className={cn(
+                  "stroke-chart-line",
+                  p.open ? "fill-card" : "fill-chart-line"
+                )}
+              />
+              <text
+                x={x(i)}
+                y={H - 10}
+                textAnchor="middle"
+                className="fill-muted-foreground"
+              >
+                {p.label}
+              </text>
+              <rect
+                x={x(i) - slot / 2}
+                y={TOP}
+                width={slot}
+                height={H - TOP - BOTTOM}
+                fill="transparent"
+                tabIndex={0}
+                role="img"
+                aria-label={`${p.key}: ${Math.round(p.rate * 100)}%, ${p.detail}`}
+                className="outline-none focus-visible:stroke-ring"
+                onMouseEnter={show}
+                onFocus={show}
+                onBlur={() => setTip(null)}
+              />
+            </g>
+          )
+        })}
       </svg>
       <Tooltip tip={tip} height={H} />
     </div>
@@ -491,46 +486,41 @@ export function FlowChart({
             </text>
           </>
         )}
-        {weeks.map((w, i) => (
-          <g key={w.label}>
-            <text
-              x={x(i)}
-              y={H - 6}
-              textAnchor="middle"
-              className="fill-muted-foreground"
-            >
-              {w.label}
-            </text>
-            <rect
-              x={x(i) - slot / 2}
-              y={TOP}
-              width={slot}
-              height={H - TOP - BOTTOM}
-              fill="transparent"
-              tabIndex={0}
-              role="img"
-              aria-label={`Week of ${w.label}: ${w.found} found, ${w.closed} closed`}
-              className="outline-none"
-              onMouseEnter={() =>
-                setTip({
-                  x: x(i),
-                  y: y(Math.max(w.found, w.closed)),
-                  title: `Week of ${w.label}`,
-                  text: `${w.found} found · ${w.closed} closed`,
-                })
-              }
-              onFocus={() =>
-                setTip({
-                  x: x(i),
-                  y: y(Math.max(w.found, w.closed)),
-                  title: `Week of ${w.label}`,
-                  text: `${w.found} found · ${w.closed} closed`,
-                })
-              }
-              onBlur={() => setTip(null)}
-            />
-          </g>
-        ))}
+        {weeks.map((w, i) => {
+          const show = () =>
+            setTip({
+              x: x(i),
+              y: y(Math.max(w.found, w.closed)),
+              title: `Week of ${w.label}`,
+              text: `${w.found} found, ${w.closed} closed`,
+            })
+          return (
+            <g key={w.label}>
+              <text
+                x={x(i)}
+                y={H - 6}
+                textAnchor="middle"
+                className="fill-muted-foreground"
+              >
+                {w.label}
+              </text>
+              <rect
+                x={x(i) - slot / 2}
+                y={TOP}
+                width={slot}
+                height={H - TOP - BOTTOM}
+                fill="transparent"
+                tabIndex={0}
+                role="img"
+                aria-label={`Week of ${w.label}: ${w.found} found, ${w.closed} closed`}
+                className="outline-none focus-visible:stroke-ring"
+                onMouseEnter={show}
+                onFocus={show}
+                onBlur={() => setTip(null)}
+              />
+            </g>
+          )
+        })}
       </svg>
       <Tooltip tip={tip} height={H} />
     </div>

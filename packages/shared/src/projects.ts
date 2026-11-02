@@ -13,7 +13,7 @@ export const projectKeySchema = z
   .toUpperCase()
   .regex(
     /^[A-Z][A-Z0-9]{1,5}$/,
-    "Use 2–6 capital letters or digits, starting with a letter"
+    "Use 2 to 6 capital letters or digits, starting with a letter"
   )
 
 /** A key suggestion from a project name, or "" when none is sensible. */

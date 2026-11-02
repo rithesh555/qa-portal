@@ -97,7 +97,9 @@ test.describe("as a tester", () => {
       status: "in_progress",
     })
     await page.goto("/")
-    const releases = page.getByRole("link", { name: `${project.name} · 7.0` })
+    const releases = page.getByRole("link", {
+      name: `${project.name}, Release 7.0`,
+    })
     await expect(releases).toBeVisible()
     await expect(releases).toHaveAttribute(
       "href",

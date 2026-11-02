@@ -34,7 +34,7 @@ test("E2E-RUN-039 a case edited after the run started can be compared and update
 
   await page.getByRole("button", { name: "Compare" }).click()
   const compare = page.getByRole("dialog", {
-    name: `${project.key}-TC-1: version 1 → 2`,
+    name: `${project.key}-TC-1: version 1 and version 2`,
   })
   const title = compare.getByRole("row", { name: /Title/ })
   await expect(title).toContainText("Run case 1")
@@ -165,7 +165,7 @@ test("E2E-RUN-044 on a phone the case list opens as a sheet @mobile", async ({
   const run = await startRun(project)
   await page.goto(runUrl(project, run.key))
   await page.getByRole("button", { name: "Cases (3 left)" }).click()
-  const sheet = page.getByRole("dialog", { name: "Cases · 3 left" })
+  const sheet = page.getByRole("dialog", { name: "Cases (3 left)" })
   await expect(sheet).toBeVisible()
   await sheet.getByRole("button", { name: /Run case 3/ }).click()
   await expect(sheet).toBeHidden()

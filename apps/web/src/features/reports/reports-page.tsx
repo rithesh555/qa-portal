@@ -340,8 +340,8 @@ function asOfLine(r: Report) {
   const when = exactTime.format(new Date(r.asOf))
   const what = r.release ? `Release ${r.release.name}` : "Runs with no release"
   return r.snapshot
-    ? `${what} · snapshot from ${when}`
-    : `${what} · live, as of ${when}`
+    ? `${what}: snapshot from ${when}`
+    : `${what}: live, as of ${when}`
 }
 
 function ReportSkeleton() {
@@ -444,7 +444,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
         <ChartCard
           id="failing"
           title="Failing cases"
-          description={`Latest result is Failed or Blocked${r.failing.length ? ` · ${noDefect} with no defect linked` : ""}`}
+          description={`Latest result is Failed or Blocked${r.failing.length ? `; ${noDefect} with no defect linked` : ""}`}
           onCsv={
             r.failing.length
               ? csv("failing cases", {
@@ -512,7 +512,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
                   </Link>
                 ) : (
                   <span key="d" className="whitespace-nowrap">
-                    <strong>None</strong> ·{" "}
+                    <strong>None</strong>,{" "}
                     <Link
                       to={`../runs/${f.runKey}?case=${f.runCaseId}`}
                       relative="path"
@@ -534,7 +534,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
           title="Untested Ready cases by priority"
           // Alone in its row without a release, so it takes the whole row.
           className={r.release ? undefined : "xl:col-span-2"}
-          description={`No result yet in these runs · ${untestedTotal} in all`}
+          description={`No result yet in these runs, ${untestedTotal} in all`}
           onCsv={csv("untested cases by priority", {
             columns: ["Priority", "Untested Ready cases"],
             rows: r.untestedByPriority.map((u) => [
@@ -711,8 +711,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
               Days since confirmed or last reopened
               {r.oldestOpen && (
                 <>
-                  {" "}
-                  · oldest:{" "}
+                  ; oldest:{" "}
                   <Link
                     to={`../defects/${r.oldestOpen.key}`}
                     relative="path"
@@ -749,7 +748,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
           title="Defects found and closed, per week"
           description={
             <>
-              Weeks start Monday ·{" "}
+              Weeks start Monday.{" "}
               <strong className="text-foreground">
                 {netOpenText(r.kpis.netOpenThisWeek)}
               </strong>
@@ -789,7 +788,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
       <ChartCard
         id="coverage"
         title="Coverage by suite"
-        description="Ready cases with a result in these runs, each case counted once · least tested first"
+        description="Ready cases with a result in these runs, each case counted once, least tested first"
         onCsv={csv("coverage by suite", {
           columns: ["Suite", "Ready", "Tested", "Pass rate", "Open defects"],
           rows: r.coverage.map((c) => [
@@ -829,8 +828,8 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
                     />
                   </span>
                   <span className="tabular-nums">
-                    {c.tested} ·{" "}
-                    {c.ready ? formatPercent(c.tested / c.ready) : "—"}
+                    {c.tested} (
+                    {c.ready ? formatPercent(c.tested / c.ready) : "—"})
                   </span>
                 </span>,
                 pct(c.passRate),
@@ -849,7 +848,7 @@ function ReportBody({ report: r, csv }: { report: Report; csv: Csv }) {
         <ChartCard
           id="workload"
           title="Workload"
-          description="Untested cases assigned per person in open runs · for balancing work, not ranking · QA Leads only"
+          description="Untested cases assigned per person in open runs, for balancing work, not ranking. QA Leads only."
         >
           {r.workload.length === 0 ? (
             <p className="text-sm text-muted-foreground">
@@ -1062,7 +1061,7 @@ function Kpis({
       <Tile
         label="Open defects"
         value={String(k.openDefects)}
-        delta={`${k.openCritical} Critical · ${k.openMajor} Major`}
+        delta={`${k.openCritical} Critical, ${k.openMajor} Major`}
         help={
           r.release
             ? `found in ${r.release.name}, not closed or rejected`
@@ -1085,15 +1084,15 @@ function Kpis({
         value={ttf.medianDays === null ? "—" : `${ttf.medianDays} d`}
         delta={
           ttf.count
-            ? `90% within ${ttf.p90Days} d · ${ttf.count} fixed`
+            ? `90% within ${ttf.p90Days} d, ${ttf.count} fixed`
             : "Nothing fixed yet"
         }
-        help="Open → Fixed, median"
+        help="Median days from Open to Fixed"
       />
       <Tile
         label="Net open this week"
         value={signed(k.netOpenThisWeek)}
-        delta={`${k.foundThisWeek} found · ${k.closedThisWeek} closed`}
+        delta={`${k.foundThisWeek} found, ${k.closedThisWeek} closed`}
         help={
           k.netOpenThisWeek === 0
             ? "the open pile is steady"

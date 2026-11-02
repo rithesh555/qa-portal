@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/pagination"
 
 /**
- * "Showing 26–50 of 103 users" with previous/next links. A page past the end
+ * "Showing 26 to 50 of 103 users" with previous/next links. A page past the end
  * (e.g. after items were removed, or an old link) moves to the last page. The links carry the
  * current filters (open in a new tab works); a plain click navigates in-app.
  */
@@ -72,7 +72,7 @@ export function ListPagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
       <p aria-live="polite">
-        Showing {first}–{last} of {total} {total === 1 ? noun[0] : noun[1]}
+        Showing {first} to {last} of {total} {total === 1 ? noun[0] : noun[1]}
       </p>
       <Pagination className="mx-0 w-auto">
         <PaginationContent>

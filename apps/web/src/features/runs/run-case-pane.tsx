@@ -512,7 +512,8 @@ export function RunCasePane({
       <div
         ref={pending ? undefined : stickyFooter}
         className={cn(
-          "mt-auto flex flex-col gap-3 rounded-b-xl border-t bg-card p-4 sm:px-6",
+          // bg-inherit: the card's own colour, so it stays opaque when sticky.
+          "mt-auto flex flex-col gap-3 rounded-b-xl border-t bg-inherit p-4 sm:px-6",
           !pending && "sticky bottom-0"
         )}
       >
@@ -608,7 +609,7 @@ export function RunCasePane({
                       <kbd
                         aria-hidden
                         className={cn(
-                          "hidden rounded border px-1 font-mono text-[0.7rem] sm:inline",
+                          "hidden rounded border px-1 font-mono text-2xs sm:inline",
                           on ? "border-current/40" : "text-muted-foreground"
                         )}
                       >
@@ -713,7 +714,7 @@ export function RunCasePane({
                 {nextLabel}
                 <kbd
                   aria-hidden
-                  className="ms-1 hidden font-mono text-[0.7rem] opacity-80 sm:inline"
+                  className="ms-1 hidden font-mono text-2xs opacity-80 sm:inline"
                 >
                   Ctrl+Enter
                 </kbd>

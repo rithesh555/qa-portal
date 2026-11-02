@@ -157,7 +157,7 @@ function CopyRunForm({
     )
   if (source.isError)
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="flex max-w-5xl flex-col gap-6">
         <RunPageHeader crumb="New run" title="Can't copy this run" />
         <Alert variant="destructive">
           <CircleAlertIcon />
@@ -177,7 +177,7 @@ function CopyRunForm({
   const failing = source.data.counts.failed + source.data.counts.blocked
   if (only === "failedOrBlocked" && failing === 0)
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="flex max-w-5xl flex-col gap-6">
         <RunPageHeader crumb="Re-test failures" title="Nothing to re-test" />
         <Alert>
           <AlertDescription>
@@ -257,7 +257,7 @@ function CopyRunFields({
   const nameMissing = !values.name.trim()
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-5xl flex-col gap-6">
       <RunPageHeader crumb={crumb} title={title} note={note} />
       <form
         noValidate
@@ -463,7 +463,7 @@ function NewRunForm() {
                       {...field}
                       id={ids.env}
                       autoComplete="off"
-                      placeholder="For example, Chrome 128 · build 4.2.0-rc1"
+                      placeholder="e.g. Chrome 128 build 4.2.0-rc1"
                       aria-invalid={fieldState.invalid}
                     />
                     <FieldDescription>

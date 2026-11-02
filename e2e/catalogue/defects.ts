@@ -283,7 +283,7 @@ const suites: CatalogueSuite[] = [
         type: "security",
         steps: [
           ["As a tester change Severity", "Saved"],
-          ["Look at Priority", "Not set yet · set by a QA Lead, not editable"],
+          ["Look at Priority", "Not set yet, set by a QA Lead; not editable"],
         ],
       },
       {
@@ -332,7 +332,7 @@ const suites: CatalogueSuite[] = [
           ],
           [
             "As a lead select Confirm (Open)",
-            "Open; the status history reads New › Open",
+            "Open; the status history reads New, then Open",
           ],
         ],
       },
@@ -368,7 +368,7 @@ const suites: CatalogueSuite[] = [
         title: "Close a fixed defect as verified",
         priority: "critical",
         steps: [
-          ["Verified — close…, Close defect", "Closed"],
+          ["Verified, close…, then Close defect", "Closed"],
           ["As a tester", 'No reopen; "Failing again? Log a new defect…"'],
         ],
       },
@@ -377,7 +377,7 @@ const suites: CatalogueSuite[] = [
         title: "Reopening a fixed defect needs a note and counts",
         priority: "high",
         steps: [
-          ["Still failing — reopen… without a note", "Say what still fails"],
+          ["Still failing, reopen… without a note", "Say what still fails"],
           [
             "Add a note, Reopen defect",
             "Reopened; Reopened 1×; the note is in the activity",
@@ -416,7 +416,7 @@ const suites: CatalogueSuite[] = [
         steps: [
           [
             "Unlink the linked result",
-            '"Unlinked <run> › <case>" with Undo, focused',
+            '"Unlinked <case> in <run>" with Undo, focused',
           ],
           ["Undo", "The result is linked again and its Unlink has focus"],
         ],

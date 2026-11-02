@@ -252,7 +252,7 @@ function CasePickerDialog({
                   {c.title}
                   <span className="block text-xs text-muted-foreground">
                     {c.suiteId ? suitePath(suites, c.suiteId) : "No suite"}
-                    {c.status === "draft" && " · Draft"}
+                    {c.status === "draft" && " (Draft)"}
                   </span>
                 </span>
               </label>

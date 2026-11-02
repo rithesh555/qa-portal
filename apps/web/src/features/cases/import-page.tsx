@@ -251,8 +251,8 @@ function RecentImports() {
           >
             <span className="font-medium">Import #{batch.number}</span>
             <span className="min-w-0 truncate text-muted-foreground">
-              {batch.fileName} · {plural(batch.caseCount, "case", "cases")} ·{" "}
-              {batch.createdBy.name} ·{" "}
+              {batch.fileName}, {plural(batch.caseCount, "case", "cases")}, by{" "}
+              {batch.createdBy.name},{" "}
               <time dateTime={batch.createdAt}>
                 {importDate.format(new Date(batch.createdAt))}
               </time>
@@ -453,7 +453,7 @@ export function ImportPage() {
       if (dataRows > MAX_IMPORT_ROWS) {
         throw new SpreadsheetError(
           "size",
-          `That file has ${dataRows.toLocaleString()} test cases. The limit is ${MAX_IMPORT_ROWS.toLocaleString()} per import — split it into smaller files.`
+          `That file has ${dataRows.toLocaleString()} test cases. The limit is ${MAX_IMPORT_ROWS.toLocaleString()} per import. Split it into smaller files.`
         )
       }
       setFileName(file.name)
@@ -654,7 +654,7 @@ export function ImportPage() {
                       Drop a CSV or Excel file here
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      .csv or .xlsx · up to 5 MB and{" "}
+                      .csv or .xlsx, up to 5 MB and{" "}
                       {MAX_IMPORT_ROWS.toLocaleString()} test cases
                     </p>
                     <input
@@ -724,8 +724,8 @@ export function ImportPage() {
                 or{" "}
                 <code className="rounded bg-muted px-1">
                   Checkout / Refunds
-                </code>{" "}
-                — one level deep. Missing suites are created; names that differ
+                </code>
+                : one level deep. Missing suites are created; names that differ
                 only in capitals or spaces count as the same suite.
               </p>
               <p>
@@ -767,8 +767,7 @@ export function ImportPage() {
             <p className="min-w-60 flex-1">
               <span className="font-semibold">{fileName}</span>
               <span className="text-muted-foreground">
-                {" "}
-                · {plural(rows.length, "row", "rows")} ·{" "}
+                : {plural(rows.length, "row", "rows")},{" "}
                 {plural(headers.length, "column", "columns")}
               </span>
             </p>
@@ -830,7 +829,7 @@ export function ImportPage() {
                 {headers.map((header, i) => {
                   const field = mapping[header] ?? null
                   const items = [
-                    { value: SKIP, label: "— Don't import —" },
+                    { value: SKIP, label: "Don't import" },
                     ...IMPORT_FIELDS.map((f) => ({
                       value: f,
                       label:
@@ -841,7 +840,7 @@ export function ImportPage() {
                   ]
                   const note = !field
                     ? /^(id|key|case id)$/i.test(header.trim())
-                      ? "IDs are ignored — every row becomes a new case."
+                      ? "IDs are ignored: every row becomes a new case."
                       : "Not imported."
                     : null
                   return (
@@ -1056,8 +1055,8 @@ export function ImportPage() {
               </AlertTitle>
               <AlertDescription className="flex flex-col gap-2">
                 Nothing is imported until every row is valid. Correct them in
-                your file and upload it again — your column and value choices
-                are kept.
+                your file and upload it again. Your column and value choices are
+                kept.
                 <span className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" onClick={downloadErrors}>
                     Download rows with errors (.csv)
@@ -1292,7 +1291,7 @@ export function ImportPage() {
                 <div className="mt-4 flex max-w-xl flex-col items-center gap-2 border-t pt-4">
                   <p className="text-sm text-muted-foreground">
                     Imported the wrong file? You can archive everything from
-                    this import at once — now or later from the import page.
+                    this import at once, now or later from the import page.
                   </p>
                   <Button
                     variant="outline"

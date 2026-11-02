@@ -72,7 +72,7 @@ test.describe("as a tester", () => {
     await expect(
       fields.getByRole("combobox", { name: "Priority" })
     ).toHaveCount(0)
-    await expect(fields).toContainText("Not set yet · set by a QA Lead")
+    await expect(fields).toContainText("Not set yet, set by a QA Lead")
     await page.reload()
     await expect(
       fields.getByRole("combobox", { name: "Severity" })

@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/composites/page-header"
+import { KeepKeys } from "@/components/keep-keys"
 import { PROJECT_ROLE_LABELS, RELEASE_STATUS_LABELS } from "@qa/shared"
 import {
   ArchiveIcon,
@@ -78,7 +79,7 @@ function CurrentRelease() {
             </div>
             {(current.startDate || current.targetDate) && (
               <p className="text-sm text-muted-foreground">
-                {formatDay(current.startDate) ?? "No start date"} –{" "}
+                {formatDay(current.startDate) ?? "No start date"} to{" "}
                 {formatDay(current.targetDate) ?? "no target date"}
               </p>
             )}
@@ -178,7 +179,7 @@ function RecentActivity() {
               <li key={item.id} className="flex gap-3 py-2.5 text-sm">
                 <span className="flex-1">
                   <span className="font-semibold">{item.actor.name}</span>{" "}
-                  {describeActivity(item)}
+                  <KeepKeys text={describeActivity(item)} />
                 </span>
                 <time
                   dateTime={item.createdAt}
@@ -291,7 +292,7 @@ export function ProjectOverviewPage() {
   const { project, allowed } = useProjectContext()
 
   return (
-    <div className="flex max-w-5xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={project.name}
         media={<ProjectTile projectKey={project.key} size="xl" />}

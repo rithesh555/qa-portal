@@ -113,7 +113,7 @@ const suites: CatalogueSuite[] = [
         steps: [
           [
             "Search for a project's key",
-            'Only its releases; "n of N active releases shown"',
+            'Only its releases; "Showing n of N active releases"',
           ],
         ],
       },
@@ -306,6 +306,18 @@ const suites: CatalogueSuite[] = [
           [
             "Open the print report",
             'Coverage by suite has "Accounts › Sign in" right after Accounts',
+          ],
+        ],
+      },
+      {
+        id: "E2E-RPT-018",
+        title: "The print report stays black on white in dark mode",
+        priority: "medium",
+        type: "usability",
+        steps: [
+          [
+            "With a dark colour scheme, open the print report and print",
+            "The page is white and the title near-black",
           ],
         ],
       },

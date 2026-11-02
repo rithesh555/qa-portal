@@ -24,7 +24,7 @@ test("E2E-DEF-001 log a defect from a failed result, prefilled from the case", a
   )
   await page.getByRole("button", { name: "Log defect…" }).click()
   const d = logDialog(page)
-  await expect(d).toContainText(`${r.runKey} › ${r.caseKey}`)
+  await expect(d).toContainText(`${r.caseKey} in ${r.runKey}`)
   await expect(d).toContainText("failed")
   await expect(d.getByLabel("Title")).toHaveValue(
     `${r.caseTitle}: Card is refused with error 500`
@@ -47,7 +47,7 @@ test("E2E-DEF-001 log a defect from a failed result, prefilled from the case", a
   await expect(page.getByText("from a failed result")).toBeVisible()
   await expect(
     page.getByRole("region", { name: /Linked results \(1\)/ })
-  ).toContainText(`${r.runKey} › ${r.caseKey}`)
+  ).toContainText(`${r.caseKey} in ${r.runKey}`)
 })
 
 test("E2E-DEF-002 a tester logging from a blocked result is told a lead will triage it", async ({

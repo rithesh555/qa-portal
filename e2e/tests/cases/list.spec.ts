@@ -21,7 +21,7 @@ test.describe("read-only list of E2E Baseline", () => {
       page.getByRole("heading", { level: 1, name: "Test cases" })
     ).toBeVisible()
     await expect(page.getByText("30 active cases in 3 suites")).toBeVisible()
-    await expect(page.getByText("Showing 1–25 of 30 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 25 of 30 cases")).toBeVisible()
   })
 
   test("E2E-CASE-002 search by title narrows the list", async ({ page }) => {
@@ -41,7 +41,9 @@ test.describe("read-only list of E2E Baseline", () => {
     await page.goto(CASES)
     await choose(page, page.getByRole("combobox", { name: "Status" }), "Draft")
     await expect(
-      page.getByText(`Showing 1–${BASE.draftCases} of ${BASE.draftCases} cases`)
+      page.getByText(
+        `Showing 1 to ${BASE.draftCases} of ${BASE.draftCases} cases`
+      )
     ).toBeVisible()
     await expect(
       caseList(page).getByRole("table").getByText("Ready", { exact: true })
@@ -55,20 +57,20 @@ test.describe("read-only list of E2E Baseline", () => {
       page.getByRole("combobox", { name: "Priority" }),
       "Critical"
     )
-    await expect(page.getByText("Showing 1–8 of 8 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 8 of 8 cases")).toBeVisible()
     await expect(page).toHaveURL(/priority=critical/)
   })
 
   test("E2E-CASE-006 filter by type", async ({ page }) => {
     await page.goto(CASES)
     await choose(page, page.getByRole("combobox", { name: "Type" }), "Security")
-    await expect(page.getByText("Showing 1–6 of 6 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 6 of 6 cases")).toBeVisible()
   })
 
   test("E2E-CASE-007 filter by label", async ({ page }) => {
     await page.goto(CASES)
     await choose(page, page.getByRole("combobox", { name: "Label" }), "smoke")
-    await expect(page.getByText("Showing 1–10 of 10 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 10 of 10 cases")).toBeVisible()
   })
 
   test("E2E-CASE-008 the Archived status shows archived cases only", async ({
@@ -110,15 +112,15 @@ test.describe("read-only list of E2E Baseline", () => {
       page.getByText("No test cases match these filters")
     ).toBeVisible()
     await page.getByRole("button", { name: "Clear filters" }).click()
-    await expect(page.getByText("Showing 1–25 of 30 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 25 of 30 cases")).toBeVisible()
   })
 
   test("E2E-CASE-011 pagination moves through the list", async ({ page }) => {
     await page.goto(`${CASES}?pageSize=10`)
-    await expect(page.getByText("Showing 1–10 of 30 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 10 of 30 cases")).toBeVisible()
     await expect(page.getByText("Page 1 of 3")).toBeVisible()
     await page.getByRole("link", { name: "Go to next page" }).click()
-    await expect(page.getByText("Showing 11–20 of 30 cases")).toBeVisible()
+    await expect(page.getByText("Showing 11 to 20 of 30 cases")).toBeVisible()
     await expect(page.getByText("Page 2 of 3")).toBeVisible()
     await expect(page).toHaveURL(/page=2/)
   })
@@ -128,13 +130,13 @@ test.describe("read-only list of E2E Baseline", () => {
   }) => {
     await page.goto(CASES)
     await page.getByLabel("Search by ID or title").fill("case 0")
-    await expect(page.getByText("Showing 1–9 of 9 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 9 of 9 cases")).toBeVisible()
     await choose(page, page.getByRole("combobox", { name: "Priority" }), "High")
-    await expect(page.getByText("Showing 1–2 of 2 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 2 of 2 cases")).toBeVisible()
     await expect(page).toHaveURL(/priority=high/)
     await expect(page).toHaveURL(/q=case(\+|%20)0/)
     await page.reload()
-    await expect(page.getByText("Showing 1–2 of 2 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 2 of 2 cases")).toBeVisible()
     await expect(page.getByLabel("Search by ID or title")).toHaveValue("case 0")
     await expect(page.getByRole("combobox", { name: "Priority" })).toHaveText(
       /High/
@@ -240,7 +242,7 @@ test.describe("read-only list of E2E Baseline", () => {
       page.getByRole("combobox", { name: "Suite" }),
       BASE.suites.checkout
     )
-    await expect(page.getByText("Showing 1–8 of 8 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 8 of 8 cases")).toBeVisible()
   })
 })
 

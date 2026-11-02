@@ -118,7 +118,7 @@ function DefectRow({
         >
           {defect.title}
         </Link>
-        <p className="text-xs text-muted-foreground">{sub.join(" · ")}</p>
+        <p className="text-xs text-muted-foreground">{sub.join(", ")}</p>
         {/* On narrow screens the side columns fold in under the title. */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 md:hidden">
           <DefectStatusBadge status={defect.status} />

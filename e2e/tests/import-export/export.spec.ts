@@ -23,7 +23,7 @@ test.describe("as a tester", () => {
   test("E2E-EXP-001 export the filtered list as Excel", async ({ page }) => {
     await page.goto(CASES)
     await choose(page, page.getByRole("combobox", { name: "Label" }), "smoke")
-    await expect(page.getByText("Showing 1–10 of 10 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 10 of 10 cases")).toBeVisible()
     const download = await exportAs(page, "Excel (.xlsx)")
     expect(download.suggestedFilename()).toMatch(/^BASE-test-cases-.*\.xlsx$/)
     const rows = await rowsOfXlsx(download)
@@ -53,7 +53,7 @@ test.describe("as a tester", () => {
       page.getByRole("combobox", { name: "Priority" }),
       "Critical"
     )
-    await expect(page.getByText("Showing 1–8 of 8 cases")).toBeVisible()
+    await expect(page.getByText("Showing 1 to 8 of 8 cases")).toBeVisible()
     await page.getByRole("button", { name: "Export" }).click()
     await expect(
       page.getByRole("dialog", { name: "Export test cases" })
@@ -94,7 +94,7 @@ test.describe("as a lead", () => {
     await page.goto(`/projects/${project.key}/cases/import`)
     await page.locator('input[type="file"]').setInputFiles(file)
     await expect(
-      page.getByText("IDs are ignored — every row becomes a new case.")
+      page.getByText("IDs are ignored: every row becomes a new case.")
     ).toBeVisible()
     await page.getByRole("button", { name: "Check rows" }).click()
     await page.getByRole("button", { name: "Import 3 test cases" }).click()

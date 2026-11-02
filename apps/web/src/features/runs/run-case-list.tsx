@@ -195,9 +195,9 @@ export function RunCaseList({
                             <span className="line-clamp-2">{c.title}</span>
                             <span className="font-mono text-xs text-muted-foreground">
                               {c.caseKey}
-                            </span>{" "}
+                            </span>
                             <span className="sr-only">
-                              — {RUN_CASE_STATUS_LABELS[c.status]},{" "}
+                              , {RUN_CASE_STATUS_LABELS[c.status]},{" "}
                               {c.assignee
                                 ? `assigned to ${c.assignee.name}`
                                 : "unassigned"}
@@ -207,7 +207,7 @@ export function RunCaseList({
                             <span
                               aria-hidden
                               title={c.assignee.name}
-                              className="grid size-6 shrink-0 place-items-center rounded-full bg-accent text-[0.65rem] font-semibold text-accent-foreground ring-1 ring-border"
+                              className="grid size-6 shrink-0 place-items-center rounded-full bg-accent text-2xs font-semibold text-accent-foreground ring-1 ring-border"
                             >
                               {initials(c.assignee.name)}
                             </span>

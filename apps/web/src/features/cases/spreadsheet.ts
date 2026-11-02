@@ -92,7 +92,7 @@ export async function readSpreadsheet(file: File): Promise<SheetTable[]> {
   if (usable.length === 0) {
     throw new SpreadsheetError(
       "empty",
-      "No test cases found — the file needs a header row and at least one row under it."
+      "No test cases found. The file needs a header row and at least one row under it."
     )
   }
   return usable

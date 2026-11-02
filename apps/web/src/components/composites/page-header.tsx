@@ -21,6 +21,7 @@ export function PageHeader({
   before,
   media,
   headingRef,
+  headingId,
   children,
   className,
 }: {
@@ -32,6 +33,8 @@ export function PageHeader({
   before?: ReactNode
   media?: ReactNode
   headingRef?: Ref<HTMLHeadingElement>
+  /** Lets a surrounding landmark name itself after the title. */
+  headingId?: string
   children?: ReactNode
   className?: string
 }) {
@@ -43,6 +46,7 @@ export function PageHeader({
           {media}
           <div className="flex max-w-2xl min-w-0 flex-col gap-1.5">
             <h1
+              id={headingId}
               ref={headingRef}
               tabIndex={headingRef ? -1 : undefined}
               className="text-3xl font-semibold tracking-tight break-words outline-none"

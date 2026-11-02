@@ -194,7 +194,9 @@ test("E2E-CASE-027 editing a case saves a new version and records it", async ({
   await expect(page.getByText(`${c.key} saved`)).toBeVisible()
   await expect(page.getByText("Version 2")).toBeVisible()
   await expect(page).toHaveURL(`/projects/${project.key}/cases/${c.key}`)
-  await expect(page.getByText("version 2", { exact: true })).toBeVisible()
+  await expect(
+    page.getByRole("group", { name: `${c.key} details` })
+  ).toContainText("Version: 2")
   await page.getByRole("tab", { name: "History" }).click()
   await expect(page.getByRole("tabpanel", { name: "History" })).toContainText(
     `${displayName("tester", slot)} renamed it to “New title”`

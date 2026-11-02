@@ -72,7 +72,9 @@ test.describe("on a phone", () => {
     await page.goto("/")
     const release = page
       .getByRole("row")
-      .filter({ has: page.getByRole("link", { name: /E2E Baseline ·/ }) })
+      .filter({
+        has: page.getByRole("link", { name: /E2E Baseline, Release / }),
+      })
       .first()
     await expect(
       release.getByText(/Pass rate/).filter({ visible: true })

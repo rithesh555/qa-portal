@@ -80,7 +80,7 @@ describe("UsersPage", () => {
     expect(await screen.findByText("Bob Tester")).toBeInTheDocument()
     const table = screen.getByRole("table")
     expect(within(table).getByText("(you)")).toBeInTheDocument()
-    expect(screen.getByText("Showing 1–2 of 2 users")).toBeInTheDocument()
+    expect(screen.getByText("Showing 1 to 2 of 2 users")).toBeInTheDocument()
     expect(fetchMock.mock.calls[0]![0]).toContain("/api/users?")
     expect(fetchMock.mock.calls[0]![0]).toContain("status=active")
   })

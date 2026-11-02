@@ -55,7 +55,7 @@ describe("three-way conflict handling", () => {
       {
         field: "Step 1",
         theirs: "Open checkout",
-        mine: "Open checkout → Card listed",
+        mine: "Open checkout. Expected: Card listed",
         both: false,
       },
     ])

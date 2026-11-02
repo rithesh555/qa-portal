@@ -367,8 +367,7 @@ export function DefectFields({ defect }: { defect: Defect }) {
                 : "Not set yet"}
               {canEdit && (
                 <span className="text-xs text-muted-foreground">
-                  {" "}
-                  · set by a QA Lead
+                  , set by a QA Lead
                 </span>
               )}
             </span>
@@ -397,7 +396,9 @@ export function DefectFields({ defect }: { defect: Defect }) {
               onSave={(developer) => void save({ developer })}
             />
           ) : (
-            defect.developer || <span className="text-muted-foreground">—</span>
+            defect.developer || (
+              <span className="text-muted-foreground">Not set</span>
+            )
           )}
         </Row>
         <Row label="Tracker link">
@@ -453,22 +454,22 @@ export function DefectFields({ defect }: { defect: Defect }) {
             <TextField
               id={ids.environment}
               value={defect.environment}
-              placeholder="e.g. Safari 18 · build 4.2.0-rc1"
+              placeholder="e.g. Safari 18 build 4.2"
               onSave={(environment) => void save({ environment })}
             />
           ) : (
             defect.environment || (
-              <span className="text-muted-foreground">—</span>
+              <span className="text-muted-foreground">Not set</span>
             )
           )}
         </Row>
         <Row label="Found in">
-          {found.join(" · ") || (
+          {found.join(", ") || (
             <span className="text-muted-foreground">No release</span>
           )}
           {defect.foundInRun && (
             <>
-              {" · "}
+              {", "}
               <Link
                 to={projectPath(project.key, `runs/${defect.foundInRun.key}`)}
                 className="text-primary underline-offset-4 hover:underline"
@@ -499,7 +500,7 @@ export function DefectFields({ defect }: { defect: Defect }) {
           {defect.fixedAt ? (
             [defect.fixedInRelease?.name, defect.fixedInBuild]
               .filter(Boolean)
-              .join(" · ") || "—"
+              .join(", ") || "Not given"
           ) : (
             <span className="text-muted-foreground">Set when marked fixed</span>
           )}

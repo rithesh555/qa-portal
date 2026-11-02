@@ -40,7 +40,7 @@ export function CaseLane({
       aria-label={label}
       tabIndex={0}
       className={cn(
-        "max-h-40 overflow-y-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "max-h-44 overflow-y-auto rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         className
       )}
     >
@@ -58,7 +58,7 @@ export function CaseLane({
                 aria-label={`${c.key}, ${RUN_CASE_STATUS_LABELS[c.status]}`}
                 onClick={() => onPick(c.id)}
                 className={cn(
-                  "h-7 rounded-full border px-3 font-mono text-xs transition-colors",
+                  "h-9 min-w-11 rounded-full border px-3 font-mono text-xs transition-colors",
                   recorded
                     ? cn(
                         STATUS_FILL[c.status],

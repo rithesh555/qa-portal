@@ -63,7 +63,7 @@ export function ExportDialog({
           <DialogTitle>Export test cases</DialogTitle>
           <DialogDescription>
             Exports the {count} {count === 1 ? "case" : "cases"} that match your
-            current suite, search and filters — every page, not just this one.
+            current suite, search and filters: every page, not just this one.
           </DialogDescription>
         </DialogHeader>
         <FieldSet>
@@ -90,8 +90,8 @@ export function ExportDialog({
         </FieldSet>
         <p className="rounded-lg bg-muted px-3 py-2 text-sm">
           The file uses the import template&apos;s columns plus an ID column.{" "}
-          <span className="font-semibold">Importing it creates new cases</span>{" "}
-          — it doesn&apos;t update the existing ones.
+          <span className="font-semibold">Importing it creates new cases</span>.
+          It doesn&apos;t update the existing ones.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

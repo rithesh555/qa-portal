@@ -48,7 +48,7 @@ test.describe("at phone width", () => {
       page,
     }) => {
       await headerFits(page, project, `${BASE.name} details`)
-      await headerFits(page, `${project}/members`, "Members details")
+      await headerFits(page, `${project}/members`)
       await headerFits(page, `${project}/releases`)
     })
 

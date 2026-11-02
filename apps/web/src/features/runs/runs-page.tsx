@@ -98,36 +98,36 @@ function RunRow({ run }: { run: RunSummary }) {
         >
           {run.name}
         </Link>
-        <p className="text-xs text-muted-foreground">{details.join(" · ")}</p>
+        <p className="text-xs text-muted-foreground">{details.join(", ")}</p>
         {readyToClose && (
           <p className="mt-1 text-xs font-medium text-status-pass-ink">
-            All tested · ready to close
+            All tested, ready to close
           </p>
         )}
         {run.state === "closed" && run.closedAt && (
           <p className="mt-1 text-xs text-muted-foreground">
-            Closed{run.closedBy ? ` by ${run.closedBy.name}` : ""} ·{" "}
+            Closed{run.closedBy ? ` by ${run.closedBy.name}` : ""},{" "}
             {timeAgo(run.closedAt)}
             {run.counts.untested > 0 &&
-              ` · ${run.counts.untested} left untested`}
+              `, ${run.counts.untested} left untested`}
           </p>
         )}
         {/* On a phone the other columns fold in here (F15). */}
         <div className="mt-2 flex flex-col gap-1.5 md:hidden">
           <ProgressBar counts={run.counts} />
           <p className="text-xs text-muted-foreground">
-            <span className="font-mono">{run.key}</span> ·{" "}
-            {formatPercent(completion(run.counts))} complete ·{" "}
-            {run.counts.failed} failed · pass rate{" "}
-            {formatPercent(passRate(run.counts))} · {timeAgo(run.updatedAt)}
+            <span className="font-mono">{run.key}</span>,{" "}
+            {formatPercent(completion(run.counts))} complete,{" "}
+            {run.counts.failed} failed, pass rate{" "}
+            {formatPercent(passRate(run.counts))}, {timeAgo(run.updatedAt)}
           </p>
         </div>
       </TableCell>
       <TableCell className="hidden min-w-48 align-top md:table-cell">
         <ProgressBar counts={run.counts} />
         <p className="mt-1.5 text-xs text-muted-foreground">
-          {formatPercent(completion(run.counts))} complete · {run.counts.failed}{" "}
-          failed · {run.counts.blocked} blocked
+          {formatPercent(completion(run.counts))} complete, {run.counts.failed}{" "}
+          failed, {run.counts.blocked} blocked
         </p>
       </TableCell>
       <TableCell className="hidden align-top font-medium tabular-nums md:table-cell">

@@ -274,7 +274,7 @@ describe("ReportsPage", () => {
     )
     // Tiles: deltas against the previous release.
     expect(screen.getByText("▲ 3 points vs 4.1")).toBeInTheDocument()
-    expect(screen.getByText("90% within 6 d · 4 fixed")).toBeInTheDocument()
+    expect(screen.getByText("90% within 6 d, 4 fixed")).toBeInTheDocument()
     // Viewers and testers don't see the per-person workload.
     expect(
       screen.queryByRole("heading", { name: "Workload" })
@@ -291,7 +291,7 @@ describe("ReportsPage", () => {
     )
     expect(
       screen.getByText(
-        "Latest result is Failed or Blocked · 1 with no defect linked"
+        "Latest result is Failed or Blocked; 1 with no defect linked"
       )
     ).toBeInTheDocument()
   })
@@ -492,13 +492,13 @@ describe("HomePage", () => {
       screen.queryByRole("tab", { name: /To triage/ })
     ).not.toBeInTheDocument()
     expect(screen.getByText("Runs ready to close")).toBeInTheDocument()
-    const releases = screen.getByRole("link", { name: "Payments · 4.2" })
+    const releases = screen.getByRole("link", { name: "Payments, Release 4.2" })
     expect(releases).toHaveAttribute(
       "href",
       `/projects/PAY/reports?release=${R42}`
     )
     // Its column, and the copy folded under the name for phones.
-    expect(screen.getAllByText("Not ready · 3 checks fail")).toHaveLength(2)
+    expect(screen.getAllByText("Not ready: 3 checks fail")).toHaveLength(2)
   })
 
   it("links to All releases only for people who oversee several projects (F13)", async () => {
@@ -583,7 +583,11 @@ describe("ReleasesOverviewPage", () => {
     const names = within(table)
       .getAllByRole("link")
       .map((l) => l.textContent)
-    expect(names).toEqual(["Payments · 4.2", "Mobile · 3.0", "Checkout · 812"])
+    expect(names).toEqual([
+      "Payments, Release 4.2",
+      "Mobile, Release 3.0",
+      "Checkout, Release 812",
+    ])
     await userEvent.click(
       screen.getByRole("button", { name: "Not ready only" })
     )
@@ -591,9 +595,9 @@ describe("ReleasesOverviewPage", () => {
       within(screen.getByRole("table"))
         .getAllByRole("link")
         .map((l) => l.textContent)
-    ).toEqual(["Payments · 4.2"])
+    ).toEqual(["Payments, Release 4.2"])
     expect(
-      screen.getByText("1 of 3 active releases shown.")
+      screen.getByText("Showing 1 of 3 active releases.")
     ).toBeInTheDocument()
   })
 })
@@ -651,8 +655,8 @@ describe("report helpers", () => {
   it("says how far off a target date is", () => {
     const now = new Date("2026-10-19T09:00:00Z")
     expect(daysUntil("2026-10-28", now)).toBe(9)
-    expect(targetText("2026-10-20", now)).toMatch(/· tomorrow$/)
-    expect(targetText("2026-10-17", now)).toMatch(/· 2 days late$/)
+    expect(targetText("2026-10-20", now)).toMatch(/, tomorrow$/)
+    expect(targetText("2026-10-17", now)).toMatch(/, 2 days late$/)
     expect(targetText(null, now)).toBe("No target date")
   })
 })

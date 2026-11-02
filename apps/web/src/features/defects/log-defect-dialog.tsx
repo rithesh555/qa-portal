@@ -174,11 +174,8 @@ function LogForm({
       <DialogHeader className="border-b pb-4">
         <DialogTitle>Log a defect for this result</DialogTitle>
         <DialogDescription>
-          From{" "}
-          <span className="font-mono">
-            {run.key} › {item.caseKey}
-          </span>
-          ,{" "}
+          From <span className="font-mono">{item.caseKey}</span> in{" "}
+          <span className="font-mono">{run.key}</span>,{" "}
           {result?.status === "blocked"
             ? "blocked"
             : result?.failedStep
@@ -218,9 +215,9 @@ function LogForm({
                     </span>
                     <span className="font-medium">{d.title}</span>
                     <span className="block text-xs text-muted-foreground">
-                      {DEFECT_STATUS_LABELS[d.status]} ·{" "}
+                      {DEFECT_STATUS_LABELS[d.status]},{" "}
                       {d.onCase ? "on this case" : "similar title"}
-                      {d.assignee ? ` · ${d.assignee.name}` : ""}
+                      {d.assignee ? `, ${d.assignee.name}` : ""}
                     </span>
                     <span className="block font-medium">
                       {linkAction(d, lead).label}
@@ -282,7 +279,7 @@ function LogForm({
             errors={errors}
             autoFocusTitle={refs.length === 0}
             stepsNote={`Copied from the case${result?.failedStep ? ` up to step ${result.failedStep}` : ""}, as run (version ${detail.revision}).`}
-            foundIn={`Found in ${run.release ? `release ${run.release.name} · ` : ""}${run.key}`}
+            foundIn={`Found in ${run.release ? `release ${run.release.name}, ` : ""}${run.key}`}
             environmentNote={
               run.environment
                 ? `From the run (“${run.environment}”): keep the one you saw it on.`

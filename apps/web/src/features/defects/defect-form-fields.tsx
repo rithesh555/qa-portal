@@ -219,7 +219,7 @@ export function DefectFormFields({
       >
         {SEVERITIES.map(
           (s) => `${SEVERITY_LABELS[s]}: ${SEVERITY_HELP[s].toLowerCase()}`
-        ).join(" · ")}
+        ).join("; ")}
         . A QA Lead sets the priority at triage.
       </p>
       <Field>
@@ -283,7 +283,7 @@ export function DefectFormFields({
         <Input
           id={f("env")}
           maxLength={200}
-          placeholder="e.g. Safari 18 · build 4.2.0-rc1"
+          placeholder="e.g. Safari 18 build 4.2"
           value={draft.environment}
           onChange={(e) => set({ environment: e.target.value })}
         />

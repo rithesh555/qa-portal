@@ -33,7 +33,7 @@ export function printCoverageRows(coverage: Report["coverage"]): string[][] {
     return [
       c.depth === 0 ? c.suite : `${parent} › ${c.suite}`,
       String(c.ready),
-      `${c.tested} · ${c.ready ? formatPercent(c.tested / c.ready) : "—"}`,
+      `${c.tested} (${c.ready ? formatPercent(c.tested / c.ready) : "—"})`,
       pct(c.passRate),
       String(c.openDefects),
     ]
@@ -59,7 +59,7 @@ export function PrintReportPage() {
   useEffect(() => {
     if (!r || !p) return
     const before = document.title
-    document.title = `Release report — ${p.name} ${r.release?.name ?? "no release"}`
+    document.title = `Release report: ${p.name}, ${r.release ? `Release ${r.release.name}` : "no release"}`
     // Leaving the print view gives the tab its usual title back.
     return () => {
       document.title = before
@@ -111,7 +111,7 @@ export function PrintReportPage() {
   const lead = p.leads.map((l) => l.name).join(", ")
 
   return (
-    <div className="min-h-svh bg-muted/40 py-6 print:bg-white print:py-0">
+    <div className="min-h-svh bg-muted/40 py-6 print:bg-print-paper print:py-0">
       <div className="mx-auto mb-4 flex max-w-[210mm] flex-wrap items-center justify-between gap-2 px-4 print:hidden">
         <ButtonLink variant="ghost" to={back}>
           <ArrowLeftIcon data-icon="inline-start" />
@@ -122,17 +122,14 @@ export function PrintReportPage() {
           Print or save as PDF
         </Button>
       </div>
-      <main className="print-page mx-auto flex max-w-[210mm] flex-col gap-4 bg-white p-[14mm] text-[12px] leading-snug text-[#1d232c] shadow-sm print:max-w-none print:p-0 print:shadow-none">
-        <header className="flex items-start justify-between gap-4 border-b-2 border-[#1d232c] pb-3">
+      <main className="print-page mx-auto flex max-w-[210mm] flex-col gap-4 bg-print-paper p-4 text-[12px] leading-snug text-print-ink shadow-sm sm:p-[14mm] print:max-w-none print:p-0 print:shadow-none">
+        <header className="flex flex-col gap-2 border-b-2 border-print-ink pb-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 print:flex-row print:justify-between">
           <div>
-            <div className="text-[10px] font-semibold tracking-wide text-[#5a6270] uppercase">
-              Release report
-            </div>
-            <h1 className="mt-0.5 text-[22px] font-semibold">
-              {p.name} ·{" "}
+            <h1 className="text-[22px] font-semibold">
+              Release report: {p.name},{" "}
               {r.release ? `Release ${r.release.name}` : "No release"}
             </h1>
-            <div className="text-[#5a6270]">
+            <div className="text-print-muted">
               {[
                 r.release?.targetDate
                   ? `Target ${formatDay(r.release.targetDate)}`
@@ -140,16 +137,16 @@ export function PrintReportPage() {
                 lead ? `QA Lead: ${lead}` : null,
               ]
                 .filter(Boolean)
-                .join(" · ")}
+                .join(", ")}
             </div>
           </div>
-          <div className="text-right text-[#5a6270]">
+          <div className="text-print-muted sm:text-right print:text-right">
             <div>
               {r.snapshot
                 ? "Snapshot taken when released"
                 : "Live numbers as of"}
             </div>
-            <div className="font-semibold text-[#1d232c]">
+            <div className="font-semibold text-print-ink">
               {exactTime.format(new Date(r.asOf))}
             </div>
             {me && <div>Printed by {me.name}</div>}
@@ -161,27 +158,27 @@ export function PrintReportPage() {
             <h2 id="p-ready" className="mb-1.5 text-[15px] font-semibold">
               {readinessTitle(r.checks)}
             </h2>
-            <span className="text-[10px] font-semibold tracking-wide text-[#5a6270] uppercase">
+            <span className="text-[11px] font-semibold text-print-muted">
               Exit checks
             </span>
           </div>
           {r.checks.map((c) => (
             <div
               key={c.id}
-              className="grid grid-cols-[18px_minmax(0,1fr)_auto] items-start gap-2 border-b border-[#e1e4e9] py-1.5"
+              className="grid grid-cols-[18px_minmax(0,1fr)_auto] items-start gap-2 border-b border-print-rule py-1.5"
             >
               <span
                 aria-hidden
                 className={
                   c.ok === false
-                    ? "grid size-4 place-items-center rounded-full bg-[#1d232c] text-[10px] font-bold text-white"
-                    : "grid size-4 place-items-center rounded-full border border-[#1d232c] text-[10px] font-bold"
+                    ? "grid size-4 place-items-center rounded-full bg-print-ink text-[10px] font-bold text-print-paper"
+                    : "grid size-4 place-items-center rounded-full border border-print-ink text-[10px] font-bold"
                 }
               >
                 {c.ok === false ? "✕" : c.ok ? "✓" : "?"}
               </span>
               <span>
-                <strong>{c.label}</strong> — {c.detail}
+                <strong>{c.label}</strong>: {c.detail}
               </span>
               <span>
                 {c.ok === false ? "Fails" : c.ok ? "Passes" : "Not yet"}
@@ -213,7 +210,7 @@ export function PrintReportPage() {
             {
               label: "Open defects",
               n: String(k.openDefects),
-              sub: `${k.openCritical} Critical · ${k.openMajor} Major`,
+              sub: `${k.openCritical} Critical, ${k.openMajor} Major`,
             },
             {
               label: "Escaped to production",
@@ -230,7 +227,7 @@ export function PrintReportPage() {
                   ? "—"
                   : `${k.timeToFix.medianDays} d`,
               sub: k.timeToFix.count
-                ? `median · 90% within ${k.timeToFix.p90Days} d · ${k.timeToFix.count} fixed`
+                ? `median, 90% within ${k.timeToFix.p90Days} d, ${k.timeToFix.count} fixed`
                 : "nothing fixed yet",
             },
             {
@@ -239,20 +236,20 @@ export function PrintReportPage() {
                 k.netOpenThisWeek > 0
                   ? `+${k.netOpenThisWeek}`
                   : String(k.netOpenThisWeek),
-              sub: `${k.foundThisWeek} found · ${k.closedThisWeek} closed`,
+              sub: `${k.foundThisWeek} found, ${k.closedThisWeek} closed`,
             },
           ].map((t) => (
             <div
               key={t.label}
-              className="rounded-md border border-[#c9ced6] px-2.5 py-2"
+              className="rounded-md border border-print-line px-2.5 py-2"
             >
-              <div className="text-[10px] font-semibold tracking-wide text-[#5a6270] uppercase">
+              <div className="text-[11px] font-semibold text-print-muted">
                 {t.label}
               </div>
               <div className="text-[20px] leading-tight font-semibold">
                 {t.n}
               </div>
-              <div className="text-[#5a6270]">{t.sub}</div>
+              <div className="text-print-muted">{t.sub}</div>
             </div>
           ))}
         </section>
@@ -262,6 +259,7 @@ export function PrintReportPage() {
           empty="No open Critical or Major defects."
           head={["ID", "Defect", "Severity", "Status", "Open for", "Assignee"]}
           numeric={[4]}
+          idFirst
           rows={r.blocking
             .slice(0, 8)
             .map((d) => [
@@ -287,22 +285,23 @@ export function PrintReportPage() {
         <PrintTable
           title="Failing cases without a defect"
           empty="Every failing case has a defect."
+          idFirst
           rows={noDefect
             .slice(0, 5)
             .map((f) => [
               f.caseKey,
               f.title,
-              `${RUN_CASE_STATUS_LABELS[f.status]}${f.failedStep ? ` at step ${f.failedStep}` : ""} · ${f.runKey}`,
+              `${RUN_CASE_STATUS_LABELS[f.status]}${f.failedStep ? ` at step ${f.failedStep}` : ""} in ${f.runKey}`,
             ])}
           more={noDefect.length - 5}
         />
 
-        <footer className="mt-auto flex justify-between gap-4 border-t border-[#c9ced6] pt-2 text-[#5a6270]">
+        <footer className="mt-auto flex justify-between gap-4 border-t border-print-line pt-2 text-print-muted">
           <span>
             Pass rate and coverage use each Ready case&apos;s latest result in
             these runs, counted once. {netOpenText(k.netOpenThisWeek)}.
           </span>
-          <span className="whitespace-nowrap">QA Portal · page 1 of 1</span>
+          <span className="whitespace-nowrap">QA Portal, page 1 of 1</span>
         </footer>
       </main>
     </div>
@@ -314,6 +313,7 @@ function PrintTable({
   head,
   rows,
   numeric = [],
+  idFirst = false,
   empty,
   more,
 }: {
@@ -321,6 +321,8 @@ function PrintTable({
   head?: string[]
   rows: string[][]
   numeric?: number[]
+  /** The first column holds IDs (set in mono). */
+  idFirst?: boolean
   empty: string
   more: number
 }) {
@@ -330,7 +332,7 @@ function PrintTable({
     <section>
       <h2 className="mb-1.5 text-[13px] font-semibold">{title}</h2>
       {rows.length === 0 ? (
-        <p className="text-[#5a6270]">{empty}</p>
+        <p className="text-print-muted">{empty}</p>
       ) : (
         <table className="w-full border-collapse">
           {head && (
@@ -340,7 +342,7 @@ function PrintTable({
                   <th
                     key={h}
                     scope="col"
-                    className={`border-b border-[#1d232c] px-1.5 py-1 text-[10px] font-semibold text-[#5a6270] ${align(i)}`}
+                    className={`border-b border-print-ink px-1.5 py-1 text-[10px] font-semibold text-print-muted ${align(i)}`}
                   >
                     {h}
                   </th>
@@ -354,7 +356,7 @@ function PrintTable({
                 {r.map((c, i) => (
                   <td
                     key={i}
-                    className={`border-b border-[#c9ced6] px-1.5 py-1 align-top tabular-nums ${align(i)} ${i === 0 ? "font-mono text-[11px] whitespace-nowrap" : ""}`}
+                    className={`border-b border-print-line px-1.5 py-1 align-top tabular-nums ${align(i)} ${i === 0 && idFirst ? "font-mono text-[11px] whitespace-nowrap" : ""}`}
                   >
                     {c}
                   </td>
@@ -365,7 +367,7 @@ function PrintTable({
         </table>
       )}
       {more > 0 && (
-        <p className="mt-1 text-[#5a6270]">…and {more} more in the portal.</p>
+        <p className="mt-1 text-print-muted">…and {more} more in the portal.</p>
       )}
     </section>
   )

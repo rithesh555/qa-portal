@@ -299,7 +299,7 @@ export function ReleasesPage() {
   const items = releases.data?.items
 
   return (
-    <div className="flex max-w-5xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Releases"
         description="Test runs and reports are grouped by release."

@@ -43,8 +43,8 @@ const ACTION_LABEL: Record<string, string> = {
   "open>in_progress": "Start work",
   "open>rejected": "Reject…",
   "in_progress>fixed": "Mark fixed…",
-  "fixed>closed": "Verified — close…",
-  "fixed>reopened": "Still failing — reopen…",
+  "fixed>closed": "Verified, close…",
+  "fixed>reopened": "Still failing, reopen…",
   "reopened>in_progress": "Start work",
   "closed>reopened": "Reopen…",
   "rejected>reopened": "Reopen…",
@@ -346,7 +346,7 @@ function TransitionForm({
           {move.to === "rejected"
             ? "Reject defect"
             : move.to === "fixed"
-              ? "Mark fixed – awaiting retest"
+              ? "Mark fixed, awaiting retest"
               : move.to === "closed"
                 ? "Close defect"
                 : "Reopen defect"}

@@ -142,7 +142,7 @@ function NewProjectForm({ onDone }: { onDone: () => void }) {
                 }
               />
               <FieldDescription>
-                2–6 capital letters or digits, starting with a letter. It
+                2 to 6 capital letters or digits, starting with a letter. It
                 appears in every ID, like{" "}
                 <span className="font-mono text-foreground">
                   {field.value || "PAY"}-TC-12

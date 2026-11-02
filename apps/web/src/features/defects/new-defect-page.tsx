@@ -110,7 +110,7 @@ export function NewDefectPage() {
   ]
 
   return (
-    <div className="flex max-w-4xl flex-col gap-5">
+    <div className="flex max-w-5xl flex-col gap-5">
       <PageHeader
         title="New defect"
         before={

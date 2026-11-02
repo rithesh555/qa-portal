@@ -16,9 +16,9 @@ export function Logo({
     <svg
       viewBox="0 0 48 48"
       className={cn("size-8 shrink-0", className)}
-      {...(label
-        ? { role: "img", "aria-label": label }
-        : { "aria-hidden": true })}
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
     >
       <rect width="48" height="48" rx="14" className="fill-foreground" />
       <circle

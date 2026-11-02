@@ -1,4 +1,5 @@
 import { CASE_TYPE_LABELS, type TestCase } from "@qa/shared"
+import { PageHeader } from "@/components/composites/page-header"
 import {
   ArchiveIcon,
   ArchiveRestoreIcon,
@@ -269,7 +270,6 @@ export function CaseDetails({
   }
 
   const testCase = query.data
-  const Heading = headingLevel === 1 ? "h1" : "h2"
   const canEdit = allowed("cases:edit") && !testCase.archived
   const canArchive = allowed("cases:archive")
   const fullPage = casePagePath(project.key, testCase.key)
@@ -311,6 +311,174 @@ export function CaseDetails({
       })
     }
   }
+
+  const suite = suitePath(suites.data?.items, testCase.suiteId)
+  const details = (
+    <>
+      <dt className="text-muted-foreground">Labels</dt>
+      <dd className="flex flex-wrap gap-1">
+        {testCase.labels.length ? (
+          testCase.labels.map((l) => <LabelChip key={l} label={l} />)
+        ) : (
+          <span className="text-muted-foreground">None</span>
+        )}
+      </dd>
+      <dt className="text-muted-foreground">References</dt>
+      <dd className="break-words">{testCase.references || "—"}</dd>
+      {testCase.duplicatedFrom && (
+        <>
+          <dt className="text-muted-foreground">Copied from</dt>
+          <dd>
+            <Link
+              to={casePagePath(project.key, testCase.duplicatedFrom)}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {testCase.duplicatedFrom}
+            </Link>
+          </dd>
+        </>
+      )}
+    </>
+  )
+  const archivedNote = testCase.archived && (
+    <p className="rounded-lg bg-muted px-3 py-2 text-sm">
+      <span className="font-semibold">Archived</span>
+      {testCase.archiveReason && `: ${testCase.archiveReason}`}. It&apos;s
+      read-only and left out of new test runs; past runs keep their copy.
+    </p>
+  )
+  const tabs = (
+    <Tabs defaultValue="steps" className="mt-1">
+      <TabsList variant="line">
+        <TabsTrigger value="steps">Steps ({testCase.steps.length})</TabsTrigger>
+        <TabsTrigger value="history">History</TabsTrigger>
+      </TabsList>
+      <TabsContent value="steps" className="pt-3">
+        <Steps
+          testCase={testCase}
+          Subheading={headingLevel === 1 ? "h2" : "h3"}
+        />
+      </TabsContent>
+      <TabsContent value="history" className="pt-3">
+        <History caseKey={testCase.key} />
+      </TabsContent>
+    </Tabs>
+  )
+  const archiveDialog = (
+    <ArchiveCaseDialog
+      testCase={testCase}
+      open={archiving}
+      onOpenChange={setArchiving}
+    />
+  )
+  const actionButtons = (size: "sm" | "default") => (
+    <>
+      {canEdit && (
+        <>
+          <ButtonLink size={size} to={`${fullPage}/edit`}>
+            <PencilIcon data-icon="inline-start" />
+            Edit
+          </ButtonLink>
+          <Button
+            size={size}
+            variant="outline"
+            disabled={duplicate.isPending}
+            onClick={() => void makeCopy()}
+          >
+            {duplicate.isPending ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <CopyIcon data-icon="inline-start" />
+            )}
+            Duplicate
+          </Button>
+        </>
+      )}
+      {canArchive && !testCase.archived && (
+        <Button
+          size={size}
+          variant="outline"
+          className="text-destructive"
+          onClick={() => setArchiving(true)}
+        >
+          <ArchiveIcon data-icon="inline-start" />
+          Archive…
+        </Button>
+      )}
+      {canArchive && testCase.archived && allowed("cases:edit") && (
+        <Button
+          size={size}
+          variant="outline"
+          disabled={restore.isPending}
+          onClick={() => void restoreCase()}
+        >
+          {restore.isPending ? (
+            <Spinner data-icon="inline-start" />
+          ) : (
+            <ArchiveRestoreIcon data-icon="inline-start" />
+          )}
+          Restore
+        </Button>
+      )}
+    </>
+  )
+
+  if (headingLevel === 1)
+    return (
+      <article aria-labelledby="case-title" className="flex flex-col gap-5">
+        <PageHeader
+          title={testCase.title}
+          headingId="case-title"
+          facts={[
+            {
+              label: "ID",
+              value: <span className="font-mono">{testCase.key}</span>,
+            },
+            { label: "Version", value: testCase.revision },
+            {
+              label: "Status",
+              value: (
+                <CaseStatusBadge
+                  status={testCase.status}
+                  archived={testCase.archived}
+                />
+              ),
+            },
+            {
+              label: "Priority",
+              value: <PriorityIndicator priority={testCase.priority} />,
+            },
+            { label: "Type", value: CASE_TYPE_LABELS[testCase.type] },
+            {
+              label: "Suite",
+              value: suite,
+            },
+          ]}
+          factsLabel={`${testCase.key} details`}
+          actions={
+            <>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Copy link to ${testCase.key}`}
+                onClick={() => void copyLink()}
+              >
+                <LinkIcon />
+              </Button>
+              {actionButtons("default")}
+            </>
+          }
+        />
+        <div className="flex max-w-3xl flex-col gap-3">
+          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
+            {details}
+          </dl>
+          {archivedNote}
+          {tabs}
+        </div>
+        {archiveDialog}
+      </article>
+    )
 
   return (
     <article aria-labelledby="case-title" className="flex flex-col gap-3">
@@ -354,16 +522,9 @@ export function CaseDetails({
           </>
         )}
       </div>
-      <Heading
-        id="case-title"
-        className={
-          headingLevel === 1
-            ? "text-3xl font-semibold tracking-tight break-words"
-            : "text-lg leading-snug font-semibold"
-        }
-      >
+      <h2 id="case-title" className="text-lg leading-snug font-semibold">
         {testCase.title}
-      </Heading>
+      </h2>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <CaseStatusBadge
           status={testCase.status}
@@ -374,111 +535,15 @@ export function CaseDetails({
       </div>
       <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
         <dt className="text-muted-foreground">Suite</dt>
-        <dd>{suitePath(suites.data?.items, testCase.suiteId)}</dd>
-        <dt className="text-muted-foreground">Labels</dt>
-        <dd className="flex flex-wrap gap-1">
-          {testCase.labels.length ? (
-            testCase.labels.map((l) => <LabelChip key={l} label={l} />)
-          ) : (
-            <span className="text-muted-foreground">None</span>
-          )}
-        </dd>
-        <dt className="text-muted-foreground">References</dt>
-        <dd className="break-words">{testCase.references || "—"}</dd>
-        {testCase.duplicatedFrom && (
-          <>
-            <dt className="text-muted-foreground">Copied from</dt>
-            <dd>
-              <Link
-                to={casePagePath(project.key, testCase.duplicatedFrom)}
-                className="text-primary underline-offset-4 hover:underline"
-              >
-                {testCase.duplicatedFrom}
-              </Link>
-            </dd>
-          </>
-        )}
+        <dd>{suite}</dd>
+        {details}
       </dl>
-      {testCase.archived && (
-        <p className="rounded-lg bg-muted px-3 py-2 text-sm">
-          <span className="font-semibold">Archived</span>
-          {testCase.archiveReason && ` — ${testCase.archiveReason}`}. It&apos;s
-          read-only and left out of new test runs; past runs keep their copy.
-        </p>
-      )}
+      {archivedNote}
       {(canEdit || canArchive) && (
-        <div className="flex flex-wrap gap-2">
-          {canEdit && (
-            <>
-              <ButtonLink size="sm" to={`${fullPage}/edit`}>
-                <PencilIcon data-icon="inline-start" />
-                Edit
-              </ButtonLink>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={duplicate.isPending}
-                onClick={() => void makeCopy()}
-              >
-                {duplicate.isPending ? (
-                  <Spinner data-icon="inline-start" />
-                ) : (
-                  <CopyIcon data-icon="inline-start" />
-                )}
-                Duplicate
-              </Button>
-            </>
-          )}
-          {canArchive && !testCase.archived && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-destructive"
-              onClick={() => setArchiving(true)}
-            >
-              <ArchiveIcon data-icon="inline-start" />
-              Archive…
-            </Button>
-          )}
-          {canArchive && testCase.archived && allowed("cases:edit") && (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={restore.isPending}
-              onClick={() => void restoreCase()}
-            >
-              {restore.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <ArchiveRestoreIcon data-icon="inline-start" />
-              )}
-              Restore
-            </Button>
-          )}
-        </div>
+        <div className="flex flex-wrap gap-2">{actionButtons("sm")}</div>
       )}
-      <Tabs defaultValue="steps" className="mt-1">
-        <TabsList variant="line">
-          <TabsTrigger value="steps">
-            Steps ({testCase.steps.length})
-          </TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
-        </TabsList>
-        <TabsContent value="steps" className="pt-3">
-          <Steps
-            testCase={testCase}
-            Subheading={headingLevel === 1 ? "h2" : "h3"}
-          />
-        </TabsContent>
-        <TabsContent value="history" className="pt-3">
-          <History caseKey={testCase.key} />
-        </TabsContent>
-      </Tabs>
-      <ArchiveCaseDialog
-        testCase={testCase}
-        open={archiving}
-        onOpenChange={setArchiving}
-      />
+      {tabs}
+      {archiveDialog}
     </article>
   )
 }

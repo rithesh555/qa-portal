@@ -30,7 +30,7 @@ test.describe("as a tester", () => {
     await moves(lead.page)
       .getByRole("button", { name: "Confirm (Open)" })
       .click()
-    await expect(history(lead.page)).toHaveText(/New\s*›\s*Open/)
+    await expect(history(lead.page)).toHaveText(/New\s*Open/)
     await expect(
       moves(lead.page).getByRole("button", { name: "Start work" })
     ).toBeFocused()
@@ -51,7 +51,7 @@ test.describe("as a tester", () => {
     await moves(page).getByRole("button", { name: "Mark fixed…" }).click()
     await page.getByLabel(/Fixed in build/).fill("4.2.0-rc2")
     await page
-      .getByRole("button", { name: "Mark fixed – awaiting retest" })
+      .getByRole("button", { name: "Mark fixed, awaiting retest" })
       .click()
     await expect(history(page)).toHaveText(/Fixed – awaiting retest$/)
     await expect(
@@ -69,7 +69,7 @@ test.describe("as a tester", () => {
       "fixed"
     )
     await openDefect(page, project.key, d.key, d.title)
-    await moves(page).getByRole("button", { name: "Verified — close…" }).click()
+    await moves(page).getByRole("button", { name: "Verified, close…" }).click()
     await expect(
       page.getByRole("heading", { name: "Close as verified" })
     ).toBeVisible()
@@ -92,7 +92,7 @@ test.describe("as a tester", () => {
     )
     await openDefect(page, project.key, d.key, d.title)
     await moves(page)
-      .getByRole("button", { name: "Still failing — reopen…" })
+      .getByRole("button", { name: "Still failing, reopen…" })
       .click()
     await page.getByRole("button", { name: "Reopen defect" }).click()
     await expect(page.getByText("Say what still fails")).toBeVisible()
@@ -142,7 +142,7 @@ test.describe("as a lead", () => {
     await expect(page.getByText("Resolution: Duplicate")).toBeVisible()
     await page
       .getByRole("link", {
-        name: new RegExp(`${original.key} · ${original.title}`),
+        name: new RegExp(`${original.key}: ${original.title}`),
       })
       .click()
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(

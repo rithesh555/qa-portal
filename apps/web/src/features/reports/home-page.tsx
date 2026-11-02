@@ -1,4 +1,5 @@
 import { DataError } from "@/components/composites/data-state"
+import { KeepKeys } from "@/components/keep-keys"
 import { PageHeader } from "@/components/composites/page-header"
 import type { Home } from "@qa/shared"
 import { FolderKanbanIcon } from "lucide-react"
@@ -132,15 +133,18 @@ export function HomePage() {
                 </CardAction>
               )}
             </CardHeader>
-            <CardContent>
-              {h.releases.length === 0 ? (
+            {h.releases.length === 0 ? (
+              <CardContent>
                 <p className="text-sm text-muted-foreground">
                   No release is planned or in progress in your projects.
                 </p>
-              ) : (
+              </CardContent>
+            ) : (
+              // Flush with the card's edges, like the other list tables.
+              <div className="border-t">
                 <ReleaseTable releases={h.releases} />
-              )}
-            </CardContent>
+              </div>
+            )}
           </Card>
           <Activity home={h} />
         </>
@@ -279,9 +283,9 @@ function MyRuns({ home: h }: { home: Home }) {
                   <span className="flex flex-col">
                     <span className="font-medium">{r.name}</span>
                     <span className="text-xs text-muted-foreground">
-                      <span className="font-mono">{r.key}</span> ·{" "}
+                      <span className="font-mono">{r.key}</span>,{" "}
                       {r.projectName}
-                      {r.environment && ` · ${r.environment}`}
+                      {r.environment && `, ${r.environment}`}
                     </span>
                   </span>
                   <ProgressBar counts={r.counts} className="h-2" />
@@ -409,15 +413,16 @@ function Activity({ home: h }: { home: Home }) {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="font-semibold">{a.actor.name}</span>{" "}
-                  {describeActivity(a)}{" "}
-                  <span className="inline-flex items-center gap-1 align-middle text-muted-foreground">
-                    ·{" "}
+                  <KeepKeys text={describeActivity(a)} />{" "}
+                  <span className="text-muted-foreground">
+                    (
                     <Link
                       to={`/projects/${a.projectKey}`}
-                      className="underline-offset-4 hover:underline"
+                      className="underline decoration-rule-strong underline-offset-4 hover:decoration-current"
                     >
                       {a.projectName}
                     </Link>
+                    )
                   </span>
                 </span>
                 <time

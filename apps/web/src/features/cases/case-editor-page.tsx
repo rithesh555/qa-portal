@@ -386,7 +386,7 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
         }}
         noValidate
         aria-label={initial ? `Edit ${initial.key}` : "New test case"}
-        className="flex flex-col gap-5"
+        className="flex max-w-5xl flex-col gap-5"
       >
         {conflict && (
           <ConflictPanel
@@ -739,6 +739,7 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
             <Button
               type="button"
               variant="outline"
+              aria-label="Save and add another"
               disabled={isSubmitting}
               onClick={() => {
                 if (labelError) {
@@ -750,12 +751,29 @@ function CaseForm({ initial }: { initial: TestCase | null }) {
                 )()
               }}
             >
-              Save and add another
+              {/* Short on a phone so the bar stays one row; the name stays whole. */}
+              <span className="sm:hidden" aria-hidden>
+                Add another
+              </span>
+              <span className="hidden sm:inline">Save and add another</span>
             </Button>
           )}
-          <Button type="submit" disabled={isSubmitting || conflict !== null}>
+          <Button
+            type="submit"
+            aria-label={initial ? undefined : "Create test case"}
+            disabled={isSubmitting || conflict !== null}
+          >
             {isSubmitting && <Spinner data-icon="inline-start" />}
-            {initial ? "Save changes" : "Create test case"}
+            {initial ? (
+              "Save changes"
+            ) : (
+              <>
+                <span className="sm:hidden" aria-hidden>
+                  Create
+                </span>
+                <span className="hidden sm:inline">Create test case</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

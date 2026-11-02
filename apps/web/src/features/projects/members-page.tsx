@@ -250,7 +250,7 @@ export function MembersPage() {
     project.roleCounts.viewer
 
   return (
-    <div className="flex max-w-5xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title="Members"
         description={
@@ -259,10 +259,6 @@ export function MembersPage() {
             open every project and aren&apos;t listed here.
           </>
         }
-        facts={PROJECT_ROLES.map((role) => ({
-          label: `${PROJECT_ROLE_LABELS[role]}s`,
-          value: project.roleCounts[role],
-        }))}
         actions={
           canManage && (
             <Button onClick={() => setAdding(true)}>
@@ -281,10 +277,10 @@ export function MembersPage() {
           }
         >
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="all">All ({active})</TabsTrigger>
             {PROJECT_ROLES.map((role) => (
               <TabsTrigger key={role} value={role}>
-                {PROJECT_ROLE_LABELS[role]}s
+                {PROJECT_ROLE_LABELS[role]}s ({project.roleCounts[role]})
               </TabsTrigger>
             ))}
           </TabsList>
@@ -295,6 +291,14 @@ export function MembersPage() {
           label="Search members"
         />
       </div>
+
+      {canManage && (
+        <p id={LAST_LEAD_NOTE_ID} className="text-xs text-muted-foreground">
+          {isAdmin
+            ? "Every project should keep an active QA Lead. As an admin you can still remove or change the last one, for example while reorganising; you'll be asked to confirm."
+            : "Every project keeps at least one active QA Lead, so the last one can't be removed or given another role. Make someone else QA Lead first."}
+        </p>
+      )}
 
       {members.isError ? (
         <DataError
@@ -424,14 +428,6 @@ export function MembersPage() {
             />
           )}
         </div>
-      )}
-
-      {canManage && (
-        <p id={LAST_LEAD_NOTE_ID} className="text-xs text-muted-foreground">
-          {isAdmin
-            ? "Every project should keep an active QA Lead. As an admin you can still remove or change the last one, for example while reorganising; you'll be asked to confirm."
-            : "Every project keeps at least one active QA Lead, so the last one can't be removed or given another role. Make someone else QA Lead first."}
-        </p>
       )}
 
       {canManage && <AddMembersDialog open={adding} onOpenChange={setAdding} />}

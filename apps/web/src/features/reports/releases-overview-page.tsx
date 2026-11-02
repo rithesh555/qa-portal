@@ -4,7 +4,6 @@ import { FlagIcon } from "lucide-react"
 import { useMemo } from "react"
 import { SearchBox } from "@/components/search-box"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
@@ -206,19 +205,17 @@ export function ReleasesOverviewPage() {
               CSV
             </Button>
           </div>
-          <Card>
-            <CardContent>
-              {rows.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">
-                  No release matches{filtered ? " these filters" : ""}.
-                </p>
-              ) : (
-                <ReleaseTable releases={rows} showLead />
-              )}
-            </CardContent>
-          </Card>
-          <p className="text-xs text-muted-foreground">
-            {rows.length} of {all.length} active releases shown.
+          <div className="rounded-xl border bg-card">
+            {rows.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">
+                No release matches{filtered ? " these filters" : ""}.
+              </p>
+            ) : (
+              <ReleaseTable releases={rows} showLead />
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Showing {rows.length} of {all.length} active releases.
           </p>
         </>
       )}

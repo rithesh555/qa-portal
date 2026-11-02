@@ -241,10 +241,10 @@ describe("DefectPage links", () => {
     }
     renderAt("/projects/PAY/defects/PAY-D-14", "tester")
     await userEvent.click(
-      await screen.findByRole("button", { name: "Unlink PAY-R-12 › PAY-TC-3" })
+      await screen.findByRole("button", { name: "Unlink PAY-TC-3 in PAY-R-12" })
     )
     const undo = await screen.findByRole("button", {
-      name: "Undo unlinking PAY-R-12 › PAY-TC-3",
+      name: "Undo unlinking PAY-TC-3 in PAY-R-12",
     })
     await waitFor(() => expect(undo).toHaveFocus())
     await userEvent.click(undo)
@@ -255,7 +255,7 @@ describe("DefectPage links", () => {
       ).toEqual({ resultId: "result-1" })
     )
     const unlinkAgain = await screen.findByRole("button", {
-      name: "Unlink PAY-R-12 › PAY-TC-3",
+      name: "Unlink PAY-TC-3 in PAY-R-12",
     })
     await waitFor(() => expect(unlinkAgain).toHaveFocus())
   })
@@ -318,7 +318,7 @@ describe("DefectPage workflow", () => {
       json(200, defect({ foundInRelease: null }))
     renderAt("/projects/PAY/defects/PAY-D-14", "tester")
     const run = await screen.findByRole("link", { name: "PAY-R-12" })
-    expect(run.parentElement).toHaveTextContent(/^No release · PAY-R-12$/)
+    expect(run.parentElement).toHaveTextContent(/^No release, PAY-R-12$/)
   })
 
   it("leaves triage to a QA Lead", async () => {

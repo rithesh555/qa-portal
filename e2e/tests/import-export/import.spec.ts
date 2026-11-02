@@ -230,7 +230,7 @@ test.describe("as a tester", () => {
     await choose(
       page,
       page.getByRole("combobox", { name: "Title imports as" }),
-      "— Don't import —"
+      "Don't import"
     )
     await expect(
       page.getByText("Choose which column holds the Title.")

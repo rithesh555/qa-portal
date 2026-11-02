@@ -58,7 +58,7 @@ export interface DiffRow {
 
 const stepText = (s?: { action: string; expected: string }) =>
   s
-    ? `${s.action.trim()}${s.expected.trim() ? ` → ${s.expected.trim()}` : ""}`
+    ? `${s.action.trim()}${s.expected.trim() ? `. Expected: ${s.expected.trim()}` : ""}`
     : ""
 
 /** One row per field I changed (one per changed step for steps). */
@@ -93,7 +93,7 @@ export function conflictRows(
         rows.push({
           field: `Step ${i + 1}`,
           theirs: stepText(theirs.steps[i]) || "—",
-          mine: after || "— (removed)",
+          mine: after || "(removed)",
           both,
         })
       }

@@ -141,7 +141,9 @@ test.describe("create and edit", () => {
     await d.getByLabel("Key").fill("9AB")
     await d.getByRole("button", { name: "Create project" }).click()
     await expect(
-      d.getByText("Use 2–6 capital letters or digits, starting with a letter")
+      d.getByText(
+        "Use 2 to 6 capital letters or digits, starting with a letter"
+      )
     ).toBeVisible()
   })
 

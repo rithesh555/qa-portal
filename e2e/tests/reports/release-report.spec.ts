@@ -23,7 +23,7 @@ test.describe("as a tester", () => {
     await expect(page.getByRole("combobox", { name: "Release" })).toContainText(
       "R1 (in progress)"
     )
-    await expect(page.getByText(/Release R1 · live, as of/)).toBeVisible()
+    await expect(page.getByText(/Release R1: live, as of/)).toBeVisible()
     await choose(page, "Release", "No release")
     await expect(
       page.getByRole("heading", { name: "No runs for this choice yet" })
@@ -194,6 +194,33 @@ test.describe("as a viewer", () => {
       `${BASE.suites.accounts} › ${BASE.suites.signIn}`
     )
   })
+
+  test("E2E-RPT-018 the print report stays black on white in dark mode", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
+    await page.goto(`/projects/${BASE.key}/reports/print`)
+    const h1 = page.getByRole("heading", { level: 1 })
+    await expect(h1).toBeVisible()
+    await page.emulateMedia({ colorScheme: "dark", media: "print" })
+    // Paint each computed colour onto a canvas and read the pixel back, so the
+    // check holds whatever colour space the tokens are written in.
+    const [paper, ink] = await page.evaluate(() => {
+      const ctx = document.createElement("canvas").getContext("2d")!
+      const rgb = (colour: string) => {
+        ctx.clearRect(0, 0, 1, 1)
+        ctx.fillStyle = colour
+        ctx.fillRect(0, 0, 1, 1)
+        return Array.from(ctx.getImageData(0, 0, 1, 1).data.slice(0, 3))
+      }
+      return [
+        rgb(getComputedStyle(document.querySelector("main")!).backgroundColor),
+        rgb(getComputedStyle(document.querySelector("h1")!).color),
+      ]
+    })
+    expect(paper).toEqual([255, 255, 255])
+    for (const c of ink!) expect(c).toBeLessThan(64)
+  })
 })
 
 test.describe("as a lead", () => {
@@ -240,7 +267,7 @@ test.describe("as a lead", () => {
       new RegExp(`/projects/${project.key}/reports/print\\?release=`)
     )
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      `${project.name} · Release R1`
+      `Release report: ${project.name}, Release R1`
     )
     await page.getByRole("button", { name: "Print or save as PDF" }).click()
     expect(
@@ -272,7 +299,7 @@ test.describe("as an admin", () => {
     const numbers = page.getByRole("region", { name: "Key numbers" })
     await expect(numbers).toContainText("Pass rate67%")
     await expect(numbers).toContainText("3 of 3 Ready cases")
-    await expect(numbers).toContainText("1 Critical · 0 Major")
+    await expect(numbers).toContainText("1 Critical, 0 Major")
   })
 
   test("E2E-RPT-012 every chart has a table view and its own CSV", async ({

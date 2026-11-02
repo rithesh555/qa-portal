@@ -37,13 +37,13 @@ const suites: CatalogueSuite[] = [
         ["Status › Draft", "4 cases, all Draft"],
       ]),
       c("E2E-CASE-005", "Filter by priority", "medium", [
-        ["Priority › Critical", "Showing 1–8 of 8 cases"],
+        ["Priority › Critical", "Showing 1 to 8 of 8 cases"],
       ]),
       c("E2E-CASE-006", "Filter by type", "medium", [
-        ["Type › Security", "Showing 1–6 of 6 cases"],
+        ["Type › Security", "Showing 1 to 6 of 6 cases"],
       ]),
       c("E2E-CASE-007", "Filter by label", "medium", [
-        ["Label › smoke", "Showing 1–10 of 10 cases"],
+        ["Label › smoke", "Showing 1 to 10 of 10 cases"],
       ]),
       c(
         "E2E-CASE-008",
@@ -74,9 +74,9 @@ const suites: CatalogueSuite[] = [
       c("E2E-CASE-011", "Pagination moves through the list", "medium", [
         [
           "Open the list with 10 per page",
-          "Showing 1–10 of 30 cases, Page 1 of 3",
+          "Showing 1 to 10 of 30 cases, Page 1 of 3",
         ],
-        ["Select Next", "Showing 11–20 of 30 cases, Page 2 of 3"],
+        ["Select Next", "Showing 11 to 20 of 30 cases, Page 2 of 3"],
       ]),
       c(
         "E2E-CASE-012",
@@ -397,7 +397,7 @@ const suites: CatalogueSuite[] = [
       c("E2E-CASE-034", "Archive a case with a reason", "high", [
         [
           "Archive…, give a reason, Archive",
-          '"… archived"; the case shows Archived — reason, without Edit',
+          '"… archived"; the case shows Archived: reason, without Edit',
         ],
       ]),
       c("E2E-CASE-035", "Restore an archived case", "medium", [

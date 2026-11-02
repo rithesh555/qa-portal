@@ -5,7 +5,7 @@ import {
   RESOLUTION_LABELS,
   RUN_CASE_STATUS_LABELS,
 } from "@qa/shared"
-import { CircleAlertIcon } from "lucide-react"
+import { ChevronRightIcon, CircleAlertIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Link, useParams } from "react-router"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -242,7 +242,7 @@ function Details({ defect }: { defect: Defect }) {
           <div className="grid gap-4 md:grid-cols-2">
             <Section label="Expected">
               {defect.expected || (
-                <span className="text-muted-foreground">—</span>
+                <span className="text-muted-foreground">Not given</span>
               )}
             </Section>
             <Section label="Actual">{defect.actual}</Section>
@@ -301,14 +301,15 @@ function LinkedResults({ defect }: { defect: Defect }) {
                 project.key,
                 `runs/${l.runKey}?case=${l.runCaseId}`
               )}
-              className="font-mono text-xs text-primary underline-offset-4 hover:underline"
+              className="text-xs text-primary underline-offset-4 hover:underline"
             >
-              {l.runKey} › {l.caseKey}
+              <span className="font-mono">{l.caseKey}</span> in{" "}
+              <span className="font-mono">{l.runKey}</span>
             </Link>
             <span className="min-w-0 flex-1 basis-full text-xs break-words text-muted-foreground sm:basis-auto">
-              {l.caseTitle} · {l.recordedBy.name} ·{" "}
+              {l.caseTitle}, {l.recordedBy.name},{" "}
               {exactTime.format(new Date(l.recordedAt))}
-              {l.note && ` · “${l.note}”`}
+              {l.note && `, “${l.note}”`}
             </span>
             {allowed("defects:edit") && (
               <Button
@@ -333,7 +334,7 @@ function LinkedResults({ defect }: { defect: Defect }) {
               >
                 Unlink{" "}
                 <span className="sr-only">
-                  {l.runKey} › {l.caseKey}
+                  {l.caseKey} in {l.runKey}
                 </span>
               </Button>
             )}
@@ -346,8 +347,9 @@ function LinkedResults({ defect }: { defect: Defect }) {
           >
             <span>
               Unlinked{" "}
-              <span className="font-mono text-xs">
-                {l.runKey} › {l.caseKey}
+              <span className="text-xs">
+                <span className="font-mono">{l.caseKey}</span> in{" "}
+                <span className="font-mono">{l.runKey}</span>
               </span>
             </span>
             <Button
@@ -373,7 +375,7 @@ function LinkedResults({ defect }: { defect: Defect }) {
             >
               Undo{" "}
               <span className="sr-only">
-                unlinking {l.runKey} › {l.caseKey}
+                unlinking {l.caseKey} in {l.runKey}
               </span>
             </Button>
           </li>
@@ -457,7 +459,7 @@ function Activity({ defect }: { defect: Defect }) {
                 <p className="text-sm">
                   <span className="font-semibold">{e.actor.name}</span>{" "}
                   <span className="text-muted-foreground">
-                    {describeDefectActivity(e)} ·{" "}
+                    {describeDefectActivity(e)},{" "}
                     <time
                       dateTime={e.createdAt}
                       title={exactTime.format(new Date(e.createdAt))}
@@ -613,9 +615,10 @@ export function DefectPage() {
                     {DEFECT_STATUS_LABELS[s]}
                   </span>
                   {!last && (
-                    <span aria-hidden className="text-muted-foreground">
-                      ›
-                    </span>
+                    <ChevronRightIcon
+                      aria-hidden
+                      className="size-3.5 text-muted-foreground"
+                    />
                   )}
                 </li>
               )
@@ -638,7 +641,7 @@ export function DefectPage() {
                   )}
                   className="text-primary underline-offset-4 hover:underline"
                 >
-                  {defect.duplicateOf.key} · {defect.duplicateOf.title}
+                  {defect.duplicateOf.key}: {defect.duplicateOf.title}
                 </Link>
               </>
             )}

@@ -817,7 +817,7 @@ export function RunPage() {
       <Sheet open={listOpen} onOpenChange={setListOpen}>
         <SheetContent side="left" className="w-[min(22rem,100vw)] gap-0 p-0">
           <SheetHeader className="border-b">
-            <SheetTitle>Cases · {untested} left</SheetTitle>
+            <SheetTitle>Cases ({untested} left)</SheetTitle>
             <SheetDescription className="sr-only">
               Choose a case to work on.
             </SheetDescription>

@@ -85,7 +85,7 @@ const suites: CatalogueSuite[] = [
           ],
           [
             "Type a key starting with a digit",
-            "Use 2–6 capital letters or digits, starting with a letter",
+            "Use 2 to 6 capital letters or digits, starting with a letter",
           ],
         ],
       },

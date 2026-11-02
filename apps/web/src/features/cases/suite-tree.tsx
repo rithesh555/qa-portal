@@ -528,7 +528,7 @@ export function SuiteTree({
             <AlertDialogDescription>
               {archivingCount === 0
                 ? "It has no active test cases. "
-                : `Its ${archivingCount} test ${archivingCount === 1 ? "case is" : "cases are"} archived with it — read-only and left out of new test runs. Past runs keep their copy. `}
+                : `Its ${archivingCount} test ${archivingCount === 1 ? "case is" : "cases are"} archived with it. They're read-only and left out of new test runs. Past runs keep their copy. `}
               Restoring one of its cases brings the suite back.
             </AlertDialogDescription>
           </AlertDialogHeader>

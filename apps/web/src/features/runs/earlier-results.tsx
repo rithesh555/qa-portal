@@ -26,8 +26,8 @@ export function EarlierResults({ detail }: { detail: RunCaseDetail }) {
                   {r.failedStep !== null && ` at step ${r.failedStep}`}
                 </span>{" "}
                 <span className="text-muted-foreground">
-                  by {r.recordedBy.name} ·{" "}
-                  {exactTime.format(new Date(r.recordedAt))} · version{" "}
+                  by {r.recordedBy.name},{" "}
+                  {exactTime.format(new Date(r.recordedAt))}, version{" "}
                   {r.revision}
                 </span>
               </p>

@@ -15,7 +15,7 @@ export function CasePage() {
   const { project } = useProjectContext()
   const { ref = "" } = useParams()
   return (
-    <div className="flex max-w-3xl flex-col gap-5">
+    <div className="flex flex-col gap-5">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

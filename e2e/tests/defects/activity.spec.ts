@@ -46,11 +46,11 @@ test("E2E-DEF-033 unlink a result and undo it", async ({ page, project }) => {
   await openDefect(page, project.key, d.key, d.title)
   const links = page.getByRole("region", { name: /Linked results/ })
   await links
-    .getByRole("button", { name: `Unlink ${r.runKey} › ${r.caseKey}` })
+    .getByRole("button", { name: `Unlink ${r.caseKey} in ${r.runKey}` })
     .click()
-  await expect(links).toContainText(`Unlinked ${r.runKey} › ${r.caseKey}`)
+  await expect(links).toContainText(`Unlinked ${r.caseKey} in ${r.runKey}`)
   const undo = links.getByRole("button", {
-    name: `Undo unlinking ${r.runKey} › ${r.caseKey}`,
+    name: `Undo unlinking ${r.caseKey} in ${r.runKey}`,
   })
   await expect(undo).toBeFocused()
   await undo.click()
@@ -58,7 +58,7 @@ test("E2E-DEF-033 unlink a result and undo it", async ({ page, project }) => {
     page.getByRole("region", { name: "Linked results (1)" })
   ).toBeVisible()
   await expect(
-    links.getByRole("button", { name: `Unlink ${r.runKey} › ${r.caseKey}` })
+    links.getByRole("button", { name: `Unlink ${r.caseKey} in ${r.runKey}` })
   ).toBeFocused()
 })
 

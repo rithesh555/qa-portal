@@ -45,12 +45,12 @@ describe("Field", () => {
       <Field data-invalid>
         <FieldLabel htmlFor="key">Key</FieldLabel>
         <Input id="key" aria-invalid aria-describedby="key-hint" />
-        <p id="key-hint">2–6 letters</p>
+        <p id="key-hint">2 to 6 letters</p>
         <FieldError errors={[{ message: "Too long" }]} />
       </Field>
     )
     expect(screen.getByLabelText("Key")).toHaveAccessibleDescription(
-      "2–6 letters Too long"
+      "2 to 6 letters Too long"
     )
   })
 })
