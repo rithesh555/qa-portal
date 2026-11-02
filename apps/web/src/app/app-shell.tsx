@@ -212,7 +212,8 @@ function AppSidebar({
           <SidebarGroupLabel>Current project</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
+              {/* Room under the bordered switcher, so the active item's fill never meets it. */}
+              <SidebarMenuItem className="mb-2">
                 <ProjectSwitcher current={project} onNavigate={closeOnMobile} />
               </SidebarMenuItem>
               {project &&
