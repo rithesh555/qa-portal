@@ -20,8 +20,8 @@ DevOps is that loop: **small changes, automated checks, repeatable delivery, and
 | #   | Stage                               | Note                                             | Status      |
 | --- | ----------------------------------- | ------------------------------------------------ | ----------- |
 | 0   | Repo and ways of working            | [stage-00-sdlc.md](stage-00-sdlc.md)             | done        |
-| 1   | Containers                          | [stage-01-containers.md](stage-01-containers.md) | in progress |
-| 2   | Continuous integration              | stage-02-ci.md                                   | planned     |
+| 1   | Containers                          | [stage-01-containers.md](stage-01-containers.md) | done        |
+| 2   | Continuous integration              | [stage-02-ci.md](stage-02-ci.md)                 | in progress |
 | 3   | Artifacts and supply-chain security | stage-03-supply-chain.md                         | planned     |
 | 4   | Local Kubernetes platform as code   | stage-04-platform.md                             | planned     |
 | 5   | Helm chart and environments         | stage-05-helm.md                                 | planned     |

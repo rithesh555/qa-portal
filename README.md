@@ -1,5 +1,9 @@
 # QA Portal
 
+[![CI](https://github.com/rithesh555/qa-portal/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rithesh555/qa-portal/actions/workflows/ci.yml)
+[![Security](https://github.com/rithesh555/qa-portal/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/rithesh555/qa-portal/actions/workflows/security.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rithesh555/qa-portal/badge)](https://scorecard.dev/viewer/?uri=github.com/rithesh555/qa-portal)
+
 Internal portal for QA work: projects, test cases, test runs, defects and
 (soon) dashboards and reports.
 

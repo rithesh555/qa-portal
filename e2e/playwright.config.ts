@@ -18,11 +18,15 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   timeout: 30_000,
   expect: { timeout: 10_000 },
-  reporter: [
-    ["list"],
-    ["html", { outputFolder: "results/html", open: "never" }],
-    ["json", { outputFile: "results/results.json" }],
-  ],
+  // CI shards the suite and merges the blob reports into one HTML report
+  // (.github/workflows/ci.yml); locally, the HTML and the JSON for e2e:publish.
+  reporter: process.env.CI
+    ? [["list"], ["blob"]]
+    : [
+        ["list"],
+        ["html", { outputFolder: "results/html", open: "never" }],
+        ["json", { outputFile: "results/results.json" }],
+      ],
   use: {
     baseURL,
     trace: "on-first-retry",

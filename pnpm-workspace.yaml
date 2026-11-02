@@ -15,6 +15,22 @@ allowBuilds:
 # Dependencies must be at least 2 weeks old before they're resolved (minutes).
 minimumReleaseAge: 20160
 
+# Supply-chain guards (Phase 9, Stage 2).
+# Transitive dependencies may only come from the registry, never from git
+# URLs or tarballs.
+blockExoticSubdeps: true
+# Fail if a version was published with weaker trust evidence (trusted
+# publishing, provenance) than an earlier one: the pattern of a hijacked
+# maintainer account.
+trustPolicy: no-downgrade
+# Versions older than a year (525600 minutes) are exempt: old release lines
+# such as semver 6 and undici-types 6 predate provenance.
+trustPolicyIgnoreAfter: 525600
+trustPolicyExclude:
+  # Published by Prisma's usual release bot, like 7.10.0; no recent prisma
+  # release carries provenance. Pinned on purpose (see CLAUDE.md).
+  - prisma@7.10.1
+
 # Security fixes for transitive packages (Phase 8 review, 2026-10-19).
 overrides:
   # Pulled in by prisma 7.10.0 and better-auth; never loaded here (Postgres

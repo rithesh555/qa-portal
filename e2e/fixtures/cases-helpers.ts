@@ -77,6 +77,8 @@ export async function choose(page: Page, trigger: Locator, option: string) {
       .getByRole("option", { name: option, exact: true })
       .click({ timeout: 2000 })
     await expect(listbox).toBeHidden({ timeout: 1000 })
+    // `option` is escaped; it comes from the test itself.
+    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
     await expect(trigger).toHaveText(new RegExp(escape(option)), {
       timeout: 1000,
     })
