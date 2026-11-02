@@ -8,7 +8,7 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 - **API:** Fastify 5 + TypeScript, Zod type provider, @fastify/swagger, pino, helmet, rate-limit, CORS (`apps/api`)
 - **Auth:** Better Auth — username/password, DB sessions in httpOnly cookies. No public sign-up; admin creates users.
 - **Access model:** portal role `admin` | `user`. Admin sees and manages everything and is the only one who creates/archives projects. Everyone else sees only projects they are members of, with a **per-project role** (`lead` | `tester` | `viewer`); project leads manage that project's members. The permission matrix lives in `packages/shared` — the web hides, the API enforces (inaccessible ids → 404). Users are deactivated, never deleted.
-- **DB:** PostgreSQL 17 (Docker) + Prisma **7.10.0 pinned** — npm `latest` points at an 8.x release candidate; do not upgrade without asking.
+- **DB:** PostgreSQL 17 (Docker) + Prisma **7.10.1 pinned** — npm `latest` points at an 8.x release candidate; do not upgrade without asking.
 - **Shared:** Zod schemas/types in `packages/shared`
 - **Tests:** Vitest (unit + API integration against a separate test DB). The API suite resets that one test DB, so never run two API test runs at once (e.g. from parallel agents) — they break each other.
 - **Monorepo:** pnpm workspaces. Node 22 LTS via nvm.

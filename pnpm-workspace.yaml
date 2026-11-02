@@ -7,8 +7,11 @@ packages:
 allowBuilds:
   esbuild: true
   msw: false
-  prisma@7.10.0: true
-  "@prisma/engines@7.10.0": true
+  prisma@7.10.1: true
+  "@prisma/engines@7.10.1": true
+
+# Dependencies must be at least 2 weeks old before they're resolved (minutes).
+minimumReleaseAge: 20160
 
 # Security fixes for transitive packages (Phase 8 review, 2026-10-19).
 overrides:
@@ -16,11 +19,41 @@ overrides:
   # via @prisma/adapter-pg). 3.24.4 fixes GHSA-3f6p-5ww8-9rcr and
   # GHSA-rgwj-5xj2-c3m3, and is what prisma 7.10.1 ships.
   mysql2: 3.24.4
+  # Dependency update, 2026-11-02 (each fix at least 2 weeks old).
+  # shadcn CLI (dev only).
+  "undici@^7": 7.30.1
+  "qs@^6": 6.16.1
+  # jsdom (tests only) via vitest.
+  "undici@^8": 8.12.2
+  # @fastify/rate-limit (API).
+  "ip-address@^10": 10.7.4
 
 auditConfig:
   ignoreGhsas:
-    # deepmerge-ts 7.x (stack exhaustion on recursive objects): only used by
-    # @prisma/config to merge our own prisma.config.ts in CLI runs; no user
-    # input reaches it. Fixed by prisma 7.10.1 (deepmerge-ts 8), pinned out
-    # until the user agrees to upgrade (released 2026-10-15). Review by 2026-11-01.
-    - GHSA-ggr8-5vv4-36mx
+    # Reviewed 2026-11-02; review all of these again by 2026-11-16.
+    # body-parser 2.3 (DoS on compressed bodies): only in the shadcn CLI's MCP
+    # server (dev tool, never runs in the app). Fix 2.4.0 is from 2026-10-22,
+    # younger than 2 weeks.
+    - GHSA-27r3-jxmh-p828
+    # glob 13 / minimatch 10: @fastify/static under @fastify/swagger-ui, which
+    # serves the dev-only /api/docs from a fixed folder; no user glob input.
+    # Fixes are new majors from 2026-10-27.
+    - GHSA-3g3m-2fjr-6pw4
+    - GHSA-g3hv-75wg-m249
+    # deepmerge 4.3.1 (prototype poisoning of the result): shadcn CLI only,
+    # merges its own registry JSON; no fixed release exists.
+    - GHSA-gcqx-w48m-w2h4
+    # Fixes published 2026-10-19, a few hours short of 2 weeks on 2026-11-02:
+    # add the overrides "fast-uri@^3": 3.1.9, "fast-uri@^4": 4.2.3 and
+    # "systeminformation@^5": 5.33.16 and drop these ignores on 2026-11-03.
+    # fast-uri: URI parsing in fast-json-stringify and @fastify/swagger's
+    # schema resolver, which only see our own route schemas.
+    - GHSA-333x-w4r6-6crp
+    - GHSA-w74x-v6f9-j3xg
+    - GHSA-wjr9-j795-jxcr
+    - GHSA-xhq7-xmqj-769h
+    # systeminformation: Windows-only command injection, shadcn CLI only.
+    - GHSA-3f7j-7jwc-fxfj
+    # zod 3.25.76 (memory on oversized constrained collections): shadcn CLI
+    # only; no fixed 3.x exists. The app's own zod is 4.6.6 (fixed).
+    - GHSA-mrhx-c7xc-m3w5
