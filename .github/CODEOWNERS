@@ -1,0 +1,9 @@
+# Who reviews what (https://docs.github.com/articles/about-code-owners).
+# One maintainer today; split these lines when the team grows.
+*                       @rithesh555
+
+# Changes here affect security, delivery or the access model: review closely.
+/.github/               @rithesh555
+/packages/shared/src/permissions*  @rithesh555
+/apps/api/src/auth/     @rithesh555
+/apps/api/prisma/       @rithesh555

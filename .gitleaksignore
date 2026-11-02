@@ -1,0 +1,5 @@
+# Reviewed false positives (gitleaks fingerprints). Add a line only after
+# checking the value is not a real secret, and say why.
+#
+# 2026-11-02: a made-up `mockToken` in a vendored Playwright skill example.
+f9ceb3a243a15c2a10667e878ea989ba4e1008f6:.agents/skills/playwright-best-practices/advanced/authentication-flows.md:generic-api-key:54

@@ -1,0 +1,62 @@
+name: Bug report
+description: Something in the portal doesn't work as it should
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Security problems go to a private advisory instead** (see SECURITY.md), never a public issue.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you saw, including any error message.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as a tester
+        2. Open run PAY-R-4
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Sign-in and users
+        - Projects, members, releases
+        - Test cases and import/export
+        - Test runs
+        - Defects
+        - Home and reports
+        - Deployment / infrastructure
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (blocks a main flow, no workaround)
+        - Major (main flow broken, has a workaround)
+        - Minor (side flow, or cosmetic in a main flow)
+        - Trivial (typo or tiny visual issue)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment and version
+      placeholder: "staging, v1.2.0, Chrome 130"
