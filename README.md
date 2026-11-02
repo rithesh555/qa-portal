@@ -50,6 +50,20 @@ pnpm test        # shared, API (against the test database), web; one at a time
 The API tests reset one shared test database, so never run two API test runs
 at once.
 
+## Run the whole app in containers
+
+The production-style images (API, migrate job, nginx + web) run as one stack
+on http://localhost:8080, with their own database volume:
+
+```bash
+docker/stack.sh init        # once: .env.stack with random secrets
+docker/stack.sh up
+docker/stack.sh seed-admin  # the admin password is in .env.stack
+docker/stack.sh smoke
+```
+
+How the images are built and hardened: `docs/devops/stage-01-containers.md`.
+
 ## Back up and restore the database
 
 The data lives in the `pgdata` Docker volume. Run these from the repository
