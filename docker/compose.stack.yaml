@@ -1,0 +1,103 @@
+# The whole app in containers: Postgres, a one-off migrate job, the API and
+# nginx serving the web app on http://localhost:8080.
+#
+#   docker/stack.sh up | smoke | seed-admin | logs | down
+#
+# Values come from .env.stack (git-ignored; `docker/stack.sh init` writes one
+# with random secrets). See docs/devops/stage-01-containers.md.
+name: qa-portal-stack
+
+x-app-env: &app-env
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER:?set in .env.stack}:${POSTGRES_PASSWORD:?set in .env.stack}@db:5432/${POSTGRES_DB:?set in .env.stack}
+  BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set in .env.stack}
+  # The browser's origin. http is allowed in production for localhost only.
+  WEB_ORIGIN: http://localhost:8080
+  BETTER_AUTH_URL: http://localhost:8080
+  LOG_LEVEL: info
+
+services:
+  db:
+    image: postgres:17.11-alpine@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # Not published to the host: only the stack network reaches it.
+    volumes:
+      - stackdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks: [stack]
+
+  # Applies pending migrations, then exits. Runs on every `up`; a no-op when
+  # the schema is current.
+  migrate:
+    image: qa-portal-migrate:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      <<: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    networks: [stack]
+
+  api:
+    image: qa-portal-api:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: api
+    init: true
+    restart: unless-stopped
+    environment:
+      <<: *app-env
+      # Only nginx's address: its X-Forwarded-For is the one we believe.
+      TRUST_PROXY: 172.30.0.10
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [stack]
+
+  web:
+    image: qa-portal-web:local
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      target: web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8080"
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks:
+      stack:
+        ipv4_address: 172.30.0.10
+
+networks:
+  stack:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  stackdata:

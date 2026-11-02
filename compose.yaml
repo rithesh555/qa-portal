@@ -1,4 +1,5 @@
-# Local PostgreSQL only. App containers come in Phase 9 (DevOps).
+# Local PostgreSQL for development only. The containerised app stack is
+# docker/compose.stack.yaml (docker/stack.sh).
 name: qa-portal
 
 services:

@@ -1,0 +1,42 @@
+# Keep the build context small and free of secrets. Docker reads this file
+# for every build. Anything listed here can't leak into an image layer.
+
+# secrets and local state
+.env
+.env.*
+!.env.example
+!.env.stack.example
+**/.auth/
+.git/
+.github/
+.claude/
+.agents/
+.mcp.json
+.playwright-mcp/
+
+# dependencies and build output (the image installs and builds its own)
+**/node_modules/
+.pnpm-store/
+**/dist/
+**/coverage/
+**/*.tsbuildinfo
+apps/api/src/generated/
+
+# not needed to build or run the app (e2e's manifest stays: it is a workspace member)
+e2e/**
+!e2e/package.json
+load/
+docs/
+deploy/
+infra/
+observability/
+**/test/
+**/*.test.ts
+**/*.test.tsx
+*.md
+!apps/**/*.md
+Dockerfile
+.dockerignore
+docker/compose*.yaml
+docker/*.sh
+docker/smoke.ts

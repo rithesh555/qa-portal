@@ -37,3 +37,6 @@ e2e/.auth/
 e2e/results/
 e2e/.web-dist/
 apps/api/src/generated/
+
+# docker/stack.sh secrets
+!.env.stack.example
