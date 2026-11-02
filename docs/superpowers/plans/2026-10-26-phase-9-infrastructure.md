@@ -1,3 +1,5 @@
+> **Superseded (2026-11-02)** by [`2026-11-02-phase-9-devops.md`](2026-11-02-phase-9-devops.md). Its container, nginx, smoke and Locust design is reused there as Stages 1 and 8.
+
 # Phase 9 Infrastructure Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
