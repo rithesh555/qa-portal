@@ -45,6 +45,12 @@ overrides:
   "undici@^8": 8.12.2
   # @fastify/rate-limit (API).
   "ip-address@^10": 10.7.4
+  # 2026-11-03, fixes published 2026-10-19. fast-uri: URI parsing in
+  # fast-json-stringify and @fastify/swagger's schema resolver (API).
+  "fast-uri@^3": 3.1.9
+  "fast-uri@^4": 4.2.3
+  # systeminformation: Windows-only command injection; shadcn CLI only.
+  "systeminformation@^5": 5.33.16
 
 auditConfig:
   ignoreGhsas:
@@ -61,17 +67,6 @@ auditConfig:
     # deepmerge 4.3.1 (prototype poisoning of the result): shadcn CLI only,
     # merges its own registry JSON; no fixed release exists.
     - GHSA-gcqx-w48m-w2h4
-    # Fixes published 2026-10-19, a few hours short of 2 weeks on 2026-11-02:
-    # add the overrides "fast-uri@^3": 3.1.9, "fast-uri@^4": 4.2.3 and
-    # "systeminformation@^5": 5.33.16 and drop these ignores on 2026-11-03.
-    # fast-uri: URI parsing in fast-json-stringify and @fastify/swagger's
-    # schema resolver, which only see our own route schemas.
-    - GHSA-333x-w4r6-6crp
-    - GHSA-w74x-v6f9-j3xg
-    - GHSA-wjr9-j795-jxcr
-    - GHSA-xhq7-xmqj-769h
-    # systeminformation: Windows-only command injection, shadcn CLI only.
-    - GHSA-3f7j-7jwc-fxfj
     # zod 3.25.76 (memory on oversized constrained collections): shadcn CLI
     # only; no fixed 3.x exists. The app's own zod is 4.6.6 (fixed).
     - GHSA-mrhx-c7xc-m3w5
