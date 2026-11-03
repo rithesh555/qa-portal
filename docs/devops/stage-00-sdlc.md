@@ -33,7 +33,7 @@ Background on the workflow choice: [ADR 0001](adr/0001-trunk-based-prs-and-relea
 
 ## Actions only you can do (one-off)
 
-- **Let Actions open the release PR.** Settings → Actions → General → Workflow permissions: keep **"Read repository contents"** as the default, and tick **"Allow GitHub Actions to create and approve pull requests"**. Every workflow still starts from `permissions: {}` and asks for what it needs; this tick only lets `release.yml` open its release PR. It's off by default, and Claude doesn't change security settings for you.
+- **Release PRs come from the release app (Stage 3).** At first we ticked "Allow GitHub Actions to create and approve pull requests" so `release.yml` could open its PR with `GITHUB_TOKEN`. Such a PR gets no CI, so it could never pass the required checks. `release.yml` now uses a GitHub App token instead (see [stage-03-supply-chain.md](stage-03-supply-chain.md)), and the tick is **off** again: with it on, any workflow's token could approve pull requests.
 - **Tag the starting point.** `gh release create v1.0.0 --target 4cf622d22e0340dde695e2840656c33665fbdec9 --title "v1.0.0" --notes "Phases 1–8.5: the complete app. Phase 9 (DevOps) starts here."` release-please counts from this point (`bootstrap-sha` in `release-please-config.json`; the version is in `.release-please-manifest.json`).
 
 - **Install the Renovate app.** Go to https://github.com/apps/renovate → Install → choose only `rithesh555/qa-portal`. Renovate then opens an onboarding PR that checks `renovate.json`. Merge it, then look at the Dependency Dashboard issue.

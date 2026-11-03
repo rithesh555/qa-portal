@@ -17,19 +17,19 @@ DevOps is that loop: **small changes, automated checks, repeatable delivery, and
 
 ## Stages
 
-| #   | Stage                               | Note                                             | Status      |
-| --- | ----------------------------------- | ------------------------------------------------ | ----------- |
-| 0   | Repo and ways of working            | [stage-00-sdlc.md](stage-00-sdlc.md)             | done        |
-| 1   | Containers                          | [stage-01-containers.md](stage-01-containers.md) | done        |
-| 2   | Continuous integration              | [stage-02-ci.md](stage-02-ci.md)                 | in progress |
-| 3   | Artifacts and supply-chain security | stage-03-supply-chain.md                         | planned     |
-| 4   | Local Kubernetes platform as code   | stage-04-platform.md                             | planned     |
-| 5   | Helm chart and environments         | stage-05-helm.md                                 | planned     |
-| 6   | GitOps delivery and promotion       | stage-06-gitops.md                               | planned     |
-| 7   | Observability and SLOs              | stage-07-observability.md                        | planned     |
-| 8   | Performance and security testing    | stage-08-testing.md                              | planned     |
-| 9   | Reliability, backup/DR, operations  | stage-09-operations.md                           | planned     |
-| 10  | Cloud (optional)                    | stage-10-cloud.md                                | later       |
+| #   | Stage                               | Note                                                 | Status      |
+| --- | ----------------------------------- | ---------------------------------------------------- | ----------- |
+| 0   | Repo and ways of working            | [stage-00-sdlc.md](stage-00-sdlc.md)                 | done        |
+| 1   | Containers                          | [stage-01-containers.md](stage-01-containers.md)     | done        |
+| 2   | Continuous integration              | [stage-02-ci.md](stage-02-ci.md)                     | in progress |
+| 3   | Artifacts and supply-chain security | [stage-03-supply-chain.md](stage-03-supply-chain.md) | in progress |
+| 4   | Local Kubernetes platform as code   | stage-04-platform.md                                 | planned     |
+| 5   | Helm chart and environments         | stage-05-helm.md                                     | planned     |
+| 6   | GitOps delivery and promotion       | stage-06-gitops.md                                   | planned     |
+| 7   | Observability and SLOs              | stage-07-observability.md                            | planned     |
+| 8   | Performance and security testing    | stage-08-testing.md                                  | planned     |
+| 9   | Reliability, backup/DR, operations  | stage-09-operations.md                               | planned     |
+| 10  | Cloud (optional)                    | stage-10-cloud.md                                    | later       |
 
 ## Other documents
 

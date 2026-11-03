@@ -1,6 +1,11 @@
 # Keeps a release PR open with the next version and CHANGELOG.md, worked out
 # from the Conventional Commit titles merged to main. Merging that PR tags
 # vX.Y.Z and creates the GitHub release. See docs/devops/stage-00-sdlc.md.
+#
+# It acts as the repo's own GitHub App (not the workflow's GITHUB_TOKEN):
+# GitHub never starts workflows for a PR opened with GITHUB_TOKEN, so the
+# release PR would get no CI and could never pass the required checks.
+# See docs/devops/stage-03-supply-chain.md.
 name: release
 
 on:
@@ -18,11 +23,25 @@ jobs:
     name: Release PR and tags
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    permissions:
-      contents: write # tags, releases, CHANGELOG commits
-      pull-requests: write # the release PR
+    # The app's private key lives in this environment, which only main can use.
+    environment: release
+    # The workflow token isn't used; the app token below does the writes.
+    permissions: {}
     steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - name: App token (this repo only, short-lived)
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write # tags, releases, CHANGELOG commits
+          permission-pull-requests: write # the release PR
+          permission-issues: write # release-please's "autorelease" labels
       - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
+          token: ${{ steps.app-token.outputs.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
