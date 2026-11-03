@@ -71,6 +71,76 @@
     {
       "groupName": "github actions",
       "matchManagers": ["github-actions"]
+    },
+    {
+      "description": "Major upgrades wait for a tick on the Dependency Dashboard: they can need migration work (a Postgres major needs a dump and restore).",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Overrides in pnpm-workspace.yaml pin one major line each (e.g. undici@^7); never move them to the next major.",
+      "matchFileNames": ["pnpm-workspace.yaml"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "engines.node is a supported range, not a pin.",
+      "matchDepTypes": ["engines"],
+      "enabled": false
+    },
+    {
+      "description": "lefthook 2.2.2 was published without provenance (pnpm trustPolicy rejects it); see docs/devops/stage-02-ci.md.",
+      "matchPackageNames": ["lefthook"],
+      "allowedVersions": "!/^2\\.2\\.2$/"
+    },
+    {
+      "description": "One Node version everywhere: Docker base image, CI and .nvmrc move together.",
+      "matchDepNames": ["node"],
+      "groupName": "node"
+    },
+    {
+      "description": "pnpm in package.json (packageManager) and the Dockerfile move together.",
+      "matchDepNames": ["pnpm"],
+      "groupName": "pnpm"
+    },
+    {
+      "description": "Tool images that CI and the git hooks run with docker run.",
+      "matchManagers": ["custom.regex"],
+      "matchDatasources": ["docker"],
+      "groupName": "ci tool images"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Tool images run with `docker run` in workflows and lefthook.yml",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/[^/]+\\.ya?ml$/",
+        "/^lefthook\\.yml$/"
+      ],
+      "matchStrings": [
+        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "pnpm version the Dockerfile activates with corepack",
+      "managerFilePatterns": ["/^Dockerfile$/"],
+      "matchStrings": ["corepack prepare pnpm@(?<currentValue>[0-9][\\w.-]*)"],
+      "depNameTemplate": "pnpm",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "description": "Default Node version of the CI setup action",
+      "managerFilePatterns": ["/^\\.github/actions/setup/action\\.yml$/"],
+      "matchStrings": [
+        "node-version:\\s*\\n\\s*description:[^\\n]*\\n\\s*default:\\s*\"(?<currentValue>[0-9][\\w.-]*)\""
+      ],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version",
+      "versioningTemplate": "node"
     }
   ]
 }

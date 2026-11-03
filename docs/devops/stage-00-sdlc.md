@@ -39,6 +39,21 @@ Background on the workflow choice: [ADR 0001](adr/0001-trunk-based-prs-and-relea
 - **Install the Renovate app.** Go to https://github.com/apps/renovate → Install → choose only `rithesh555/qa-portal`. Renovate then opens an onboarding PR that checks `renovate.json`. Merge it, then look at the Dependency Dashboard issue.
 - **Local hooks.** `pnpm install` installs them through the `prepare` script. Check with `pnpm exec lefthook run pre-commit`.
 
+## Renovate after its first run (2026-11-03)
+
+Renovate found our `renovate.json` already on `main`, so it skipped the onboarding PR and opened the **Dependency Dashboard** (issue #5). Reading that first dashboard showed what the config got wrong, and we tuned it:
+
+| Seen on the dashboard                                                                              | Rule added                                                                                                       |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `undici@^7` override proposed to v8                                                                | Overrides in `pnpm-workspace.yaml` never change major: each one pins one major line.                             |
+| lefthook 2.2.2 proposed again                                                                      | Never propose 2.2.2 (no provenance; pnpm's `trustPolicy` rejects it).                                            |
+| Postgres 18, TypeScript 7, ubuntu-26.04 runners, actions/cache v6 as ordinary PRs                  | Every major update waits for a tick on the dashboard.                                                            |
+| `engines.node` range would be rewritten                                                            | `engines` is a supported range, not a pin: left alone.                                                           |
+| pnpm in the Dockerfile, CI's Node default and the tool images in `docker run` lines were invisible | Three regex custom managers teach Renovate those places.                                                         |
+| Node and pnpm updates would land piecemeal                                                         | Groups: one Node version everywhere (Docker base, CI, `.nvmrc`), one pnpm (`packageManager` and the Dockerfile). |
+
+Updates younger than 14 days sit under **Pending Status Checks** on the dashboard: that's `minimumReleaseAge` working. Check `renovate.json` with `npx --package renovate@44.171.1 -- renovate-config-validator --strict renovate.json`.
+
 ## Exercise (about 15 minutes)
 
 1. **Bad commit message.** On a scratch branch, run `git commit --allow-empty -m "fixed stuff"`. commitlint rejects it with `type may not be empty`. Then try `git commit --allow-empty -m "chore: try the hooks"`; it passes.
