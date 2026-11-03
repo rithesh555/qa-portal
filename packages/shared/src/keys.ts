@@ -15,6 +15,8 @@ export function parseKeyRef(
     /[.*+?^${}()|[\]\\]/g,
     "\\$&"
   )
+  // The prefix is escaped above; the rest is a fixed pattern.
+  // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
   const match = new RegExp(`^(?:${prefix})?([1-9][0-9]{0,9})$`, "i").exec(
     ref.trim()
   )

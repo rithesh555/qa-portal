@@ -191,6 +191,8 @@ function serveRun(r: TestRun, cases: RunCase[]) {
 const resultButton = (name: string) =>
   within(screen.getByRole("group", { name: "Record a result" })).getByRole(
     "button",
+    // Test helper; `name` is a literal from the test itself.
+    // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
     { name: new RegExp(`^${name}`) }
   )
 

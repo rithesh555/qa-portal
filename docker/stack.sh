@@ -3,6 +3,7 @@
 #
 #   docker/stack.sh init        write .env.stack with random secrets (once)
 #   docker/stack.sh up          build the images and start the stack
+#                               (STACK_NO_BUILD=1: use images built already, as CI does)
 #   docker/stack.sh seed-admin  create the first admin (SEED_ADMIN_* in .env.stack)
 #   docker/stack.sh smoke       run the smoke checks against http://localhost:8080
 #   docker/stack.sh logs [svc]  follow logs
@@ -42,7 +43,9 @@ case "$cmd" in
     ;;
   up)
     need_env
-    "${compose[@]}" up --build --detach --wait "$@"
+    build_flag=--build
+    [[ "${STACK_NO_BUILD:-}" == 1 ]] && build_flag=--no-build
+    "${compose[@]}" up "$build_flag" --detach --wait "$@"
     "${compose[@]}" ps
     ;;
   seed-admin)
@@ -71,7 +74,7 @@ case "$cmd" in
     "${compose[@]}" down "$@"
     ;;
   *)
-    sed -n '2,10p' "$0"
+    sed -n '2,11p' "$0"
     exit 1
     ;;
 esac

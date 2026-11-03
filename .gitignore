@@ -36,6 +36,10 @@ playwright-report/
 e2e/.auth/
 e2e/results/
 e2e/.web-dist/
+# CI: per-shard blob reports and the merged HTML report
+e2e/blob-report/
+e2e/all-blob-reports/
+e2e/playwright-report/
 apps/api/src/generated/
 
 # docker/stack.sh secrets

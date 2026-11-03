@@ -1,0 +1,8 @@
+# zizmor configuration (https://docs.zizmor.sh/configuration/).
+rules:
+  # zizmor recommends GitHub's new `uses: $/...` syntax for in-repo actions
+  # (July 2026), but actionlint 1.7.12, the newest release, rejects it. Our
+  # workflows check out the commit under test and clone nothing else before
+  # using ./.github/actions/setup. Revisit when actionlint supports `$/`.
+  self-repository:
+    disable: true

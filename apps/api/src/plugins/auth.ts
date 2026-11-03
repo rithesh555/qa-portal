@@ -293,6 +293,9 @@ async function forward(
     // The session lives in an httpOnly cookie; its token never goes to page script.
     return reply.send(rest)
   }
+  // Better Auth's own body, sent with its Content-Type (copied above) and
+  // helmet's nosniff: not HTML built from user input.
+  // nosemgrep: javascript.express.security.audit.xss.direct-response-write.direct-response-write
   return reply.send(text)
 }
 
