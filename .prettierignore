@@ -8,3 +8,6 @@ skills-lock.json
 e2e/.auth
 e2e/results
 e2e/.web-dist
+# Written by release-please in its own style; reformatting it would make
+# every release PR fail the lint job.
+CHANGELOG.md
