@@ -33,5 +33,6 @@ The rule: every version is **at least 14 days old** when we pin it. Actions are 
 | zizmor                                           | 1.31.1       | 2026-10-15 | `ghcr.io/zizmorcore/zizmor:1.31.1@sha256:42d409db…`                           | 2026-11-02 |
 | semgrep CE                                       | 1.181.0      | 2026-10-14 | `semgrep/semgrep:1.181.0@sha256:81474464…` (1.183.0 is under 14 days old)     | 2026-11-02 |
 | Node in CI                                       | 22.23.3      | 2026-09-23 | `node-version` in `.github/actions/setup` (22.23.4 is under 14 days old)      | 2026-11-02 |
+| actions/create-github-app-token                  | v3.3.0       | 2026-10-12 | `64ab729a6294000f5aa4a4bc0b73d1f32bc45510`                                    | 2026-11-03 |
 
 **Images: version age versus digest.** The 14-day rule applies to the _version_ (Node 22.23.3, nginx 1.30.6). The digest is whatever build of that version is current, because upstream rebuilds a tag to ship OS security patches. Renovate (`docker:pinDigests`) proposes new digests as they appear.
