@@ -31,7 +31,7 @@ concurrency:
 jobs:
   promote:
     name: Verify and version-tag the images
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 45
     permissions:
       contents: read # resolve the release tag to its commit
