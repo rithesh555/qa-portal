@@ -1,0 +1,127 @@
+# Build once, promote by digest. When a release is published (release.yml,
+# acting as the repo's GitHub App, so this workflow is triggered), the
+# release commit's images get their version tags (1.2.3, 1.2, 1).
+#
+# A version tag is only a new name for an image build.yml already built,
+# scanned, signed and attested on main. Before naming it, this job checks
+# that: it resolves sha-<7> to a digest once, verifies the cosign signature
+# and the SLSA provenance against build.yml on refs/heads/main *for this
+# exact commit*, and only when all three images pass does it tag those
+# verified digests. An image pushed by anything else fails here.
+# See docs/devops/stage-03-supply-chain.md.
+name: Promote release images
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+# Explicit bash adds pipefail, so a failing command in a pipe fails the step.
+defaults:
+  run:
+    shell: bash
+
+# One group for all releases: two promotions never interleave their writes
+# to the shared 1 and 1.2 tags.
+concurrency:
+  group: promote
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Verify and version-tag the images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read # resolve the release tag to its commit
+      actions: read # find and watch that commit's build run
+      packages: write # add the version tags in GHCR
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG_NAME: ${{ github.event.release.tag_name }}
+      IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/build.yml@refs/heads/main
+      ISSUER: https://token.actions.githubusercontent.com
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - name: Release commit and version
+        id: release
+        run: |
+          [[ "$TAG_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || { echo "::error::Not a release tag: $TAG_NAME"; exit 1; }
+          sha=$(gh api "repos/$GH_REPO/commits/$TAG_NAME" --jq .sha)
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Could not resolve $TAG_NAME"; exit 1; }
+          {
+            echo "sha=$sha"
+            echo "version=${TAG_NAME#v}"
+            echo "minor=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+            echo "major=${BASH_REMATCH[1]}"
+          } >> "$GITHUB_OUTPUT"
+      - name: Wait for the release commit's images
+        env:
+          SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id=$(gh run list --workflow build.yml --commit "$SHA" --event push --limit 1 --json databaseId -q '.[0].databaseId')
+            [ -n "$run_id" ] && break
+            sleep 20
+          done
+          [ -n "$run_id" ] || { echo "::error::No build.yml run for $SHA"; exit 1; }
+          gh run watch "$run_id" --exit-status --interval 30 > /dev/null
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: docker login ghcr.io -u "$ACTOR" --password-stdin <<< "$TOKEN"
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: v3.1.3
+      # The tag is read once; from then on everything uses the digest, so the
+      # image that was verified is the image that gets tagged.
+      # --certificate-github-workflow-sha pins the signature to the release
+      # commit: an older main image moved onto sha-<7> fails.
+      # All three are verified before any tag is written, so a failure
+      # never leaves a release half-tagged.
+      - name: Verify all three images
+        env:
+          SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          : > digests
+          for image in api migrate web; do
+            ref="ghcr.io/rithesh555/qa-portal-$image"
+            digest=$(docker buildx imagetools inspect "$ref:sha-${SHA::7}" --format '{{json .Manifest}}' | jq -r .digest)
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || { echo "::error::No digest for $ref:sha-${SHA::7}"; exit 1; }
+            cosign verify "$ref@$digest" --certificate-github-workflow-sha "$SHA" \
+              --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" > /dev/null
+            cosign verify-attestation "$ref@$digest" --type https://slsa.dev/provenance/v1 \
+              --certificate-github-workflow-sha "$SHA" \
+              --certificate-identity "$IDENTITY" --certificate-oidc-issuer "$ISSUER" > /dev/null
+            echo "$image $digest" >> digests
+          done
+      # 1.2.3 always. The moving 1.2 and 1 tags only if this is the newest
+      # release in that line, so re-running an old release's promotion never
+      # moves them backwards.
+      # --prefer-index=false copies the manifest as it is, so the digest
+      # (and everything signed or attested against it) stays the same.
+      - name: Add the version tags
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+          MINOR: ${{ steps.release.outputs.minor }}
+          MAJOR: ${{ steps.release.outputs.major }}
+        run: |
+          releases=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName -q '.[].tagName')
+          grep -qx "v$VERSION" <<< "$releases" || { echo "::error::v$VERSION is not in the release list yet"; exit 1; }
+          newest() { grep -E "^v$1\.[0-9]+(\.[0-9]+)?$" <<< "$releases" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1; }
+          tags=("$VERSION")
+          [ "$(newest "${MINOR//./\\.}")" = "v$VERSION" ] && tags+=("$MINOR")
+          [ "$(newest "$MAJOR")" = "v$VERSION" ] && tags+=("$MAJOR")
+          while read -r image digest; do
+            ref="ghcr.io/rithesh555/qa-portal-$image"
+            args=()
+            for t in "${tags[@]}"; do args+=(-t "$ref:$t"); done
+            docker buildx imagetools create --prefer-index=false "${args[@]}" "$ref@$digest"
+            echo "- \`$ref@$digest\`: ${tags[*]} (signature and provenance verified)" >> "$GITHUB_STEP_SUMMARY"
+          done < digests
