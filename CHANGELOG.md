@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/rithesh555/qa-portal/compare/v1.0.1...v1.0.2) (2026-11-04)
+
+
+### Bug fixes
+
+* **deps:** update dependency @hookform/resolvers to v6 ([#14](https://github.com/rithesh555/qa-portal/issues/14)) ([f8c9647](https://github.com/rithesh555/qa-portal/commit/f8c9647564aa90cd96871383b4ae9be79cd99e48))
+
 ## [1.0.1](https://github.com/rithesh555/qa-portal/compare/v1.0.0...v1.0.1) (2026-11-03)
 
 
