@@ -25,7 +25,7 @@ concurrency:
 jobs:
   scan:
     name: Rescan qa-portal-${{ matrix.image }}:main
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
       contents: read # .trivyignore.yaml

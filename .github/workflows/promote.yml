@@ -43,7 +43,7 @@ jobs:
   promote:
     name: Verify and version-tag the images
     if: github.event_name == 'release' || github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 45
     permissions:
       contents: read # resolve the release tag to its commit
