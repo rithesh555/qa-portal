@@ -12,7 +12,7 @@ The rule: every version is **at least 14 days old** when we pin it. Actions are 
 | GitHub runner image                              | ubuntu-24.04 | n/a        | label                                                                         | 2026-11-02 |
 | node (base image)                                | 22.23.3      | 2026-09-23 | `node:22.23.3-bookworm-slim@sha256:3ed98443…`                                 | 2026-11-02 |
 | nginx-unprivileged (base image)                  | 1.30.6       | 2026-10-14 | `nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4…`                  | 2026-11-02 |
-| postgres (stack image)                           | 17.11        | n/a        | `postgres:17.11-alpine@sha256:266d3c25…`                                      | 2026-11-02 |
+| postgres (dev, stack and CI service image)       | 18.4         | n/a        | `postgres:18.4-alpine@sha256:9a8afca5…`                                       | 2026-11-04 |
 | pnpm (in the build stages)                       | 12.11.2      | 2026-10-09 | `corepack prepare pnpm@12.11.2`                                               | 2026-11-02 |
 | hadolint                                         | v2.15.1      | 2026-07-31 | `hadolint/hadolint:v2.15.1` (CI: `@sha256:32dac941…`)                         | 2026-11-02 |
 | shellcheck                                       | v0.11.0      | 2025-08-04 | `koalaman/shellcheck:v0.11.0`                                                 | 2026-11-02 |
