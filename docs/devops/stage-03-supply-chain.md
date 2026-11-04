@@ -86,6 +86,7 @@ An image signed from a fork, a PR branch or another workflow file fails that che
 
 - **Today:** `promote.yml` refuses to version-tag an image that isn't signed by `build.yml` on `main` **for the release commit** (`--certificate-github-workflow-sha <commit>`). Without that, anything able to push to `sha-<7>` could get its image released, including an older, genuinely signed image moved onto the tag. The identity says _who_ signed; the commit check says _what source_ it was. `build.yml` also refuses to re-sign an existing `sha-<7>` image whose `revision` label isn't this commit.
 - **All checks before any write:** promote verifies all three images before it tags any of them, so a failure never leaves a release half-tagged.
+- **Promote again by hand** (a failed or partial promotion): Actions → "Promote release images" → Run workflow on `main`, with the tag (e.g. `v1.0.5`), or `gh workflow run promote.yml -f tag=v1.0.5`. The same checks run, and it's safe to repeat.
 - **Stage 6:** Kyverno refuses to run such an image in the cluster.
 
 ## The SBOM: what's inside
