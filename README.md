@@ -9,7 +9,7 @@ Internal portal for QA work: projects, test cases, test runs, defects and
 
 - **Web:** React + Vite (`apps/web`), http://localhost:5173
 - **API:** Fastify (`apps/api`), http://localhost:3000 (`/api/health`; API docs at `/api/docs` in development only)
-- **Database:** PostgreSQL 17 in Docker, on port **5433**
+- **Database:** PostgreSQL 18 in Docker, on port **5433**
 - **Shared code:** Zod schemas and rules in `packages/shared`
 
 ## What you need
@@ -70,7 +70,7 @@ How the images are built and hardened: `docs/devops/stage-01-containers.md`.
 
 ## Back up and restore the database
 
-The data lives in the `pgdata` Docker volume. Run these from the repository
+The data lives in the `pgdata18` Docker volume. Run these from the repository
 root while the database is up. They read the user and database names from
 `.env` inside the container, so nothing secret goes on the command line.
 
@@ -90,6 +90,36 @@ docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB
 A backup includes the migration history, so after restoring an older backup
 run `pnpm --filter @qa/api db:deploy` to bring it up to date. Keep backups
 out of the repository: they hold every user's data and password hashes.
+
+## Upgrading the database to Postgres 18
+
+Postgres can't open another major version's data files, so a new major
+means dump, then restore. `compose.yaml` uses a new volume (`pgdata18`) for
+18 and leaves the old `qa-portal_pgdata` (Postgres 17) untouched, so nothing
+is lost if a step goes wrong. Stop `pnpm dev` first.
+
+```bash
+# 1. Back up from the old Postgres 17 (an image tag, so it starts the old volume)
+docker compose down
+docker run -d --name pg17-old --env-file .env -v qa-portal_pgdata:/var/lib/postgresql/data postgres:17.11-alpine
+until docker exec pg17-old pg_isready -q; do sleep 1; done
+docker exec pg17-old sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom' > qa-portal-pg17.dump
+docker rm -f pg17-old
+
+# 2. Start Postgres 18 (creates pgdata18 with the main, test and E2E databases)
+docker compose up -d --wait
+
+# 3. Restore, then check
+docker compose exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner --exit-on-error' < qa-portal-pg17.dump
+pnpm --filter @qa/api db:deploy      # "No pending migrations"
+pnpm dev                             # sign in, check your projects are there
+```
+
+Once you're happy: `docker volume rm qa-portal_pgdata` and delete the dump
+(it holds every user's data and password hashes). The test and E2E databases
+aren't restored: their suites reset them on every run.
+The container stack (`docker/stack.sh`) starts empty on 18 too; its old
+`qa-portal-stack_stackdata` volume can simply be removed.
 
 ## Database changes and demo data
 
