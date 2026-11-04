@@ -1,0 +1,12 @@
+# actionlint settings (CI: ci.yml "Workflow lint"; locally: lefthook).
+self-hosted-runner:
+  # Not self-hosted: GitHub-hosted labels that actionlint 1.7.12 (the newest
+  # release, 2026-03-30) doesn't know yet. Remove each one once a newer
+  # actionlint lists it, so typos in runs-on are caught again.
+  labels:
+    - ubuntu-26.04
+
+# Every `vars.X` a workflow may use. A typo in a variable name then fails the
+# lint instead of silently resolving to an empty string at run time.
+config-variables:
+  - RELEASE_APP_CLIENT_ID
