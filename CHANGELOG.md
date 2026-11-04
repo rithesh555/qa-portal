@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/rithesh555/qa-portal/compare/v1.0.3...v1.0.4) (2026-11-04)
+
+
+### CI and delivery
+
+* **lint:** teach actionlint the ubuntu-26.04 runner label ([#18](https://github.com/rithesh555/qa-portal/issues/18)) ([f9b258f](https://github.com/rithesh555/qa-portal/commit/f9b258ffafd94c3cb62aa9a7da7f53b06f406679))
+
 ## [1.0.3](https://github.com/rithesh555/qa-portal/compare/v1.0.2...v1.0.3) (2026-11-04)
 
 
