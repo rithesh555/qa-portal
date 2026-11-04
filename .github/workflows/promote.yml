@@ -14,6 +14,14 @@ name: Promote release images
 on:
   release:
     types: [published]
+  # Runbook: promote a published release again (a failed or partial
+  # promotion). Only from main; the same verification runs.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to promote, e.g. v1.2.3"
+        required: true
+        type: string
 
 permissions: {}
 
@@ -28,9 +36,13 @@ concurrency:
   group: promote
   cancel-in-progress: false
 
+# TAG_NAME comes from the release event or the dispatch input, and is only
+# ever used through env, after the version check below.
+
 jobs:
   promote:
     name: Verify and version-tag the images
+    if: github.event_name == 'release' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
@@ -40,7 +52,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      TAG_NAME: ${{ github.event.release.tag_name }}
+      TAG_NAME: ${{ github.event.release.tag_name || inputs.tag }}
       IDENTITY: https://github.com/${{ github.repository }}/.github/workflows/build.yml@refs/heads/main
       ISSUER: https://token.actions.githubusercontent.com
     steps:
@@ -51,14 +63,19 @@ jobs:
         id: release
         run: |
           [[ "$TAG_NAME" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || { echo "::error::Not a release tag: $TAG_NAME"; exit 1; }
+          # Copy the groups now: any later [[ =~ ]] overwrites BASH_REMATCH.
+          major="${BASH_REMATCH[1]}"
+          minor="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
           sha=$(gh api "repos/$GH_REPO/commits/$TAG_NAME" --jq .sha)
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Could not resolve $TAG_NAME"; exit 1; }
+          [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+\.[0-9]+$ ]] || { echo "::error::Bad version parts '$major' '$minor'"; exit 1; }
           {
             echo "sha=$sha"
             echo "version=${TAG_NAME#v}"
-            echo "minor=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
-            echo "major=${BASH_REMATCH[1]}"
+            echo "minor=$minor"
+            echo "major=$major"
           } >> "$GITHUB_OUTPUT"
+          echo "$TAG_NAME = ${sha::7}: tags ${TAG_NAME#v}, and $minor / $major if it's the newest"
       - name: Wait for the release commit's images
         env:
           SHA: ${{ steps.release.outputs.sha }}
@@ -115,6 +132,7 @@ jobs:
           releases=$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName -q '.[].tagName')
           grep -qx "v$VERSION" <<< "$releases" || { echo "::error::v$VERSION is not in the release list yet"; exit 1; }
           newest() { grep -E "^v$1\.[0-9]+(\.[0-9]+)?$" <<< "$releases" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1; }
+          [[ "$MAJOR" =~ ^[0-9]+$ && "$MINOR" =~ ^[0-9]+\.[0-9]+$ ]] || { echo "::error::Bad version parts"; exit 1; }
           tags=("$VERSION")
           [ "$(newest "${MINOR//./\\.}")" = "v$VERSION" ] && tags+=("$MINOR")
           [ "$(newest "$MAJOR")" = "v$VERSION" ] && tags+=("$MAJOR")
