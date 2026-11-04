@@ -39,8 +39,8 @@ merge to main ─► build.yml
 release PR merged ─► release.yml: tag vX.Y.Z, publish the release
                   ─► promote.yml: wait for that commit's build.yml
                   ├─ resolve sha-<7> to a digest, once
-                  ├─ cosign verify + verify-attestation (build.yml on main) ─► else stop
-                  └─ add 1.2.3, 1.2, 1 to that verified digest (no rebuild)
+                  ├─ cosign verify + verify-attestation (build.yml on main, this commit) ─► else stop
+                  └─ all three passed: add 1.2.3 (and 1.2, 1 if it's the newest) to those digests
 every night     ─► image-rescan.yml: Trivy on :main ─► open, update or close an issue
 ```
 
@@ -84,7 +84,8 @@ An image signed from a fork, a PR branch or another workflow file fails that che
 
 **Producing a signature is not the same as enforcing it.** A signature only protects you where something refuses an image that fails the check:
 
-- **Today:** `promote.yml` refuses to version-tag an image that isn't signed by `build.yml` on `main`. Without that, anything able to push to `sha-<7>` could get its image released.
+- **Today:** `promote.yml` refuses to version-tag an image that isn't signed by `build.yml` on `main` **for the release commit** (`--certificate-github-workflow-sha <commit>`). Without that, anything able to push to `sha-<7>` could get its image released, including an older, genuinely signed image moved onto the tag. The identity says _who_ signed; the commit check says _what source_ it was. `build.yml` also refuses to re-sign an existing `sha-<7>` image whose `revision` label isn't this commit.
+- **All checks before any write:** promote verifies all three images before it tags any of them, so a failure never leaves a release half-tagged.
 - **Stage 6:** Kyverno refuses to run such an image in the cluster.
 
 ## The SBOM: what's inside

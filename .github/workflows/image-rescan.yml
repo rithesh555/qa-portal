@@ -29,7 +29,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read # .trivyignore.yaml
-      packages: read # pull the image while the package is private
       issues: write # open, update or close the findings issue
     strategy:
       fail-fast: false
@@ -45,19 +44,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       # Exit code 3 means "findings"; any other non-zero code is a scan error
       # and fails the job, so a broken scan never looks like a clean one.
       - name: Scan
         id: scan
         run: |
           set +e
+          # The packages are public: Trivy pulls anonymously, with no
+          # credentials in its container.
           docker run --rm \
-            -v "$HOME/.docker/config.json:/config/config.json:ro" -e DOCKER_CONFIG=/config \
             -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" \
             aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
             image --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL \

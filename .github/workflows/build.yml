@@ -22,6 +22,11 @@ on:
 
 permissions: {}
 
+# Explicit bash adds pipefail, so a failing command in a pipe fails the step.
+defaults:
+  run:
+    shell: bash
+
 # No concurrency group: every commit gets its own images, and runs for
 # different commits don't block each other. Only the "main" tag is shared,
 # and tag-main moves it only while its commit is still main's head.
@@ -65,15 +70,22 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       # sha-<7> is written once. A re-run of this workflow (say, after the
       # sign job failed) reuses the image already pushed instead of pushing a
-      # second one under the same tag.
+      # second one under the same tag, but only if its revision label says
+      # it was built from this exact commit. A short SHA can collide, and an
+      # image pushed by hand must never get signed as ours.
       - name: Already published?
         id: existing
         env:
           REF: ${{ env.IMAGE }}:sha-${{ steps.commit.outputs.short }}
         run: |
           if out=$(docker buildx imagetools inspect "$REF" --format '{{json .Manifest}}' 2>&1); then
+            revision=$(docker buildx imagetools inspect "$REF" --format '{{json .Image}}' \
+              | jq -r '.config.Labels["org.opencontainers.image.revision"] // ""')
+            if [ "$revision" != "$GITHUB_SHA" ]; then
+              echo "::error::$REF exists but was built from '${revision:-unknown}', not $GITHUB_SHA"; exit 1
+            fi
             echo "digest=$(jq -r .digest <<< "$out")" >> "$GITHUB_OUTPUT"
-            echo "$REF already exists; reusing it."
+            echo "$REF already exists, built from this commit; reusing it."
           elif grep -q 'not found' <<< "$out"; then
             echo "digest=" >> "$GITHUB_OUTPUT"
           else
@@ -268,6 +280,7 @@ jobs:
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
           head=$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)
+          [[ "$head" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::Could not read main's head"; exit 1; }
           if [ "$head" != "$GITHUB_SHA" ]; then
             echo "main is now at ${head::7}; leaving its tags to that run."
             exit 0
