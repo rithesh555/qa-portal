@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/rithesh555/qa-portal/compare/v1.0.4...v1.0.5) (2026-11-04)
+
+
+### CI and delivery
+
+* **supply-chain:** verify before promoting, split signing from the build ([#20](https://github.com/rithesh555/qa-portal/issues/20)) ([8695757](https://github.com/rithesh555/qa-portal/commit/86957571d581d118e16903bbfc282c01ee78e42e))
+
 ## [1.0.4](https://github.com/rithesh555/qa-portal/compare/v1.0.3...v1.0.4) (2026-11-04)
 
 
