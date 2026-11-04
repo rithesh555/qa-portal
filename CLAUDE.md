@@ -20,7 +20,7 @@ Internal portal for managing QA work: login, home dashboard, projects, test case
 - **Phase 8.5 is done (2026-11-02).**
 - **Phase 9 (DevOps, started with the user 2026-11-02):**
   - What it covers: containers, CI, supply-chain security, a local k3d cluster managed with OpenTofu, a Helm chart, Argo CD GitOps promotion through dev → staging → prod, OpenTelemetry and Grafana with SLOs, Locust and ZAP, backup/DR and runbooks. A cloud stage is optional and comes later.
-  - How we work: learn as we build. Each stage ships as a PR and gets a note in `docs/devops/`.
+  - How we work: learn as we build. Each stage ships as a PR and gets a note in `docs/devops/`. Before a stage's PR is merged, the `devops-reviewer` agent (senior DevOps review, read-only) reviews it; fix or explicitly accept each finding with the user.
   - Limits: the laptop has 8 GB RAM, so heavy work runs in GitHub Actions.
   - Plan: `docs/superpowers/plans/2026-11-02-phase-9-devops.md`.
 
