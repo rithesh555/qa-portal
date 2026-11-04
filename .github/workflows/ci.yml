@@ -264,12 +264,21 @@ jobs:
             migrate.cache-to=type=gha,scope=migrate,mode=max
             web.cache-from=type=gha,scope=web
             web.cache-to=type=gha,scope=web,mode=max
+      - name: Check the accepted findings (each needs a statement and an expiry date)
+        run: |
+          docker run --rm -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" \
+            mikefarah/yq:4.54.1@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e \
+            -e '[.[][] | select((has("statement") and has("expired_at")) | not)] | length == 0' \
+            /work/.trivyignore.yaml > /dev/null \
+            || { echo "::error file=.trivyignore.yaml::Every entry needs a statement and an expired_at date"; exit 1; }
       - name: Scan the images (fail on fixable HIGH/CRITICAL, or secrets)
         run: |
           for image in api migrate web; do
             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" \
               aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
               image --quiet --scanners vuln,secret --ignore-unfixed \
+              --ignorefile /work/.trivyignore.yaml \
               --severity HIGH,CRITICAL --exit-code 1 "qa-portal-$image:local"
           done
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

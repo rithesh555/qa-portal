@@ -34,5 +34,11 @@ The rule: every version is **at least 14 days old** when we pin it. Actions are 
 | semgrep CE                                       | 1.181.0      | 2026-10-14 | `semgrep/semgrep:1.181.0@sha256:81474464…` (1.183.0 is under 14 days old)     | 2026-11-02 |
 | Node in CI                                       | 22.23.3      | 2026-09-23 | `node-version` in `.github/actions/setup` (22.23.4 is under 14 days old)      | 2026-11-02 |
 | actions/create-github-app-token                  | v3.3.0       | 2026-10-12 | `64ab729a6294000f5aa4a4bc0b73d1f32bc45510`                                    | 2026-11-03 |
+| docker/login-action                              | v4.6.0       | 2026-07-29 | `dbcb813823bdd20940b903addbd779551569679f` (v4.7.0 is under 14 days old)      | 2026-11-03 |
+| sigstore/cosign-installer                        | v4.1.2       | 2026-05-07 | `6f9f17788090df1f26f669e9d70d6ae9567deba6`                                    | 2026-11-03 |
+| cosign                                           | v3.1.3       | 2026-08-06 | `cosign-release: v3.1.3` (v3.1.4 is under 14 days old)                        | 2026-11-03 |
+| actions/attest                                   | v4.2.2       | 2026-08-04 | `1e69f48acb82d1966a394da916b4c1698aa569d6`                                    | 2026-11-03 |
+| syft                                             | v1.54.1      | 2026-10-06 | `anchore/syft:v1.54.1@sha256:3eb5379b…` (v1.55.0 is under 14 days old)        | 2026-11-03 |
+| yq                                               | v4.54.1      | 2026-09-29 | `mikefarah/yq:4.54.1@sha256:4b3d9475…`                                        | 2026-11-03 |
 
 **Images: version age versus digest.** The 14-day rule applies to the _version_ (Node 22.23.3, nginx 1.30.6). The digest is whatever build of that version is current, because upstream rebuilds a tag to ship OS security patches. Renovate (`docker:pinDigests`) proposes new digests as they appear.
