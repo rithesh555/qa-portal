@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/rithesh555/qa-portal/compare/v1.0.2...v1.0.3) (2026-11-04)
+
+
+### CI and delivery
+
+* Stage 3 publish signed images with SBOM and provenance ([#16](https://github.com/rithesh555/qa-portal/issues/16)) ([7b30e02](https://github.com/rithesh555/qa-portal/commit/7b30e021ad1734c244f795d9f2e48f9ee170a594))
+
 ## [1.0.2](https://github.com/rithesh555/qa-portal/compare/v1.0.1...v1.0.2) (2026-11-04)
 
 
