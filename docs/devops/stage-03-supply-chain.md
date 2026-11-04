@@ -15,7 +15,7 @@ Every commit on `main` publishes three images to GitHub Container Registry (GHCR
 Each image has:
 
 - **Tags:**
-  - `sha-<7>` names one commit's image and is never moved.
+  - `sha-<7>` names one commit's image. It's written once: a re-run of `build.yml` finds it already there and reuses that image instead of pushing another.
   - `main` moves to the newest commit.
   - A release adds `1.0.1`, `1.0` and `1`.
 - **OCI labels** (`org.opencontainers.image.*`): the source repo, the exact commit (`revision`), the commit time, a title, and `version` = `sha-<7>`. The `source` label also links the GHCR package to this repo. `licenses` is set to `NOASSERTION` on purpose: without it, the web image inherited nginx's own `Apache-2.0` and `1.30.6-alpine` labels, which describe nginx, not our app.
@@ -27,23 +27,39 @@ Pull requests never publish. `ci.yml` builds and scans their images without push
 ## How a commit becomes a signed image
 
 ```
-merge to main ─► build.yml (one job per image, in parallel)
+merge to main ─► build.yml
+                  build     (per image; can push, can't sign)
                   ├─ bake: build with the Actions cache, push as sha-<7>    ─► digest
+                  └─ Trivy on <image>@<digest>                (findings stop the run)
+                  sign      (per image; can sign, never checks out or builds)
                   ├─ cosign sign <image>@<digest>             (keyless, logged in Rekor)
                   ├─ syft <image>@<digest> → sbom.spdx.json   ─► SBOM attestation
-                  ├─ provenance attestation                   (SLSA, signed by Sigstore)
-                  └─ move "main" to this digest, if this commit is still main's head
-release PR merged ─► release.yml: tag vX.Y.Z ─► wait for that commit's build.yml
-                  └─ add 1.2.3, 1.2, 1 to the same digests (no rebuild)
+                  └─ provenance attestation                   (SLSA, signed by Sigstore)
+                  tag-main  move "main" on all three, if this commit is still main's head
+release PR merged ─► release.yml: tag vX.Y.Z, publish the release
+                  ─► promote.yml: wait for that commit's build.yml
+                  ├─ resolve sha-<7> to a digest, once
+                  ├─ cosign verify + verify-attestation (build.yml on main) ─► else stop
+                  └─ add 1.2.3, 1.2, 1 to that verified digest (no rebuild)
 every night     ─► image-rescan.yml: Trivy on :main ─► open, update or close an issue
 ```
+
+### Why three jobs
+
+A job's permissions apply to **every step in it**. `id-token: write` lets any step mint the OIDC token and sign as "`build.yml` on `main`". If the job that signs also ran our Dockerfile, the build actions and a Syft container holding registry credentials, a compromise of any one of them could sign anything it liked. So:
+
+- **`build`** runs the risky, third-party-heavy part (checkout, buildx, bake, our Dockerfile, Trivy). It can push to GHCR but has no `id-token`, so it can't sign.
+- **`sign`** never checks out the repo or builds anything. It gets the digest from `build` (as a tiny artifact, because matrix jobs can't pass one output per leg) and runs only cosign, Syft (with no credentials; the packages are public) and `actions/attest`.
+- **`tag-main`** has only `packages: write` and moves `main` once all three images are signed.
+
+This separation of "build" from "sign the provenance" is what SLSA Build Level 3 asks for: the build steps can't forge the provenance about themselves.
 
 ### Tags lie, digests don't
 
 A tag is a name that can be pointed at a different image at any time, by us or by an attacker with push access. A **digest** (`sha256:…`) is the hash of the image itself. That's why:
 
 - **Everything is signed and attested by digest,** never by tag.
-- **Releases are promoted, not rebuilt.** `docker buildx imagetools create --prefer-index=false` adds the version tags to the exact manifest `main` already built, scanned and signed. A rebuild would give a new digest, and the signatures would no longer apply to it. "Build once, promote everywhere" is the rule from here on; Stage 6 deploys by digest too.
+- **Releases are promoted, not rebuilt.** `docker buildx imagetools create --prefer-index=false` adds the version tags to the exact manifest `main` already built, scanned and signed, after `promote.yml` has **verified** its signature and provenance. A rebuild would give a new digest, and the signatures would no longer apply to it. "Build once, promote everywhere" is the rule from here on; Stage 6 deploys by digest too.
 - **`main` moves carefully.** Runs for two quick merges can finish out of order, so the last step moves `main` only if `git ls-remote` still shows this commit as main's head.
 
 ## Signing: cosign, keyless
@@ -57,12 +73,19 @@ The usual way to sign something is with a private key. Then you have to store th
 To verify, you don't need a public key. You say **who** must have signed the image:
 
 ```bash
-cosign verify ghcr.io/rithesh555/qa-portal-api:main \
+cosign verify ghcr.io/rithesh555/qa-portal-api@sha256:<digest> \
   --certificate-identity https://github.com/rithesh555/qa-portal/.github/workflows/build.yml@refs/heads/main \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
-An image signed from a fork, a PR branch or another workflow file fails that check. That's the property Stage 6's Kyverno policy enforces in the cluster.
+Verify **by digest**, as above. Verifying `:main` works too, but it checks whatever the tag points at _right now_, which may not be the image you go on to pull.
+
+An image signed from a fork, a PR branch or another workflow file fails that check.
+
+**Producing a signature is not the same as enforcing it.** A signature only protects you where something refuses an image that fails the check:
+
+- **Today:** `promote.yml` refuses to version-tag an image that isn't signed by `build.yml` on `main`. Without that, anything able to push to `sha-<7>` could get its image released.
+- **Stage 6:** Kyverno refuses to run such an image in the cluster.
 
 ## The SBOM: what's inside
 
@@ -80,7 +103,15 @@ The SBOM is attached as an **attestation**. That means it's signed in the same k
 - the workflow file and ref;
 - the run ID and the runner environment.
 
-`gh attestation verify` checks the signature, and checks that the identity in it belongs to our repo. GitHub keeps the attestations, and `push-to-registry` also stores them in GHCR next to the image, so the cluster can read them later.
+`gh attestation verify` checks the signature and the identity in it. With only `--repo`, any workflow on any branch of this repo would pass, so also say which workflow and ref:
+
+```bash
+gh attestation verify oci://ghcr.io/rithesh555/qa-portal-api@sha256:<digest> \
+  --repo rithesh555/qa-portal \
+  --signer-workflow rithesh555/qa-portal/.github/workflows/build.yml --source-ref refs/heads/main
+```
+
+It's the same identity the `cosign verify` command names. (`cosign verify-attestation --type https://slsa.dev/provenance/v1` with the cosign flags above checks the same thing; `promote.yml` uses that.) GitHub keeps the attestations, and `push-to-registry` also stores them in GHCR next to the image, so the cluster can read them later.
 
 **cosign signature and attestations: isn't that two signatures?** Yes, on purpose. The attestations carry facts (packages, build details). The cosign signature is the plain "this repo's build workflow published this digest" check that admission controllers support most widely.
 
@@ -89,6 +120,7 @@ The SBOM is attached as an **attestation**. That means it's signed in the same k
 An image that was clean at build time can have a critical CVE next week, because advisories keep being published. So:
 
 - **The PR gate** (`ci.yml`, Stage 2) blocks fixable HIGH/CRITICAL findings before merge.
+- **`build.yml`** scans the exact digest it published, before anything is signed. The PR scanned a different build (the PR's merge preview), and a new advisory may have landed between the PR and the merge. "Scan what you ship."
 - **`image-rescan.yml`** runs every night at 04:15 UTC and scans each `:main` image again with fresh vulnerability data.
   - With findings, it opens one issue per image, or updates the open one with a comment.
   - When a later scan is clean, the issue closes itself.
@@ -100,14 +132,16 @@ An image that was clean at build time can have a critical CVE next week, because
 
 ## Decisions, and what we left out
 
-| Decision                                                            | Why                                                                                                                                                                                                                                                          |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **amd64 only** (no arm64)                                           | The laptop cluster (k3d on WSL) and GitHub's runners are x86. Building arm64 under QEMU emulation would multiply build time for a platform nobody runs. Add it the day a target needs it: `platforms = ["linux/amd64", "linux/arm64"]` in `docker-bake.hcl`. |
-| **BuildKit's own provenance and SBOM turned off**                   | One source of truth (the GitHub attestations), and each image stays a plain single-platform manifest, which keeps the retag and verify steps simple.                                                                                                         |
-| **`actions/attest`**, not `attest-build-provenance` / `attest-sbom` | Both are now thin wrappers around `actions/attest`, and `attest-sbom` is being deprecated.                                                                                                                                                                   |
-| **No Trivy step in `build.yml`**                                    | The same commit already passed the PR gate's scan. The nightly rescan covers what's published.                                                                                                                                                               |
-| **Build images on `main` again** (even though CI built the PR's)    | A PR's images are built from the PR's merge preview, not from the commit that actually lands on `main`. Publishing what was actually merged keeps provenance honest. The Actions cache makes the rebuild quick.                                              |
-| **The Actions cache in a publishing workflow**                      | This is safe here because GitHub isolates caches by branch. A PR's cache can't be read from `main`, so a PR can't poison what `main` publishes.                                                                                                              |
+| Decision                                                                   | Why                                                                                                                                                                                                                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **amd64 only** (no arm64)                                                  | The laptop cluster (k3d on WSL) and GitHub's runners are x86. Building arm64 under QEMU emulation would multiply build time for a platform nobody runs. Add it the day a target needs it: `platforms = ["linux/amd64", "linux/arm64"]` in `docker-bake.hcl`. |
+| **BuildKit's own provenance and SBOM turned off**                          | One source of truth (the GitHub attestations), and each image stays a plain single-platform manifest, which keeps the retag and verify steps simple.                                                                                                         |
+| **`actions/attest`**, not `attest-build-provenance` / `attest-sbom`        | Both are now thin wrappers around `actions/attest`, and `attest-sbom` is being deprecated.                                                                                                                                                                   |
+| **Trivy again in `build.yml`**                                             | The PR's scan was of a different build, and advisories keep landing. Scanning the published digest costs about 30 seconds and means "signed" also means "scanned".                                                                                           |
+| **Promotion in its own workflow** (`promote.yml`, on `release: published`) | It used to be a job in `release.yml` and held that workflow's concurrency lock while it waited for the build, delaying the next release-please run. Releases are created with the App token, so they do trigger workflows.                                   |
+| **harden-runner in `audit` mode** (not `block`)                            | Blocking needs an allowlist of every host each job talks to. Worth doing for the `sign` job once the list has settled from the audit logs; a later hardening item.                                                                                           |
+| **Build images on `main` again** (even though CI built the PR's)           | A PR's images are built from the PR's merge preview, not from the commit that actually lands on `main`. Publishing what was actually merged keeps provenance honest. The Actions cache makes the rebuild quick.                                              |
+| **The Actions cache in a publishing workflow**                             | This is safe here because GitHub isolates caches by branch. A PR's cache can't be read from `main`, so a PR can't poison what `main` publishes.                                                                                                              |
 
 ## One-off steps for you
 
@@ -164,14 +198,15 @@ You need `cosign` (https://docs.sigstore.dev/cosign/system_config/installation/)
    - Run `docker buildx imagetools inspect ghcr.io/rithesh555/qa-portal-api:main` and note the digest.
    - Do the same for the `sha-<7>` tag of the newest commit, and for `:1`. Which ones match, and why?
 2. **Verify the signature.**
-   - Run the `cosign verify` command above.
+   - Run the `cosign verify` command above, with the digest from step 1.
    - Then change `refs/heads/main` to `refs/heads/feature` in it and run it again. Read the error: the signature is real, but the identity is wrong.
 3. **Find it in the public log.** In the `cosign verify` output, find the Rekor log index, and look it up on https://search.sigstore.dev. Anyone in the world can see that this repo signed this digest.
-4. **Verify the provenance.** Run `gh attestation verify oci://ghcr.io/rithesh555/qa-portal-api:main --repo rithesh555/qa-portal`. Then run it again with `--format json | jq '.[0].verificationResult.statement.predicate.buildDefinition.externalParameters'`, and find the workflow file and commit.
+4. **Verify the provenance.** Run the `gh attestation verify` command above (it needs `gh` 2.49 or newer; with an older `gh`, use `cosign verify-attestation --type https://slsa.dev/provenance/v1` plus the cosign identity flags). Run it once with only `--repo`, then with `--signer-workflow` and `--source-ref`: what does the second form rule out? Then run it again with `--format json | jq '.[0].verificationResult.statement.predicate.buildDefinition.externalParameters'`, and find the workflow file and commit.
 5. **Read the SBOM.**
-   - Download it from the `build.yml` run (artifact `sbom-api`), or run `gh attestation download oci://…`.
+   - Download it from the `build.yml` run: `gh run download <run-id> -n sbom-api` writes `sbom.spdx.json`.
+   - Or take it from the attestation: `gh attestation download oci://ghcr.io/rithesh555/qa-portal-api@sha256:<digest> --repo rithesh555/qa-portal --predicate-type https://spdx.dev/Document/v2.3` writes a `.jsonl` file of signed Sigstore bundles, one per line. The SBOM is inside, base64-encoded: `jq -r '.dsseEnvelope.payload' <file>.jsonl | base64 -d | jq '.predicate' > sbom.spdx.json`.
    - Answer: how many packages are in the API image? Which version of `fastify` is in it? Does it contain `prisma` (the CLI), or only `@prisma/client`? Stage 1's prune script should explain the answer.
-6. **"Are we affected?"** Pick a package from the SBOM and look it up on https://osv.dev. Then run `docker run --rm aquasec/trivy:0.76.0 sbom sbom.spdx.json`. That scans the list itself, without pulling the image.
+6. **"Are we affected?"** Pick a package from the SBOM and look it up on https://osv.dev. Then run `docker run --rm -v "$PWD/sbom.spdx.json:/sbom.spdx.json:ro" aquasec/trivy:0.76.0 sbom /sbom.spdx.json`. That scans the list itself, without pulling the image.
 7. **Accept a finding (on a scratch branch).**
    - Add an entry to `.trivyignore.yaml` without `expired_at`, and watch the CI image job fail.
    - Add the date, and it passes.

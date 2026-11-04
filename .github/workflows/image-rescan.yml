@@ -12,6 +12,12 @@ on:
 
 permissions: {}
 
+# Explicit bash adds pipefail (the default shell doesn't), so a failing
+# `gh` in a pipe fails the step instead of looking like "no issue".
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: image-rescan
   cancel-in-progress: false

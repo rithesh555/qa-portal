@@ -141,14 +141,6 @@
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version",
       "versioningTemplate": "node"
-    },
-    {
-      "customType": "regex",
-      "description": "cosign version that sigstore/cosign-installer installs",
-      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
-      "matchStrings": ["cosign-release:\\s*(?<currentValue>v[0-9][\\w.-]*)"],
-      "depNameTemplate": "sigstore/cosign",
-      "datasourceTemplate": "github-releases"
     }
   ]
 }

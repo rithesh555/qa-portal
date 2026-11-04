@@ -1,10 +1,19 @@
 # Publishes the three images for every commit on main: pushed to GHCR,
-# signed with cosign (keyless), with an SBOM and SLSA build provenance
-# attached as attestations. Pull requests never publish; ci.yml builds and
-# scans their images without pushing. See docs/devops/stage-03-supply-chain.md.
+# scanned, signed with cosign (keyless), with an SBOM and SLSA build
+# provenance attached as attestations. Pull requests never publish; ci.yml
+# builds and scans their images without pushing. See
+# docs/devops/stage-03-supply-chain.md.
 #
-# Tags: sha-<7> (immutable, one per commit) and main (moves to the newest
-# commit). release.yml adds the version tags to the same digests.
+# Three jobs, so each holds only the permissions it needs:
+#   build   checks out and builds (runs our Dockerfile and third-party build
+#           actions), pushes sha-<7>, scans that digest. It can push, but it
+#           can't sign: no id-token.
+#   sign    gets the digest, never checks out or builds. It holds id-token,
+#           so only cosign, Syft and actions/attest run next to it.
+#   tag-main  moves the "main" tag once the image is signed.
+#
+# Tags: sha-<7> (written once per commit, never moved) and main (moves to the
+# newest commit). promote.yml adds the version tags to the same digests.
 name: Build and publish
 
 on:
@@ -15,22 +24,19 @@ permissions: {}
 
 # No concurrency group: every commit gets its own images, and runs for
 # different commits don't block each other. Only the "main" tag is shared,
-# and the last step moves it only while its commit is still main's head.
+# and tag-main moves it only while its commit is still main's head.
 
 env:
   IMAGE_PREFIX: ghcr.io/rithesh555/qa-portal-
 
 jobs:
-  image:
-    name: Publish ${{ matrix.image }}
+  build:
+    name: Build and scan ${{ matrix.image }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read # check out the code
       packages: write # push the image to GHCR
-      id-token: write # the OIDC token that keyless signing and attestations are bound to
-      attestations: write # store the provenance and SBOM attestations
-      artifact-metadata: write # the storage record linking the image to this repo
     strategy:
       fail-fast: false
       matrix:
@@ -47,19 +53,44 @@ jobs:
       - name: Commit details
         id: commit
         run: |
-          echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "created=$(git log -1 --format=%cI)" >> "$GITHUB_OUTPUT"
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+          {
+            echo "short=${GITHUB_SHA::7}"
+            echo "created=$(git log -1 --format=%cI)"
+            echo "epoch=$(git log -1 --format=%ct)"
+          } >> "$GITHUB_OUTPUT"
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # BuildKit's own provenance and SBOM are off: the attestations below are
-      # the single source, and the image stays a plain single-platform manifest.
+      # sha-<7> is written once. A re-run of this workflow (say, after the
+      # sign job failed) reuses the image already pushed instead of pushing a
+      # second one under the same tag.
+      - name: Already published?
+        id: existing
+        env:
+          REF: ${{ env.IMAGE }}:sha-${{ steps.commit.outputs.short }}
+        run: |
+          if out=$(docker buildx imagetools inspect "$REF" --format '{{json .Manifest}}' 2>&1); then
+            echo "digest=$(jq -r .digest <<< "$out")" >> "$GITHUB_OUTPUT"
+            echo "$REF already exists; reusing it."
+          elif grep -q 'not found' <<< "$out"; then
+            echo "digest=" >> "$GITHUB_OUTPUT"
+          else
+            echo "$out"; echo "::error::Could not check $REF"; exit 1
+          fi
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        if: steps.existing.outputs.digest == ''
+      # BuildKit's own provenance and SBOM are off: the attestations in the
+      # sign job are the single source, and the image stays a plain
+      # single-platform manifest. SOURCE_DATE_EPOCH (the commit time) sets
+      # the timestamps BuildKit writes, so they don't change between builds.
       - name: Build and push
         id: bake
+        if: steps.existing.outputs.digest == ''
         uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        env:
+          SOURCE_DATE_EPOCH: ${{ steps.commit.outputs.epoch }}
         with:
           source: .
           files: docker-bake.hcl
@@ -77,14 +108,76 @@ jobs:
             ${{ matrix.image }}.cache-from=type=gha,scope=${{ matrix.image }}
             ${{ matrix.image }}.cache-to=type=gha,scope=${{ matrix.image }},mode=max
       - name: Image digest
-        id: digest
         env:
+          EXISTING: ${{ steps.existing.outputs.digest }}
           METADATA: ${{ steps.bake.outputs.metadata }}
           TARGET: ${{ matrix.image }}
         run: |
-          digest=$(jq -r --arg t "$TARGET" '.[$t]["containerimage.digest"]' <<< "$METADATA")
-          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || { echo "::error::No digest in the bake metadata"; exit 1; }
+          digest="$EXISTING"
+          [ -n "$digest" ] || digest=$(jq -r --arg t "$TARGET" '.[$t]["containerimage.digest"]' <<< "$METADATA")
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || { echo "::error::No image digest"; exit 1; }
+          mkdir -p digest && echo "$digest" > "digest/$TARGET"
+      # Scan what we ship: this exact digest, with today's vulnerability data.
+      # The PR gate scanned a different build (the PR's merge preview), and a
+      # new advisory may have landed since. Findings stop the run here, so
+      # nothing unscanned gets signed or tagged "main". No credentials go
+      # into the container; the packages are public.
+      - name: Scan the published digest
+        run: |
+          docker run --rm \
+            -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" \
+            aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
+            image --quiet --scanners vuln,secret --ignore-unfixed \
+            --ignorefile /work/.trivyignore.yaml \
+            --severity HIGH,CRITICAL --exit-code 1 "$IMAGE@$(cat "digest/${{ matrix.image }}")"
+      # Matrix jobs can't pass one output per leg, so the digest travels to
+      # the sign job as a tiny artifact of this run.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: digest-${{ matrix.image }}
+          path: digest/${{ matrix.image }}
+          retention-days: 1
+
+  sign:
+    name: Sign and attest ${{ matrix.image }}
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      packages: write # push the signature and attestations next to the image
+      id-token: write # the OIDC token that keyless signing and attestations are bound to
+      attestations: write # store the provenance and SBOM attestations
+      artifact-metadata: write # the storage record linking the image to this repo
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [api, migrate, web]
+    env:
+      IMAGE: ghcr.io/rithesh555/qa-portal-${{ matrix.image }}
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: digest-${{ matrix.image }}
+          path: digest
+      - name: Image digest
+        id: digest
+        env:
+          TARGET: ${{ matrix.image }}
+        run: |
+          digest=$(cat "digest/$TARGET")
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || { echo "::error::Bad digest artifact"; exit 1; }
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      # Plain docker login instead of a third-party action, so nothing extra
+      # runs in the job that can sign. cosign and actions/attest read
+      # ~/.docker/config.json.
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: docker login ghcr.io -u "$ACTOR" --password-stdin <<< "$TOKEN"
 
       # Keyless: no key to store or leak. Sigstore's Fulcio issues a
       # 10-minute certificate for this workflow's OIDC identity, and the
@@ -97,12 +190,13 @@ jobs:
           DIGEST: ${{ steps.digest.outputs.digest }}
         run: cosign sign --yes "$IMAGE@$DIGEST"
 
+      # Syft reads the public image anonymously: the registry credentials
+      # stay out of its container.
       - name: SBOM (Syft, SPDX JSON)
         env:
           DIGEST: ${{ steps.digest.outputs.digest }}
         run: |
           docker run --rm \
-            -v "$HOME/.docker/config.json:/config/config.json:ro" -e DOCKER_CONFIG=/config \
             anchore/syft:v1.54.1@sha256:3eb5379ba7b409c3f4069b686110527af0c47df993fa5c10d13e7cf34f49b1aa \
             "registry:$IMAGE@$DIGEST" -o spdx-json > sbom.spdx.json
           jq -e '.packages | length > 0' sbom.spdx.json > /dev/null
@@ -124,30 +218,15 @@ jobs:
           name: sbom-${{ matrix.image }}
           path: sbom.spdx.json
           retention-days: 30
-
-      # "main" is a moving tag. A slower run for an older commit must not
-      # move it back, so check that this commit is still main's head.
-      - name: Move the main tag
-        env:
-          DIGEST: ${{ steps.digest.outputs.digest }}
-          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        run: |
-          head=$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)
-          if [ "$head" != "$GITHUB_SHA" ]; then
-            echo "main is now at ${head::7}; leaving its tag to that run."
-            exit 0
-          fi
-          docker buildx imagetools create --prefer-index=false -t "$IMAGE:main" "$IMAGE@$DIGEST"
       - name: Summary
         env:
           DIGEST: ${{ steps.digest.outputs.digest }}
-          SHORT: ${{ steps.commit.outputs.short }}
         run: |
           {
             echo "### $IMAGE"
             echo
             echo "- Digest: \`$DIGEST\`"
-            echo "- Tags: \`sha-$SHORT\` (and \`main\` if this commit is still main's head)"
+            echo "- Tags: \`sha-${GITHUB_SHA::7}\` (and \`main\` if this commit is still main's head)"
             echo
             echo "Verify:"
             echo
@@ -155,6 +234,47 @@ jobs:
             echo "cosign verify $IMAGE@$DIGEST \\"
             echo "  --certificate-identity https://github.com/$GITHUB_REPOSITORY/.github/workflows/build.yml@refs/heads/main \\"
             echo "  --certificate-oidc-issuer https://token.actions.githubusercontent.com"
-            echo "gh attestation verify oci://$IMAGE@$DIGEST --repo $GITHUB_REPOSITORY"
+            echo "gh attestation verify oci://$IMAGE@$DIGEST --repo $GITHUB_REPOSITORY \\"
+            echo "  --signer-workflow $GITHUB_REPOSITORY/.github/workflows/build.yml --source-ref refs/heads/main"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # "main" is a moving tag. It moves only after all three images are signed,
+  # and a slower run for an older commit must not move it back, so check
+  # that this commit is still main's head.
+  tag-main:
+    name: Move the main tags
+    needs: sign
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      packages: write # retag in GHCR
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: digest-*
+          merge-multiple: true
+          path: digest
+      - name: Log in to GHCR
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: docker login ghcr.io -u "$ACTOR" --password-stdin <<< "$TOKEN"
+      - name: Move main
+        env:
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          head=$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)
+          if [ "$head" != "$GITHUB_SHA" ]; then
+            echo "main is now at ${head::7}; leaving its tags to that run."
+            exit 0
+          fi
+          for image in api migrate web; do
+            digest=$(cat "digest/$image")
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || { echo "::error::Bad digest for $image"; exit 1; }
+            ref="$IMAGE_PREFIX$image"
+            docker buildx imagetools create --prefer-index=false -t "$ref:main" "$ref@$digest"
+          done
