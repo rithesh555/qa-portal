@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/rithesh555/qa-portal/compare/v1.0.5...v1.0.6) (2026-11-04)
+
+
+### Bug fixes
+
+* **ci:** keep the release's major and minor in promote ([#22](https://github.com/rithesh555/qa-portal/issues/22)) ([ae8a8dd](https://github.com/rithesh555/qa-portal/commit/ae8a8ddb0262f71e82ff9ba86ee5524c4db16f5b))
+
 ## [1.0.5](https://github.com/rithesh555/qa-portal/compare/v1.0.4...v1.0.5) (2026-11-04)
 
 
