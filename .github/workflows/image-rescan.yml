@@ -1,0 +1,92 @@
+# Rescans the published images every night. An image that was clean when it
+# was built can have new CVEs tomorrow, because advisories keep coming.
+# Findings open (or update) one issue per image; a clean scan closes it.
+# Accepted findings live in .trivyignore.yaml, each with an expiry date.
+# See docs/devops/stage-03-supply-chain.md.
+name: Image rescan
+
+on:
+  schedule:
+    - cron: "15 4 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: image-rescan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    name: Rescan qa-portal-${{ matrix.image }}:main
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read # .trivyignore.yaml
+      packages: read # pull the image while the package is private
+      issues: write # open, update or close the findings issue
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [api, migrate, web]
+    env:
+      IMAGE: ghcr.io/rithesh555/qa-portal-${{ matrix.image }}:main
+      TITLE: "Image rescan: fixable HIGH/CRITICAL CVEs in qa-portal-${{ matrix.image }}:main"
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Exit code 3 means "findings"; any other non-zero code is a scan error
+      # and fails the job, so a broken scan never looks like a clean one.
+      - name: Scan
+        id: scan
+        run: |
+          set +e
+          docker run --rm \
+            -v "$HOME/.docker/config.json:/config/config.json:ro" -e DOCKER_CONFIG=/config \
+            -v "$PWD/.trivyignore.yaml:/work/.trivyignore.yaml:ro" \
+            aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
+            image --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL \
+            --ignorefile /work/.trivyignore.yaml --exit-code 3 "$IMAGE" > report.txt
+          code=$?
+          set -e
+          case "$code" in
+            0) echo "found=false" >> "$GITHUB_OUTPUT" ;;
+            3) echo "found=true" >> "$GITHUB_OUTPUT"; echo "::warning::Fixable HIGH/CRITICAL CVEs in $IMAGE" ;;
+            *) cat report.txt; echo "::error::Trivy failed (exit $code)"; exit "$code" ;;
+          esac
+      - name: Open, update or close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FOUND: ${{ steps.scan.outputs.found }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue=$(gh issue list --state open --limit 200 --json number,title -q '.[] | select(.title == env.TITLE) | .number' | head -1)
+          if [ "$FOUND" = "true" ]; then
+            {
+              echo "The nightly rescan found fixable HIGH/CRITICAL vulnerabilities in \`$IMAGE\` ([run]($RUN_URL))."
+              echo
+              echo "**What to do:** rebuild with the fix (bump the base image digest or the package, usually a Renovate PR), or, if it can't affect us, add it to \`.trivyignore.yaml\` with a \`statement\` and an \`expired_at\` date. This issue closes itself after a clean scan."
+              echo
+              echo '```'
+              head -c 60000 report.txt
+              echo '```'
+            } > body.md
+            if [ -n "$issue" ]; then
+              gh issue edit "$issue" --body-file body.md
+              gh issue comment "$issue" --body "Still present on $(date -u +%F) ([run]($RUN_URL))."
+            else
+              gh issue create --title "$TITLE" --body-file body.md
+            fi
+          elif [ -n "$issue" ]; then
+            gh issue close "$issue" --comment "Clean rescan on $(date -u +%F) ([run]($RUN_URL))."
+          fi

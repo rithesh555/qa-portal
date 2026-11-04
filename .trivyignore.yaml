@@ -1,0 +1,19 @@
+# Trivy findings we have decided to accept. Used by the image scan in CI
+# (ci.yml) and by the nightly rescan (image-rescan.yml).
+#
+# Rules (CI checks the first one):
+# - Every entry has a `statement` (why it can't affect us, or why it can't be
+#   fixed yet) and an `expired_at` date, at most 90 days out. After that date
+#   the finding fails the build again, and someone has to look at it again.
+# - One CVE per entry, narrowed with `purls` or `paths` where possible.
+# - Prefer fixing: a newer base image digest or package version first.
+# The same policy as the pnpm audit ignores in pnpm-workspace.yaml.
+#
+# Example:
+#   - id: CVE-2026-12345
+#     purls:
+#       - pkg:deb/debian/libexample1
+#     statement: Only reachable through the X tool, which our images don't run.
+#     expired_at: 2027-01-31
+
+vulnerabilities: []

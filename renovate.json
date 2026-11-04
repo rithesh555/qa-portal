@@ -119,7 +119,7 @@
         "/^lefthook\\.yml$/"
       ],
       "matchStrings": [
-        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep|anchore/syft|mikefarah/yq)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
       ],
       "datasourceTemplate": "docker"
     },
@@ -141,6 +141,14 @@
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version",
       "versioningTemplate": "node"
+    },
+    {
+      "customType": "regex",
+      "description": "cosign version that sigstore/cosign-installer installs",
+      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      "matchStrings": ["cosign-release:\\s*(?<currentValue>v[0-9][\\w.-]*)"],
+      "depNameTemplate": "sigstore/cosign",
+      "datasourceTemplate": "github-releases"
     }
   ]
 }
