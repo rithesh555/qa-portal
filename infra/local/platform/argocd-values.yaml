@@ -1,0 +1,64 @@
+# Values for the argo-cd chart (version pinned in argocd.tf).
+# Core install: only what the GitOps engine needs. Without the API server
+# there is no UI or login to protect; you drive Argo CD through Kubernetes
+# (kubectl, Application resources) and Kubernetes RBAC.
+# See docs/devops/stage-04-k8s-platform.md.
+
+global:
+  image:
+    # Same version as the chart's appVersion, pinned by digest. Bump the tag
+    # together with the chart version.
+    repository: quay.io/argoproj/argocd
+    tag: v3.5.5@sha256:13db7b10db23283b1b36f855046602e18539a8a8204c9f6f039e8896c8897518
+  # The chart's NetworkPolicies, plus deny-by-default for any other ingress
+  # into the argocd namespace.
+  networkPolicy:
+    create: true
+    defaultDenyIngress: true
+
+configs:
+  cm:
+    # No local admin login: core mode has no API server to log in to.
+    admin.enabled: false
+    exec.enabled: false
+    statusbadge.enabled: false
+
+server:
+  enabled: false
+dex:
+  enabled: false
+notifications:
+  enabled: false
+
+# Requests sized for the 4 GiB node; memory limits stop a runaway
+# controller or repo server from taking the node down.
+controller:
+  resources:
+    requests: { cpu: 50m, memory: 256Mi }
+    limits: { memory: 768Mi }
+
+repoServer:
+  resources:
+    requests: { cpu: 25m, memory: 128Mi }
+    limits: { memory: 512Mi }
+
+applicationSet:
+  resources:
+    requests: { cpu: 10m, memory: 48Mi }
+    limits: { memory: 192Mi }
+
+redis:
+  # The chart's default Redis image, pinned by digest. On every chart bump,
+  # compare with the new chart's default (helm show values) and move this
+  # with it.
+  image:
+    repository: ecr-public.aws.com/docker/library/redis
+    tag: 8.6.4-alpine@sha256:2cc044fc5a07c9b701f8f1255a309ae9ad7856e694ac03513bf3648c01e40763
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
+
+redisSecretInit:
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 64Mi }

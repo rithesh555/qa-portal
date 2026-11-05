@@ -1,0 +1,50 @@
+# The local cluster: one k3s server in Docker, no agents (8 GB laptop).
+# OpenTofu (infra/local/cluster) creates and deletes it from this file;
+# any change here makes `tofu plan` replace the whole cluster, because k3d
+# can't change these settings on a running cluster.
+# See docs/devops/stage-04-k8s-platform.md.
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: qa-portal # kubectl context: k3d-qa-portal
+servers: 1
+agents: 0
+# Kubernetes 1.36: the newest minor Argo CD 3.5 is tested on.
+image: rancher/k3s:v1.36.5-k3s1@sha256:057cfd5a9d51b89f1f0ee139c28d5d5fdd5aa7ddeac2742a0ba90c6dbc0329bb
+kubeAPI:
+  # Only this machine can reach the API server (k3d's default is 0.0.0.0).
+  hostIP: "127.0.0.1"
+  hostPort: "6550"
+ports:
+  # Traefik (k3s' bundled ingress) on the host, for the app from Stage 5.
+  # 8080 is taken by docker/stack.sh.
+  - port: 127.0.0.1:8880:80
+    nodeFilters: [loadbalancer]
+  - port: 127.0.0.1:8443:443
+    nodeFilters: [loadbalancer]
+options:
+  k3d:
+    wait: true
+    timeout: "180s"
+  k3s:
+    extraArgs:
+      # Secrets encrypted at rest in the cluster datastore.
+      - arg: "--secrets-encryption"
+        nodeFilters: [server:*]
+      # k3s itself (API server, datastore, kubelet) lives inside the same
+      # 4 GiB cgroup as the pods. Reserve room for it, and evict pods before
+      # the cgroup is full, so the kubelet picks what goes (lowest priority
+      # first), not the kernel's OOM killer (which could pick k3s).
+      # Allocatable for pods: node capacity minus 768 MiB (about 3.3 GiB).
+      - arg: "--kubelet-arg=system-reserved=memory=512Mi"
+        nodeFilters: [server:*]
+      # Setting eviction-hard replaces all kubelet defaults, so the disk
+      # signals are restated at their default values.
+      - arg: "--kubelet-arg=eviction-hard=memory.available<256Mi,nodefs.available<10%,imagefs.available<15%,nodefs.inodesFree<5%"
+        nodeFilters: [server:*]
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+  runtime:
+    # Hard cap for the whole cluster (Docker memory limit on the node).
+    serversMemory: "4g"
