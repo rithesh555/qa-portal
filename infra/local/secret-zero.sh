@@ -71,8 +71,9 @@ if [[ ! -f "$ca_dir/ca.key" || ! -f "$ca_dir/ca.crt" ]]; then
     -addext "nameConstraints=critical,permitted;DNS:qa.localtest.me" \
     -addext "subjectKeyIdentifier=hash" 2> /dev/null)
   echo "Created a new local CA in $ca_dir (valid 5 years)."
+  # The path is resolved here, so the command works in PowerShell too.
   echo "Trust it in Windows once (current user; Windows asks to confirm):"
-  echo "  certutil.exe -user -addstore Root \"\$(wslpath -w $ca_dir/ca.crt)\""
+  echo "  certutil.exe -user -addstore Root \"$(wslpath -w "$ca_dir/ca.crt")\""
 fi
 chmod 600 "$ca_dir/ca.key"
 
