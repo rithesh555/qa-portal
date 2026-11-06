@@ -4,7 +4,7 @@
 #   infra/local/cluster.sh up [-auto-approve]    create the cluster, then the platform,
 #                                                then load secret zero (secret-zero.sh)
 #   infra/local/cluster.sh plan                  what `up` would change (both roots)
-#   infra/local/cluster.sh down [-auto-approve]  destroy the platform, then the cluster
+#   infra/local/cluster.sh down [-auto-approve]  delete the cluster (and forget the platform state)
 #   infra/local/cluster.sh stop | start         pause / resume (keeps everything; frees RAM)
 #   infra/local/cluster.sh status               nodes, memory, Argo CD and the namespaces
 #
@@ -83,16 +83,21 @@ case "$cmd" in
     ;;
   down)
     check_tools
-    # Platform first, so its state matches an empty cluster afterwards.
-    if cluster_exists; then
-      need_running
-      tf platform init -input=false > /dev/null
-      tf platform destroy -input=false "$@"
-    else
-      echo "Cluster $name is not running: nothing to remove from it."
-    fi
+    # Delete the cluster, then forget the platform root's state: every
+    # object it lists lived in the cluster and went with it. Destroying the
+    # platform object by object first is slower and fragile: operators,
+    # finalizers and pre-delete hooks (Kyverno's) wait for controllers that
+    # the same destroy has already removed.
     tf cluster init -input=false > /dev/null
     tf cluster destroy -input=false "$@"
+    if ! cluster_exists; then
+      tf platform init -input=false > /dev/null
+      mapfile -t addresses < <(tf platform state list 2> /dev/null)
+      if ((${#addresses[@]})); then
+        tf platform state rm "${addresses[@]}" > /dev/null
+        echo "Platform state cleared (${#addresses[@]} resources were in the deleted cluster)."
+      fi
+    fi
     ;;
   stop)
     k3d cluster stop "$name"

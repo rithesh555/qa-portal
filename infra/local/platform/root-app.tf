@@ -29,14 +29,13 @@ locals {
     # can change Argo CD or its RBAC.
     platform = {
       namespace   = "argocd"
-      description = "Platform add-ons (cert-manager, CloudNativePG, Garage, Kyverno, Traefik config)."
+      description = "Platform add-ons (cert-manager, CloudNativePG, Garage, Traefik config)."
       sourceRepos = [
         local.repo_url,
         "quay.io/jetstack/charts",
         "ghcr.io/cloudnative-pg/charts",
-        "ghcr.io/kyverno/charts",
       ]
-      destinations = [for ns in ["cert-manager", "cnpg-system", "garage", "kyverno", "kube-system"] :
+      destinations = [for ns in ["cert-manager", "cnpg-system", "garage", "kube-system"] :
         { server = "https://kubernetes.default.svc", namespace = ns }
       ]
       clusterResourceWhitelist = [

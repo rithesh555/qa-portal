@@ -17,6 +17,13 @@ global:
     defaultDenyIngress: true
 
 configs:
+  params:
+    # Compare git with the cluster through a server-side apply dry run, the
+    # same way the sync applies (every add-on uses ServerSideApply). The
+    # client-side diff reported big CRDs (Kyverno) and StatefulSet volume
+    # templates as OutOfSync forever, though nothing differed. Argo CD 3.6
+    # turns this on by itself for ServerSideApply apps.
+    controller.diff.server.side: "true"
   cm:
     # No local admin login: core mode has no API server to log in to.
     admin.enabled: false
