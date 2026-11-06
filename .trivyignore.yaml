@@ -16,4 +16,16 @@
 #     statement: Only reachable through the X tool, which our images don't run.
 #     expired_at: 2027-01-31
 
-vulnerabilities: []
+vulnerabilities:
+  - id: CVE-2026-109518
+    purls:
+      - pkg:deb/debian/apt
+      - pkg:deb/debian/libapt-pkg6.0
+    statement: >-
+      apt (an on-path attack while apt downloads packages) in the Debian
+      bookworm base of node:22.23.3-bookworm-slim. The api and migrate images
+      never run apt: they run node as user 1000, and no build stage installs
+      packages with apt. The upstream image has not been rebuilt with apt
+      2.6.2 yet (the pinned digest is still current, 2026-11-05). Remove this
+      entry when Renovate's base-image digest PR lands.
+    expired_at: 2026-11-19
