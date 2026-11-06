@@ -1,0 +1,28 @@
+# Deny everything in the garage namespace, then let only the app
+# namespaces (where the Postgres pods and their backup sidecar run) reach
+# the S3 port. Garage needs no egress at all.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-s3-from-app-namespaces
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: garage
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: qa-portal
+      ports:
+        - port: 3900
+          protocol: TCP

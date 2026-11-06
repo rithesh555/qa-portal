@@ -1,0 +1,32 @@
+# Traefik ships with k3s. This app only configures it: it turns on the
+# Gateway API provider and gives the gateway its TLS certificate. It must not
+# create or relabel kube-system (no CreateNamespace, no namespace metadata).
+# Wave 2: needs the local CA issuer.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik-config
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: platform
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  source:
+    repoURL: "{{ .Values.repoURL }}"
+    targetRevision: "{{ .Values.revision }}"
+    path: deploy/platform/traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m

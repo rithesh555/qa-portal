@@ -1,0 +1,40 @@
+# Configures the Traefik that k3s installs (it stays k3s' HelmChart; k3s
+# merges these values over its own and re-runs the install).
+# - Turns on the Gateway API provider (the CRDs ship with k3s).
+# - The chart's default Gateway "traefik-gateway" in kube-system gets an
+#   HTTPS listener with the certificate from certificate.yaml.
+# - Routes may attach only from the app namespaces (label
+#   app.kubernetes.io/part-of=qa-portal), not from any namespace.
+# Host ports: k3d maps 127.0.0.1:8880 -> 80 and 127.0.0.1:8443 -> 443
+# (infra/local/k3d.yaml), so the app is https://<env>.qa.localtest.me:8443.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    providers:
+      kubernetesGateway:
+        enabled: true
+    gateway:
+      listeners:
+        web:
+          port: 8000
+          protocol: HTTP
+          namespacePolicy:
+            from: Selector
+            selector:
+              matchLabels:
+                app.kubernetes.io/part-of: qa-portal
+        websecure:
+          port: 8443
+          protocol: HTTPS
+          namespacePolicy:
+            from: Selector
+            selector:
+              matchLabels:
+                app.kubernetes.io/part-of: qa-portal
+          certificateRefs:
+            - kind: Secret
+              name: qa-localtest-me-tls

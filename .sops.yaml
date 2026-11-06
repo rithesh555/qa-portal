@@ -1,0 +1,9 @@
+# SOPS rules: which key encrypts which files. Only the age PUBLIC key is
+# here; the private key is "secret zero" (infra/local/secret-zero.sh).
+# Only data/stringData are encrypted, so names and kinds stay readable in
+# diffs. Rotate: add the new recipient, `sops updatekeys` every file, then
+# remove the old one (docs/devops/stage-04-k8s-platform.md).
+creation_rules:
+  - path_regex: ^deploy/.+\.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    age: age1nrdhx8c3wkgvxdt23x4lnydv9t45vdjfv6qqwjc2h5ufyzp2ud8qzmxj74

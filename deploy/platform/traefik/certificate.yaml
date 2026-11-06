@@ -1,0 +1,24 @@
+# One wildcard certificate for every environment
+# (dev.qa.localtest.me, staging..., prod...), signed by the local CA.
+# localtest.me and all its subdomains resolve to 127.0.0.1 in public DNS,
+# so no hosts-file edits are needed.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: qa-localtest-me
+  namespace: kube-system
+spec:
+  secretName: qa-localtest-me-tls
+  dnsNames:
+    - qa.localtest.me
+    - "*.qa.localtest.me"
+  duration: 2160h # 90 days
+  renewBefore: 360h # 15 days
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: local-ca

@@ -11,3 +11,8 @@ output "argocd" {
     app_version = helm_release.argocd.metadata.app_version
   }
 }
+
+output "platform_revision" {
+  description = "Git revision Argo CD syncs the platform add-ons from."
+  value       = var.platform_revision
+}

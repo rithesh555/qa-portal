@@ -11,3 +11,6 @@ e2e/.web-dist
 # Written by release-please in its own style; reformatting it would make
 # every release PR fail the lint job.
 CHANGELOG.md
+
+# SOPS writes these; reformatting can break their integrity check.
+*.sops.yaml

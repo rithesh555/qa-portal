@@ -22,6 +22,11 @@ configs:
     admin.enabled: false
     exec.enabled: false
     statusbadge.enabled: false
+    # KSOPS is a kustomize exec plugin; kustomize runs plugins only with
+    # these flags. Risk: any kustomization Argo CD builds may then run a
+    # binary in the repo server, so the AppProjects allow only this repo as
+    # a source (root-app.tf). See docs/devops/stage-04-k8s-platform.md.
+    kustomize.buildOptions: --enable-alpha-plugins --enable-exec
 
 server:
   enabled: false
@@ -41,6 +46,43 @@ repoServer:
   resources:
     requests: { cpu: 25m, memory: 128Mi }
     limits: { memory: 512Mi }
+  # KSOPS: an init container copies the ksops binary into a shared
+  # emptyDir; the repo server finds it on its PATH. Argo CD's own kustomize
+  # stays (no --with-kustomize).
+  initContainers:
+    - name: install-ksops
+      image: viaductoss/ksops:v4.5.1@sha256:4def9fdd4e2f850265740ebe9592c5455d19b76891e88e602df8b52d74b95334
+      command: ["/usr/local/bin/ksops", "install", "/custom-tools"]
+      resources:
+        requests: { cpu: 10m, memory: 16Mi }
+        limits: { memory: 64Mi }
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }
+        seccompProfile: { type: RuntimeDefault }
+      volumeMounts:
+        - name: custom-tools
+          mountPath: /custom-tools
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+  volumeMounts:
+    - name: custom-tools
+      mountPath: /usr/local/bin/ksops
+      subPath: ksops
+  env:
+    # The age private key ("secret zero"), from the Secret that
+    # infra/local/secret-zero.sh creates. Optional, so Argo CD starts
+    # before it exists; the script restarts the repo server afterwards.
+    - name: SOPS_AGE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: sops-age
+          key: keys.txt
+          optional: true
 
 applicationSet:
   resources:

@@ -1,0 +1,5 @@
+# Set by the root Application (infra/local/platform/root-app.tf). Every
+# child reads its own config from the same repo and revision, so pointing
+# the root at a branch tests the whole platform from that branch.
+repoURL: https://github.com/rithesh555/qa-portal.git
+revision: main

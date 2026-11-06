@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # The local Kubernetes platform, from code. See docs/devops/stage-04-k8s-platform.md.
 #
-#   infra/local/cluster.sh up [-auto-approve]    create the cluster, then the platform
+#   infra/local/cluster.sh up [-auto-approve]    create the cluster, then the platform,
+#                                                then load secret zero (secret-zero.sh)
 #   infra/local/cluster.sh plan                  what `up` would change (both roots)
 #   infra/local/cluster.sh down [-auto-approve]  destroy the platform, then the cluster
 #   infra/local/cluster.sh stop | start         pause / resume (keeps everything; frees RAM)
@@ -64,6 +65,8 @@ case "$cmd" in
     need_running
     tf platform init -input=false > /dev/null
     tf platform apply -input=false "$@"
+    # The age key and the local CA (not in git, not in OpenTofu state).
+    "$here/secret-zero.sh"
     ;;
   plan)
     check_tools
@@ -103,11 +106,12 @@ case "$cmd" in
     docker stats --no-stream --format 'table {{.Name}}\t{{.MemUsage}}\t{{.CPUPerc}}' "k3d-$name-server-0"
     kubectl --context "$context" get nodes -o wide
     kubectl --context "$context" -n argocd get pods
+    kubectl --context "$context" -n argocd get applications.argoproj.io
     kubectl --context "$context" get ns -l app.kubernetes.io/part-of=qa-portal \
       -L pod-security.kubernetes.io/enforce
     ;;
   *)
-    sed -n '2,10p' "$0"
+    sed -n '2,11p' "$0"
     exit 2
     ;;
 esac

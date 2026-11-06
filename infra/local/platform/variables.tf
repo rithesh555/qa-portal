@@ -15,3 +15,13 @@ variable "kube_context" {
     error_message = "infra/local/platform only targets a local k3d cluster (context k3d-*)."
   }
 }
+
+variable "platform_revision" {
+  description = <<-EOT
+    Git revision the platform add-ons come from (branch, tag or commit).
+    main in normal use; a branch name to try platform changes before they
+    merge (the branch must be pushed: Argo CD reads from GitHub).
+  EOT
+  type        = string
+  default     = "main"
+}
