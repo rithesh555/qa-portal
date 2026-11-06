@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/rithesh555/qa-portal/compare/v1.0.7...v1.1.0) (2026-11-06)
+
+
+### Features
+
+* **infra:** local k3d platform with OpenTofu and Argo CD core (Stage 4 part 1) ([#27](https://github.com/rithesh555/qa-portal/issues/27)) ([0b1a391](https://github.com/rithesh555/qa-portal/commit/0b1a39129f0e3a29993a61888e28caaba9d7d314))
+
 ## [1.0.7](https://github.com/rithesh555/qa-portal/compare/v1.0.6...v1.0.7) (2026-11-06)
 
 
