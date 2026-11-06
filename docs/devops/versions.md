@@ -2,43 +2,54 @@
 
 The rule: every version is **at least 14 days old** when we pin it. Actions are pinned by commit SHA (the tag goes in a comment) and images by digest. Renovate proposes updates.
 
-| Tool                                             | Version      | Released   | Pinned as                                                                     | Checked    |
-| ------------------------------------------------ | ------------ | ---------- | ----------------------------------------------------------------------------- | ---------- |
-| @commitlint/cli, @commitlint/config-conventional | 21.2.4       | 2026-10-18 | exact, root `devDependencies`                                                 | 2026-11-02 |
-| lefthook                                         | 2.2.1        | 2026-10-08 | exact, root `devDependencies` (2.2.2 lacks provenance; see stage-02-ci.md)    | 2026-11-02 |
-| gitleaks                                         | v8.30.1      | 2026-03-21 | `ghcr.io/gitleaks/gitleaks:v8.30.1` (hook fallback)                           | 2026-11-02 |
-| googleapis/release-please-action                 | v5.0.0       | 2026-04-22 | `45996ed1f6d02564a971a2fa1b5860e934307cf7`                                    | 2026-11-02 |
-| amannn/action-semantic-pull-request              | v6.1.1       | 2025-08-22 | `48f256284bd46cdaab1048c3721360e808335d50`                                    | 2026-11-02 |
-| GitHub runner image                              | ubuntu-24.04 | n/a        | label                                                                         | 2026-11-02 |
-| node (base image)                                | 22.23.3      | 2026-09-23 | `node:22.23.3-bookworm-slim@sha256:3ed98443…`                                 | 2026-11-02 |
-| nginx-unprivileged (base image)                  | 1.30.6       | 2026-10-14 | `nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4…`                  | 2026-11-02 |
-| postgres (dev, stack and CI service image)       | 18.4         | n/a        | `postgres:18.4-alpine@sha256:9a8afca5…`                                       | 2026-11-04 |
-| pnpm (in the build stages)                       | 12.11.2      | 2026-10-09 | `corepack prepare pnpm@12.11.2`                                               | 2026-11-02 |
-| hadolint                                         | v2.15.1      | 2026-07-31 | `hadolint/hadolint:v2.15.1` (CI: `@sha256:32dac941…`)                         | 2026-11-02 |
-| shellcheck                                       | v0.11.0      | 2025-08-04 | `koalaman/shellcheck:v0.11.0`                                                 | 2026-11-02 |
-| trivy                                            | 0.76.0       | 2026-10-14 | `aquasec/trivy:0.76.0` (CI: `@sha256:2416d1f7…`; 0.76.1 is under 14 days old) | 2026-11-02 |
-| actions/checkout                                 | v7.0.1       | 2026-07-20 | `3d3c42e5aac5ba805825da76410c181273ba90b1`                                    | 2026-11-02 |
-| actions/setup-node                               | v7.1.0       | 2026-10-08 | `949feb2413d6458794dcd2491c4babbbce0c15c1`                                    | 2026-11-02 |
-| pnpm/action-setup                                | v6.1.0       | 2026-09-05 | `ea17c68df8912ef543352723c149a84f56e3d413`                                    | 2026-11-02 |
-| actions/cache                                    | v5.1.0       | 2026-06-26 | `caa296126883cff596d87d8935842f9db880ef25`                                    | 2026-11-02 |
-| actions/upload-artifact                          | v7.0.2       | 2026-10-07 | `cf430e030ddbb5b0abf93d22962f4752f3646cd9`                                    | 2026-11-02 |
-| actions/download-artifact                        | v8.0.2       | 2026-10-07 | `9000827ccba6bdab643e8b6fd33ac0654aef8333`                                    | 2026-11-02 |
-| docker/setup-buildx-action                       | v4.4.1       | 2026-09-16 | `f87e5991a6d7451dcb8d9637bfbc97413f497069`                                    | 2026-11-02 |
-| docker/bake-action                               | v7.5.0       | 2026-10-14 | `59cb1203cd42bcefd40a1b6d73b589e48c86040e`                                    | 2026-11-02 |
-| github/codeql-action                             | v4.39.0      | 2026-10-15 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee`                                    | 2026-11-02 |
-| actions/dependency-review-action                 | v5.0.0       | 2026-05-08 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294`                                    | 2026-11-02 |
-| ossf/scorecard-action                            | v2.5.0       | 2026-10-12 | `fa7117db83c52d787ae5a89f350999701505d78e`                                    | 2026-11-02 |
-| step-security/harden-runner                      | v2.22.2      | 2026-10-19 | `dc2769abcc0fcfbadfc1df54081c1608579ef6b2` (v2.22.3 is under 14 days old)     | 2026-11-02 |
-| actionlint                                       | 1.7.12       | 2026-03-30 | `rhysd/actionlint:1.7.12@sha256:b1934ee5…`                                    | 2026-11-02 |
-| zizmor                                           | 1.31.1       | 2026-10-15 | `ghcr.io/zizmorcore/zizmor:1.31.1@sha256:42d409db…`                           | 2026-11-02 |
-| semgrep CE                                       | 1.181.0      | 2026-10-14 | `semgrep/semgrep:1.181.0@sha256:81474464…` (1.183.0 is under 14 days old)     | 2026-11-02 |
-| Node in CI                                       | 22.23.3      | 2026-09-23 | `node-version` in `.github/actions/setup` (22.23.4 is under 14 days old)      | 2026-11-02 |
-| actions/create-github-app-token                  | v3.3.0       | 2026-10-12 | `64ab729a6294000f5aa4a4bc0b73d1f32bc45510`                                    | 2026-11-03 |
-| docker/login-action                              | v4.6.0       | 2026-07-29 | `dbcb813823bdd20940b903addbd779551569679f` (v4.7.0 is under 14 days old)      | 2026-11-03 |
-| sigstore/cosign-installer                        | v4.1.2       | 2026-05-07 | `6f9f17788090df1f26f669e9d70d6ae9567deba6`                                    | 2026-11-03 |
-| cosign                                           | v3.1.3       | 2026-08-06 | `cosign-release: v3.1.3` (v3.1.4 is under 14 days old)                        | 2026-11-03 |
-| actions/attest                                   | v4.2.2       | 2026-08-04 | `1e69f48acb82d1966a394da916b4c1698aa569d6`                                    | 2026-11-03 |
-| syft                                             | v1.54.1      | 2026-10-06 | `anchore/syft:v1.54.1@sha256:3eb5379b…` (v1.55.0 is under 14 days old)        | 2026-11-03 |
-| yq                                               | v4.54.1      | 2026-09-29 | `mikefarah/yq:4.54.1@sha256:4b3d9475…`                                        | 2026-11-03 |
+| Tool                                             | Version      | Released   | Pinned as                                                                                                       | Checked    |
+| ------------------------------------------------ | ------------ | ---------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
+| @commitlint/cli, @commitlint/config-conventional | 21.2.4       | 2026-10-18 | exact, root `devDependencies`                                                                                   | 2026-11-02 |
+| lefthook                                         | 2.2.1        | 2026-10-08 | exact, root `devDependencies` (2.2.2 lacks provenance; see stage-02-ci.md)                                      | 2026-11-02 |
+| gitleaks                                         | v8.30.1      | 2026-03-21 | `ghcr.io/gitleaks/gitleaks:v8.30.1` (hook fallback)                                                             | 2026-11-02 |
+| googleapis/release-please-action                 | v5.0.0       | 2026-04-22 | `45996ed1f6d02564a971a2fa1b5860e934307cf7`                                                                      | 2026-11-02 |
+| amannn/action-semantic-pull-request              | v6.1.1       | 2025-08-22 | `48f256284bd46cdaab1048c3721360e808335d50`                                                                      | 2026-11-02 |
+| GitHub runner image                              | ubuntu-24.04 | n/a        | label                                                                                                           | 2026-11-02 |
+| node (base image)                                | 22.23.3      | 2026-09-23 | `node:22.23.3-bookworm-slim@sha256:3ed98443…`                                                                   | 2026-11-02 |
+| nginx-unprivileged (base image)                  | 1.30.6       | 2026-10-14 | `nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4…`                                                    | 2026-11-02 |
+| postgres (dev, stack and CI service image)       | 18.4         | n/a        | `postgres:18.4-alpine@sha256:9a8afca5…`                                                                         | 2026-11-04 |
+| pnpm (in the build stages)                       | 12.11.2      | 2026-10-09 | `corepack prepare pnpm@12.11.2`                                                                                 | 2026-11-02 |
+| hadolint                                         | v2.15.1      | 2026-07-31 | `hadolint/hadolint:v2.15.1` (CI: `@sha256:32dac941…`)                                                           | 2026-11-02 |
+| shellcheck                                       | v0.11.0      | 2025-08-04 | `koalaman/shellcheck:v0.11.0`                                                                                   | 2026-11-02 |
+| trivy                                            | 0.76.0       | 2026-10-14 | `aquasec/trivy:0.76.0` (CI: `@sha256:2416d1f7…`; 0.76.1 is under 14 days old)                                   | 2026-11-02 |
+| actions/checkout                                 | v7.0.1       | 2026-07-20 | `3d3c42e5aac5ba805825da76410c181273ba90b1`                                                                      | 2026-11-02 |
+| actions/setup-node                               | v7.1.0       | 2026-10-08 | `949feb2413d6458794dcd2491c4babbbce0c15c1`                                                                      | 2026-11-02 |
+| pnpm/action-setup                                | v6.1.0       | 2026-09-05 | `ea17c68df8912ef543352723c149a84f56e3d413`                                                                      | 2026-11-02 |
+| actions/cache                                    | v5.1.0       | 2026-06-26 | `caa296126883cff596d87d8935842f9db880ef25`                                                                      | 2026-11-02 |
+| actions/upload-artifact                          | v7.0.2       | 2026-10-07 | `cf430e030ddbb5b0abf93d22962f4752f3646cd9`                                                                      | 2026-11-02 |
+| actions/download-artifact                        | v8.0.2       | 2026-10-07 | `9000827ccba6bdab643e8b6fd33ac0654aef8333`                                                                      | 2026-11-02 |
+| docker/setup-buildx-action                       | v4.4.1       | 2026-09-16 | `f87e5991a6d7451dcb8d9637bfbc97413f497069`                                                                      | 2026-11-02 |
+| docker/bake-action                               | v7.5.0       | 2026-10-14 | `59cb1203cd42bcefd40a1b6d73b589e48c86040e`                                                                      | 2026-11-02 |
+| github/codeql-action                             | v4.39.0      | 2026-10-15 | `6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee`                                                                      | 2026-11-02 |
+| actions/dependency-review-action                 | v5.0.0       | 2026-05-08 | `a1d282b36b6f3519aa1f3fc636f609c47dddb294`                                                                      | 2026-11-02 |
+| ossf/scorecard-action                            | v2.5.0       | 2026-10-12 | `fa7117db83c52d787ae5a89f350999701505d78e`                                                                      | 2026-11-02 |
+| step-security/harden-runner                      | v2.22.2      | 2026-10-19 | `dc2769abcc0fcfbadfc1df54081c1608579ef6b2` (v2.22.3 is under 14 days old)                                       | 2026-11-02 |
+| actionlint                                       | 1.7.12       | 2026-03-30 | `rhysd/actionlint:1.7.12@sha256:b1934ee5…`                                                                      | 2026-11-02 |
+| zizmor                                           | 1.31.1       | 2026-10-15 | `ghcr.io/zizmorcore/zizmor:1.31.1@sha256:42d409db…`                                                             | 2026-11-02 |
+| semgrep CE                                       | 1.181.0      | 2026-10-14 | `semgrep/semgrep:1.181.0@sha256:81474464…` (1.183.0 is under 14 days old)                                       | 2026-11-02 |
+| Node in CI                                       | 22.23.3      | 2026-09-23 | `node-version` in `.github/actions/setup` (22.23.4 is under 14 days old)                                        | 2026-11-02 |
+| actions/create-github-app-token                  | v3.3.0       | 2026-10-12 | `64ab729a6294000f5aa4a4bc0b73d1f32bc45510`                                                                      | 2026-11-03 |
+| docker/login-action                              | v4.6.0       | 2026-07-29 | `dbcb813823bdd20940b903addbd779551569679f` (v4.7.0 is under 14 days old)                                        | 2026-11-03 |
+| sigstore/cosign-installer                        | v4.1.2       | 2026-05-07 | `6f9f17788090df1f26f669e9d70d6ae9567deba6`                                                                      | 2026-11-03 |
+| cosign                                           | v3.1.3       | 2026-08-06 | `cosign-release: v3.1.3` (v3.1.4 is under 14 days old)                                                          | 2026-11-03 |
+| actions/attest                                   | v4.2.2       | 2026-08-04 | `1e69f48acb82d1966a394da916b4c1698aa569d6`                                                                      | 2026-11-03 |
+| syft                                             | v1.54.1      | 2026-10-06 | `anchore/syft:v1.54.1@sha256:3eb5379b…` (v1.55.0 is under 14 days old)                                          | 2026-11-03 |
+| yq                                               | v4.54.1      | 2026-09-29 | `mikefarah/yq:4.54.1@sha256:4b3d9475…`                                                                          | 2026-11-03 |
+| OpenTofu (laptop and CI)                         | 1.13.2       | 2026-10-21 | `cluster.sh` check; CI `ghcr.io/opentofu/opentofu:1.13.2@sha256:25bdfbe8…` (1.13.8 is under 14 days old)        | 2026-11-05 |
+| k3d                                              | v5.9.0       | 2026-06-02 | `cluster.sh` check; binary in `~/.local/bin`, checksum verified                                                 | 2026-11-05 |
+| k3s (cluster node image)                         | v1.36.5+k3s1 | 2026-09-30 | `rancher/k3s:v1.36.5-k3s1@sha256:057cfd5a…` in `infra/local/k3d.yaml` (1.37 waits for Argo CD support)          | 2026-11-05 |
+| kubectl                                          | v1.36.5      | 2026-09-23 | binary in `~/.local/bin`, checksum verified (matches the cluster minor)                                         | 2026-11-05 |
+| Helm CLI                                         | v4.3.1       | 2026-10-15 | binary in `~/.local/bin`, checksum verified (for `helm template`; installs go through the provider)             | 2026-11-05 |
+| tflint                                           | v0.65.0      | 2026-10-22 | CI `ghcr.io/terraform-linters/tflint:v0.65.0@sha256:2788f4d4…`; bundled terraform ruleset                       | 2026-11-05 |
+| hashicorp/helm provider                          | 3.3.0        | 2026-09-02 | exact, `infra/local/platform/versions.tf` + lock file                                                           | 2026-11-05 |
+| hashicorp/kubernetes provider                    | 3.4.0        | 2026-10-19 | exact, `infra/local/platform/versions.tf` + lock file (3.5.0 is under 14 days old)                              | 2026-11-05 |
+| argo-cd Helm chart                               | 10.10.5      | 2026-10-15 | `oci://ghcr.io/argoproj/argo-helm`, `infra/local/platform/argocd.tf`                                            | 2026-11-05 |
+| Argo CD                                          | v3.5.5       | 2026-10-12 | `quay.io/argoproj/argocd:v3.5.5@sha256:13db7b10…` in `argocd-values.yaml` (v3.5.6 is under 14 days old)         | 2026-11-05 |
+| Redis (Argo CD cache)                            | 8.6.4        | 2026-06-04 | `ecr-public.aws.com/docker/library/redis:8.6.4-alpine@sha256:2cc044fc…` (the chart's default, pinned by digest) | 2026-11-05 |
 
 **Images: version age versus digest.** The 14-day rule applies to the _version_ (Node 22.23.3, nginx 1.30.6). The digest is whatever build of that version is current, because upstream rebuilds a tag to ship OS security patches. Renovate (`docker:pinDigests`) proposes new digests as they appear.

@@ -108,6 +108,43 @@
       "matchManagers": ["custom.regex"],
       "matchDatasources": ["docker"],
       "groupName": "ci tool images"
+    },
+    {
+      "description": "OpenTofu reads providers from registry.opentofu.org (see .terraform.lock.hcl), so Renovate looks there too.",
+      "matchDatasources": ["terraform-provider", "terraform-module"],
+      "registryUrls": ["https://registry.opentofu.org"]
+    },
+    {
+      "description": "Local platform tooling under infra/ (laptop CLI pins, the k3s node image, providers, the Argo CD chart) in one PR. CI lint images live in ci.yml and stay in the ci tool images group.",
+      "matchFileNames": ["infra/**"],
+      "groupName": "local platform"
+    },
+    {
+      "description": "The Argo CD chart and the images its values pin by digest move together (the image tag is the chart's appVersion).",
+      "matchFileNames": ["infra/local/platform/**"],
+      "matchDepNames": [
+        "argo-cd",
+        "quay.io/argoproj/argocd",
+        "ecr-public.aws.com/docker/library/redis"
+      ],
+      "groupName": "argo cd"
+    },
+    {
+      "description": "k3s tags look like v1.36.5-k3s1. Stay on Kubernetes 1.36 until the pinned Argo CD is tested on a newer minor (docs/devops/stage-04-k8s-platform.md). A k3s bump rebuilds the cluster: back up first.",
+      "matchDepNames": ["rancher/k3s"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-k3s(?<build>\\d+)$",
+      "allowedVersions": "/^v1\\.36\\./"
+    },
+    {
+      "description": "required_version is an OpenTofu range, but Renovate would look it up as Terraform. Bump it by hand with the OpenTofu version.",
+      "matchManagers": ["terraform"],
+      "matchDepTypes": ["required_version"],
+      "enabled": false
+    },
+    {
+      "description": "The OpenTofu CLI pin (cluster.sh) and the CI image move together.",
+      "matchDepNames": ["opentofu/opentofu", "ghcr.io/opentofu/opentofu"],
+      "groupName": "opentofu"
     }
   ],
   "customManagers": [
@@ -119,7 +156,7 @@
         "/^lefthook\\.yml$/"
       ],
       "matchStrings": [
-        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep|anchore/syft|mikefarah/yq)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep|anchore/syft|mikefarah/yq|ghcr\\.io/opentofu/opentofu|ghcr\\.io/terraform-linters/tflint)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
       ],
       "datasourceTemplate": "docker"
     },
@@ -141,6 +178,27 @@
       "depNameTemplate": "node",
       "datasourceTemplate": "node-version",
       "versioningTemplate": "node"
+    },
+    {
+      "customType": "regex",
+      "description": "Tool versions with a `# renovate:` comment on the line above (infra/local/cluster.sh)",
+      "managerFilePatterns": ["/^infra/local/cluster\\.sh$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[\\w-]+) depName=(?<depName>[\\w./-]+)\\n\\w+=(?<currentValue>[0-9][\\w.-]*)"
+      ],
+      "extractVersionTemplate": "^v?(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "description": "k3s node image in the k3d cluster config",
+      "managerFilePatterns": ["/^infra/local/k3d\\.yaml$/"],
+      "matchStrings": [
+        "image: (?<depName>rancher/k3s):(?<currentValue>v[\\w.-]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
     }
-  ]
+  ],
+  "helm-values": {
+    "managerFilePatterns": ["/^infra/local/platform/argocd-values\\.yaml$/"]
+  }
 }

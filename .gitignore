@@ -44,3 +44,10 @@ apps/api/src/generated/
 
 # docker/stack.sh secrets
 !.env.stack.example
+
+# OpenTofu: providers and local state (state is per machine; the lock file is committed)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
