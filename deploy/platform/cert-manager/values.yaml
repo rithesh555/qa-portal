@@ -3,6 +3,13 @@
 # Every image is pinned by digest (tag@digest; the tag is the chart's
 # appVersion). Renovate moves the chart and these pins in one PR.
 
+global:
+  leaderElection:
+    # Leader-election leases (and the Roles for them) in cert-manager's own
+    # namespace, not the chart's default kube-system: the add-ons' AppProject
+    # has no access to kube-system.
+    namespace: cert-manager
+
 crds:
   enabled: true
   # Deleting the Application must never delete every Certificate with it.

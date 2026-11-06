@@ -1,7 +1,8 @@
 # One wildcard certificate for every environment
 # (dev.qa.localtest.me, staging..., prod...), signed by the local CA.
 # localtest.me and all its subdomains resolve to 127.0.0.1 in public DNS,
-# so no hosts-file edits are needed.
+# so no hosts-file edits are needed. The local CA can only sign names under
+# qa.localtest.me (its name constraint), which is all this needs.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -20,5 +21,5 @@ spec:
     rotationPolicy: Always
   issuerRef:
     group: cert-manager.io
-    kind: ClusterIssuer
+    kind: Issuer
     name: local-ca

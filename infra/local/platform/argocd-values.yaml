@@ -34,6 +34,22 @@ configs:
     # binary in the repo server, so the AppProjects allow only this repo as
     # a source (root-app.tf). See docs/devops/stage-04-k8s-platform.md.
     kustomize.buildOptions: --enable-alpha-plugins --enable-exec
+    # Health of an Application, as a resource of the app-of-apps root.
+    # Removed from Argo CD in 1.8; without it the root's sync waves only
+    # order creation and never wait for an add-on to become Healthy.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
 
 server:
   enabled: false
@@ -84,6 +100,9 @@ repoServer:
     # The age private key ("secret zero"), from the Secret that
     # infra/local/secret-zero.sh creates. Optional, so Argo CD starts
     # before it exists; the script restarts the repo server afterwards.
+    # Every process the repo server starts inherits it, including any
+    # kustomize exec plugin committed to this repo: review of main is what
+    # keeps that safe. (A KSOPS sidecar plugin would isolate it; Stage 6.)
     - name: SOPS_AGE_KEY
       valueFrom:
         secretKeyRef:

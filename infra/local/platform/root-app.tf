@@ -8,7 +8,11 @@
 locals {
   repo_url = "https://github.com/rithesh555/qa-portal.git"
 
-  # Two projects, so each Application can only touch what it owns.
+  # Three projects, so each Application can only touch what it owns.
+  # They catch mistakes (a chart that suddenly writes somewhere new), not a
+  # determined attacker: anything allowed to create a ClusterRoleBinding or
+  # a webhook can make itself cluster-admin. Review of what merges to main
+  # is the real boundary. See docs/devops/stage-04-k8s-platform.md.
   projects = {
     # The root: may only create Application objects in argocd.
     bootstrap = {
@@ -25,17 +29,17 @@ locals {
     }
 
     # The add-ons: only these sources and namespaces, and only the
-    # cluster-wide kinds operators need. Never argocd itself, so no add-on
-    # can change Argo CD or its RBAC.
+    # cluster-wide kinds operators install (CRDs, their RBAC, webhooks).
+    # Not argocd or kube-system.
     platform = {
       namespace   = "argocd"
-      description = "Platform add-ons (cert-manager, CloudNativePG, Garage, Traefik config)."
+      description = "Platform add-ons (cert-manager, CloudNativePG, Garage)."
       sourceRepos = [
         local.repo_url,
         "quay.io/jetstack/charts",
         "ghcr.io/cloudnative-pg/charts",
       ]
-      destinations = [for ns in ["cert-manager", "cnpg-system", "garage", "kube-system"] :
+      destinations = [for ns in ["cert-manager", "cnpg-system", "garage"] :
         { server = "https://kubernetes.default.svc", namespace = ns }
       ]
       clusterResourceWhitelist = [
@@ -45,7 +49,22 @@ locals {
         { group = "rbac.authorization.k8s.io", kind = "ClusterRoleBinding" },
         { group = "admissionregistration.k8s.io", kind = "MutatingWebhookConfiguration" },
         { group = "admissionregistration.k8s.io", kind = "ValidatingWebhookConfiguration" },
-        { group = "cert-manager.io", kind = "ClusterIssuer" },
+      ]
+    }
+
+    # k3s' Traefik configuration: three kinds in kube-system and nothing
+    # else. kube-system also holds k3s' HelmChart objects, which install
+    # charts with cluster-admin rights, so no other project may write there.
+    gateway = {
+      namespace                = "argocd"
+      description              = "Configuration of the k3s Traefik gateway (kube-system)."
+      sourceRepos              = [local.repo_url]
+      destinations             = [{ server = "https://kubernetes.default.svc", namespace = "kube-system" }]
+      clusterResourceWhitelist = []
+      namespaceResourceWhitelist = [
+        { group = "helm.cattle.io", kind = "HelmChartConfig" },
+        { group = "cert-manager.io", kind = "Issuer" },
+        { group = "cert-manager.io", kind = "Certificate" },
       ]
     }
   }

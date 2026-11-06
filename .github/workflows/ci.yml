@@ -362,25 +362,42 @@ jobs:
         run: docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:v0.11.0@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d infra/local/cluster.sh infra/local/secret-zero.sh
       - name: Secrets in deploy/ are encrypted
         shell: bash
+        env:
+          YQ_IMAGE: mikefarah/yq:4.54.1@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e
         run: |
-          # Every Secret under deploy/ must be a SOPS file: a plaintext Secret
-          # here would be public the moment it's pushed.
+          # Every Secret under deploy/ must be in a *.sops.yaml file, with a
+          # sops block and every data/stringData value encrypted: a plaintext
+          # Secret here is public the moment it's pushed. yq parses each
+          # document, so a Secret in a multi-document file is caught too.
+          # Chart templates aren't plain YAML; Stage 5 checks rendered charts.
+          mapfile -t files < <(find deploy -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path '*/templates/*' | sort)
+          result=$(docker run --rm -v "$PWD:/repo:ro" -w /repo "$YQ_IMAGE" e '
+            select(.kind == "Secret") |
+            filename + " " + (
+              if (filename | test("[.]sops[.]yaml$") | not) then "outside"
+              elif (has("sops") | not) then "plain"
+              elif ([(.data // {})[], (.stringData // {})[]] | length) == 0 then "plain"
+              elif ([(.data // {})[], (.stringData // {})[]] | map(select(tag != "!!str" or (test("^ENC[\[]") | not))) | length) > 0 then "plain"
+              else "ok" end)
+          ' "${files[@]}")
+          echo "$result"
           bad=0
-          while IFS= read -r f; do
-            case "$f" in
-              *.sops.yaml)
-                if ! grep -q '^sops:' "$f" || ! grep -q 'ENC\[' "$f"; then
-                  echo "::error file=$f::not SOPS-encrypted"; bad=1
-                fi ;;
-              *) echo "::error file=$f::a Secret outside a *.sops.yaml file"; bad=1 ;;
+          while read -r f state; do
+            case "$state" in
+              ok) ;;
+              outside) echo "::error file=$f::a Secret outside a *.sops.yaml file"; bad=1 ;;
+              *) echo "::error file=$f::Secret not fully SOPS-encrypted"; bad=1 ;;
             esac
-          done < <(grep -rlE '^kind: Secret$' deploy || true)
+          done <<< "$result"
           exit "$bad"
       - name: Platform manifests (helm lint, kubeconform)
         shell: bash
         env:
           HELM_VERSION: v4.3.1
           HELM_SHA256: 0403a88ae20913d11b10a2467b50087721fea7581736da6b9d3992f5357fe54b
+          # datreeio/CRDs-catalog commit (2026-10-18): pinned like everything
+          # else, so a catalog change can't silently change what we accept.
+          CRDS_CATALOG_SHA: 501527ab9c40c827144c8f45945b25a023e344ce
           KUBECONFORM_IMAGE: ghcr.io/yannh/kubeconform:v0.8.0@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
         run: |
           curl -fsSLo /tmp/helm.tgz "https://get.helm.sh/helm-$HELM_VERSION-linux-amd64.tar.gz"
@@ -398,7 +415,7 @@ jobs:
           docker run --rm -v /tmp/apps.yaml:/apps.yaml:ro -v "$PWD:/repo:ro" -w /repo "$KUBECONFORM_IMAGE" \
             -strict -summary -kubernetes-version 1.36.0 \
             -schema-location default \
-            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            -schema-location "https://raw.githubusercontent.com/datreeio/CRDs-catalog/${CRDS_CATALOG_SHA}/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
             /apps.yaml "${files[@]}"
 
   # The one required check. Passes when every job passed or was skipped

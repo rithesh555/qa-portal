@@ -147,9 +147,25 @@
       "groupName": "opentofu"
     },
     {
-      "description": "Platform add-ons Argo CD installs (deploy/argocd/platform charts, deploy/platform values and manifests): each chart moves with the image pins in its values file. Read the chart's upgrade notes first (CRD changes, Kyverno policy API).",
-      "matchFileNames": ["deploy/argocd/platform/**", "deploy/platform/**"],
-      "groupName": "platform add-ons"
+      "description": "cert-manager (deploy/argocd/platform/templates/cert-manager.yaml): the chart moves with the four image pins in its values file. Read the upgrade notes first (CRD changes).",
+      "matchFileNames": [
+        "deploy/argocd/platform/templates/cert-manager.yaml",
+        "deploy/platform/cert-manager/**"
+      ],
+      "groupName": "cert-manager"
+    },
+    {
+      "description": "CloudNativePG operator and its Barman Cloud plugin (deploy/argocd/platform/templates/cloudnative-pg.yaml): both charts and their image pins move together, since the plugin follows the operator's API. Read the upgrade notes first (CRD changes).",
+      "matchFileNames": [
+        "deploy/argocd/platform/templates/cloudnative-pg.yaml",
+        "deploy/platform/cloudnative-pg/**"
+      ],
+      "groupName": "cloudnative-pg"
+    },
+    {
+      "description": "Garage (deploy/platform/garage/): one image. Read the release notes first (the config format and the single-node start).",
+      "matchFileNames": ["deploy/platform/garage/**"],
+      "groupName": "garage"
     },
     {
       "description": "KSOPS runs inside the Argo CD repo server (infra/local/platform/argocd-values.yaml).",
