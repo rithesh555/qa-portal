@@ -145,6 +145,32 @@
       "description": "The OpenTofu CLI pin (cluster.sh) and the CI image move together.",
       "matchDepNames": ["opentofu/opentofu", "ghcr.io/opentofu/opentofu"],
       "groupName": "opentofu"
+    },
+    {
+      "description": "cert-manager (deploy/argocd/platform/templates/cert-manager.yaml): the chart moves with the four image pins in its values file. Read the upgrade notes first (CRD changes).",
+      "matchFileNames": [
+        "deploy/argocd/platform/templates/cert-manager.yaml",
+        "deploy/platform/cert-manager/**"
+      ],
+      "groupName": "cert-manager"
+    },
+    {
+      "description": "CloudNativePG operator and its Barman Cloud plugin (deploy/argocd/platform/templates/cloudnative-pg.yaml): both charts and their image pins move together, since the plugin follows the operator's API. Read the upgrade notes first (CRD changes).",
+      "matchFileNames": [
+        "deploy/argocd/platform/templates/cloudnative-pg.yaml",
+        "deploy/platform/cloudnative-pg/**"
+      ],
+      "groupName": "cloudnative-pg"
+    },
+    {
+      "description": "Garage (deploy/platform/garage/): one image. Read the release notes first (the config format and the single-node start).",
+      "matchFileNames": ["deploy/platform/garage/**"],
+      "groupName": "garage"
+    },
+    {
+      "description": "KSOPS runs inside the Argo CD repo server (infra/local/platform/argocd-values.yaml).",
+      "matchDepNames": ["viaductoss/ksops"],
+      "groupName": "argo cd"
     }
   ],
   "customManagers": [
@@ -156,7 +182,7 @@
         "/^lefthook\\.yml$/"
       ],
       "matchStrings": [
-        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep|anchore/syft|mikefarah/yq|ghcr\\.io/opentofu/opentofu|ghcr\\.io/terraform-linters/tflint)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
+        "(?<depName>(?:ghcr\\.io/zizmorcore/zizmor|ghcr\\.io/gitleaks/gitleaks|hadolint/hadolint|koalaman/shellcheck|aquasec/trivy|rhysd/actionlint|semgrep/semgrep|anchore/syft|mikefarah/yq|ghcr\\.io/opentofu/opentofu|ghcr\\.io/terraform-linters/tflint|ghcr\\.io/yannh/kubeconform)):(?<currentValue>v?[0-9][\\w.-]*)(?:@(?<currentDigest>sha256:[a-f0-9]{64}))?"
       ],
       "datasourceTemplate": "docker"
     },
@@ -196,9 +222,35 @@
         "image: (?<depName>rancher/k3s):(?<currentValue>v[\\w.-]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Plain image strings (image: repo:tag@digest) in the Argo CD values (the KSOPS init container)",
+      "managerFilePatterns": ["/^infra/local/platform/argocd-values\\.yaml$/"],
+      "matchStrings": [
+        "image: (?<depName>[\\w./-]+):(?<currentValue>v?[0-9][\\w.-]*)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Helm CLI that CI downloads and checks against its published SHA-256 (ci.yml infra job). Renovate bumps the version; refresh HELM_SHA256 by hand from the release notes.",
+      "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+      "matchStrings": ["HELM_VERSION: (?<currentValue>v[0-9][\\w.-]*)"],
+      "depNameTemplate": "helm/helm",
+      "datasourceTemplate": "github-releases"
     }
   ],
   "helm-values": {
-    "managerFilePatterns": ["/^infra/local/platform/argocd-values\\.yaml$/"]
+    "managerFilePatterns": [
+      "/^infra/local/platform/argocd-values\\.yaml$/",
+      "/^deploy/platform/.+values\\.yaml$/"
+    ]
+  },
+  "argocd": {
+    "managerFilePatterns": ["/^deploy/argocd/.+\\.yaml$/"]
+  },
+  "kubernetes": {
+    "managerFilePatterns": ["/^deploy/platform/.+\\.yaml$/"]
   }
 }

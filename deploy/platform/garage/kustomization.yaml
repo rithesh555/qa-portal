@@ -1,0 +1,19 @@
+# Garage: one node, one bucket ("cnpg-backups") and one access key, all
+# created by Garage itself on first start (--single-node --default-bucket).
+# The credentials are SOPS-encrypted in credentials.sops.yaml; the KSOPS
+# generator decrypts them inside the Argo CD repo server.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: garage
+labels:
+  - pairs:
+      app.kubernetes.io/name: garage
+      app.kubernetes.io/part-of: platform
+    includeSelectors: false
+resources:
+  - configmap.yaml
+  - statefulset.yaml
+  - service.yaml
+  - networkpolicy.yaml
+generators:
+  - secret-generator.yaml

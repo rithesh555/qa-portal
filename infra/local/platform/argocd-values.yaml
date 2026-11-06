@@ -17,11 +17,39 @@ global:
     defaultDenyIngress: true
 
 configs:
+  params:
+    # Compare git with the cluster through a server-side apply dry run, the
+    # same way the sync applies (every add-on uses ServerSideApply). The
+    # client-side diff reported big CRDs (Kyverno) and StatefulSet volume
+    # templates as OutOfSync forever, though nothing differed. Argo CD 3.6
+    # turns this on by itself for ServerSideApply apps.
+    controller.diff.server.side: "true"
   cm:
     # No local admin login: core mode has no API server to log in to.
     admin.enabled: false
     exec.enabled: false
     statusbadge.enabled: false
+    # KSOPS is a kustomize exec plugin; kustomize runs plugins only with
+    # these flags. Risk: any kustomization Argo CD builds may then run a
+    # binary in the repo server, so the AppProjects allow only this repo as
+    # a source (root-app.tf). See docs/devops/stage-04-k8s-platform.md.
+    kustomize.buildOptions: --enable-alpha-plugins --enable-exec
+    # Health of an Application, as a resource of the app-of-apps root.
+    # Removed from Argo CD in 1.8; without it the root's sync waves only
+    # order creation and never wait for an add-on to become Healthy.
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      return hs
 
 server:
   enabled: false
@@ -41,6 +69,46 @@ repoServer:
   resources:
     requests: { cpu: 25m, memory: 128Mi }
     limits: { memory: 512Mi }
+  # KSOPS: an init container copies the ksops binary into a shared
+  # emptyDir; the repo server finds it on its PATH. Argo CD's own kustomize
+  # stays (no --with-kustomize).
+  initContainers:
+    - name: install-ksops
+      image: viaductoss/ksops:v4.5.1@sha256:4def9fdd4e2f850265740ebe9592c5455d19b76891e88e602df8b52d74b95334
+      command: ["/usr/local/bin/ksops", "install", "/custom-tools"]
+      resources:
+        requests: { cpu: 10m, memory: 16Mi }
+        limits: { memory: 64Mi }
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities: { drop: ["ALL"] }
+        seccompProfile: { type: RuntimeDefault }
+      volumeMounts:
+        - name: custom-tools
+          mountPath: /custom-tools
+  volumes:
+    - name: custom-tools
+      emptyDir: {}
+  volumeMounts:
+    - name: custom-tools
+      mountPath: /usr/local/bin/ksops
+      subPath: ksops
+  env:
+    # The age private key ("secret zero"), from the Secret that
+    # infra/local/secret-zero.sh creates. Optional, so Argo CD starts
+    # before it exists; the script restarts the repo server afterwards.
+    # Every process the repo server starts inherits it, including any
+    # kustomize exec plugin committed to this repo: review of main is what
+    # keeps that safe. (A KSOPS sidecar plugin would isolate it; Stage 6.)
+    - name: SOPS_AGE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: sops-age
+          key: keys.txt
+          optional: true
 
 applicationSet:
   resources:

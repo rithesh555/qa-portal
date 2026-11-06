@@ -1,0 +1,17 @@
+# The S3 endpoint for the backup plugin: http://garage.garage.svc:3900
+# (in-cluster only, plain HTTP; Stage 9 decides whether to add TLS).
+# Headless, because it is also the StatefulSet's governing Service (its
+# serviceName), which gives the pod its stable DNS name. With one replica
+# the name resolves straight to the pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: garage
+  ports:
+    - name: s3
+      port: 3900
+      targetPort: s3
