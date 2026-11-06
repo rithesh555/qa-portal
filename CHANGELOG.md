@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/rithesh555/qa-portal/compare/v1.0.6...v1.0.7) (2026-11-06)
+
+
+### Bug fixes
+
+* **ci:** accept the apt CVE-2026-109518 until the node base image is rebuilt ([#28](https://github.com/rithesh555/qa-portal/issues/28)) ([2ee486e](https://github.com/rithesh555/qa-portal/commit/2ee486ec00e834678e05d6a9dc98075fc754059b))
+
 ## [1.0.6](https://github.com/rithesh555/qa-portal/compare/v1.0.5...v1.0.6) (2026-11-04)
 
 
