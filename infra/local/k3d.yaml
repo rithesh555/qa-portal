@@ -10,7 +10,7 @@ metadata:
 servers: 1
 agents: 0
 # Kubernetes 1.36: the newest minor Argo CD 3.5 is tested on.
-image: rancher/k3s:v1.36.5-k3s1@sha256:057cfd5a9d51b89f1f0ee139c28d5d5fdd5aa7ddeac2742a0ba90c6dbc0329bb
+image: rancher/k3s:v1.36.6-k3s1@sha256:88d3fac10eb4a429d3c5275f4868fe4b13620f6bbca5bdb5dca0627ac76ae2a0
 kubeAPI:
   # Only this machine can reach the API server (k3d's default is 0.0.0.0).
   hostIP: "127.0.0.1"

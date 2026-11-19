@@ -5,7 +5,7 @@ terraform {
     # the exact version (and commits the lock file).
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = ">= 3.4.0, < 4.0.0"
+      version = "3.5.0"
     }
   }
 }
